@@ -1,0 +1,7 @@
+{
+  "name": "YouTube Creator Studio-2",
+  "description": "AI-powered YouTube content creation suite transforming voice stories into fully animated video scripts.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
