@@ -62,7 +62,31 @@ export enum ArtStyle {
 
   Comic = 'Modern graphic novel style with bold black ink outlines and vibrant flat colors. Dynamic composition, dramatic shadows, and clean vector-like details.',
 
-  Mystical = 'Cinematic magical realism blending gritty historical texture with ethereal spiritual light. Supernatural glow, surreal atmosphere, and divine energy anomalies in a hyper-realistic setting.'
+  Mystical = 'Cinematic magical realism blending gritty historical texture with ethereal spiritual light. Supernatural glow, surreal atmosphere, and divine energy anomalies in a hyper-realistic setting.',
+
+  OilPainting = 'Classical oil painting with visible impasto brushstrokes, rich textures, and dramatic chiaroscuro lighting. Warm color palette with deep shadows and historical fine art quality.',
+
+  Ukiyoe = 'Traditional Japanese ukiyo-e woodblock print style with flat areas of color, bold outlines, and stylized landscapes. Elegant compositions inspired by Edo-period masters.',
+
+  Sumie = 'Traditional East Asian ink wash painting (Sumi-e) on aged rice paper. Minimalist aesthetic with spontaneous brushwork, emphasizing negative space and Zen-like simplicity.',
+
+  Isometric = 'Clean isometric 3D digital art style with vibrant colors and low-poly geometric shapes. Playful diorama-like composition with soft ambient occlusion and modern digital aesthetics.',
+
+  Vaporwave = 'Surreal 1990s internet aesthetic featuring Greek statues, glitch art, and pixelated elements. Pastel neon color palette with marble textures, palm trees, and a nostalgic lo-fi vibe.',
+
+  Noir = 'Atmospheric film noir style with high-contrast black and white cinematography. Dramatic hard lighting, deep shadows (low-key), and a gritty urban mystery feel with cinematic grain.',
+
+  Claymation = 'Tactile stop-motion claymation style with visible fingerprints and handmade imperfections. Warm studio lighting, expressive character features, and a whimsical miniature world aesthetic.',
+
+  PulpFiction = 'Vintage 1950s pulp magazine cover art with distressed paper textures and halftone printing dots. Bold, sensationalist composition with saturated colors and retro illustrative style.',
+
+  StainedGlass = 'Intricate stained glass window art with vibrant translucent colors and thick black leaded outlines. Divine light rays shining through geometric glass patterns, creating a cathedral-like glow.',
+
+  GothicWhimsy = 'Whimsical gothic art style inspired by Tim Burton, with spindly proportions and slightly eerie atmospheres. Desaturated color palette, curly motifs, and a dark yet playful fairy tale vibe.',
+
+  Surrealism = 'Dream-like surrealist painting featuring impossible geometry, melting objects, and illogical compositions. Vibrant yet haunting atmosphere inspired by masters like Dali and Magritte.',
+
+  VectorGraphic = 'Flat, clean vector illustration style with sharp edges and minimal gradients. Professional corporate aesthetic with a modern, friendly look suitable for educational storytelling.'
 }
 
 export enum AspectRatio {
@@ -115,7 +139,7 @@ export interface AudioAsset {
 
 export interface VideoOptions {
   duration: 4 | 6 | 8;
-  resolution: '720p' | '1080p';
+  resolution: '720p' | '1080p' | '1440p';
   generateAudio: boolean;
   aspectRatio: '16:9' | '9:16';
   numVideos: 1 | 2;

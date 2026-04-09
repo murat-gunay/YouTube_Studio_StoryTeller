@@ -19,6 +19,24 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
+/**
+ * Robustly ensures we have base64 data from ANY image source (Data URL or Blob URL).
+ */
+export const urlToBase64 = async (url: string): Promise<string> => {
+  if (!url) return "";
+  if (url.startsWith('data:')) {
+    return url.split(',')[1];
+  }
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return await blobToBase64(blob);
+  } catch (e) {
+    console.error(`Failed to convert URL to base64: ${url}`, e);
+    return "";
+  }
+};
+
 // --- WAV Header Utilities ---
 
 const writeString = (view: DataView, offset: number, string: string) => {
@@ -267,12 +285,9 @@ export const generateStoryScript = async (
   };
 
   const scenes = (rawData.scenes || []).map((s, index) => {
-    // Randomize second overlay style
-    const secondStyle = Math.random() > 0.5 ? 'comic-box' : 'speech-bubble';
-
     const overlays: Overlay[] = [
       { text: s.caption_context, style: 'comic-box' },
-      { text: s.caption_dialogue, style: secondStyle }
+      { text: s.caption_dialogue, style: 'speech-bubble' }
     ];
 
     // Handle time range calculation correctly
@@ -357,14 +372,16 @@ export const generateImage = async (
     // Add images and instructions for each detected character
     for (const char of relevantCharacters) {
       if (char.referenceImageUrl) {
-        const base64Data = char.referenceImageUrl.split(',')[1];
-        contentParts.push({
-          inlineData: { mimeType: 'image/png', data: base64Data }
-        });
-        characterInstruction += `--- REFERENCE IMAGE PROVIDED FOR CHARACTER: "${char.name}" ---\n`;
-        characterInstruction += `  - **IDENTITY RULE**: You MUST extract the facial identity, eye shape, nose shape, and hair style from this reference image. The character in the output MUST be recognizable as this specific person.\n`;
-        characterInstruction += `  - **STYLE NEGATION RULE**: The reference image might have a different art style (e.g., sketch, anime). IGNORE the art style of the reference image. Only use the facial identity.\n`;
-        characterInstruction += `  - **OUTFIT/CONTEXT RULE**: Do NOT copy the clothing or background from the reference image unless the scene description explicitly asks for it. Use the "CURRENT SCENE DESCRIPTION" for outfit and setting.\n`;
+        const base64Data = await urlToBase64(char.referenceImageUrl);
+        if (base64Data) {
+          contentParts.push({
+            inlineData: { mimeType: 'image/png', data: base64Data }
+          });
+          characterInstruction += `--- REFERENCE IMAGE PROVIDED FOR CHARACTER: "${char.name}" ---\n`;
+          characterInstruction += `  - **IDENTITY RULE**: You MUST extract the facial identity, eye shape, nose shape, and hair style from this reference image. The character in the output MUST be recognizable as this specific person.\n`;
+          characterInstruction += `  - **STYLE NEGATION RULE**: The reference image might have a different art style (e.g., sketch, anime). IGNORE the art style of the reference image. Only use the facial identity.\n`;
+          characterInstruction += `  - **OUTFIT/CONTEXT RULE**: Do NOT copy the clothing or background from the reference image unless the scene description explicitly asks for it. Use the "CURRENT SCENE DESCRIPTION" for outfit and setting.\n`;
+        }
       }
     }
   } else {
@@ -468,7 +485,7 @@ export const generateCharacterReference = async (
 // 3b. Edit Image (Updated to use Gemini 3 Pro for high quality "Edit by Instruction")
 export const editImage = async (base64Image: string, prompt: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const base64Data = base64Image.split(',')[1];
+  const base64Data = await urlToBase64(base64Image);
 
   // We treat the original image as a reference and ask the model to regenerate it with the change
   const fullPrompt = `
@@ -515,7 +532,7 @@ export const generateVideo = async (
   options?: VideoOptions
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const startBase64 = imageSrc.split(',')[1];
+  const startBase64 = await urlToBase64(imageSrc);
 
   const videoConfig: any = {
     numberOfVideos: options?.numVideos || 1,
@@ -668,11 +685,13 @@ export const generateThumbnail = async (
     charInstructions += "CHARACTERS TO INCLUDE (Maintain consistency with provided references):\n";
     for (const char of charsWithRefs) {
       if (char.referenceImageUrl) {
-        const base64Data = char.referenceImageUrl.split(',')[1];
-        contentParts.push({
-          inlineData: { mimeType: 'image/png', data: base64Data }
-        });
-        charInstructions += `- Character "${char.name}": Reference image provided. Maintain facial identity but ADAPT CLOTHING/POSE to the thumbnail composition.\n`;
+        const base64Data = await urlToBase64(char.referenceImageUrl);
+        if (base64Data) {
+          contentParts.push({
+            inlineData: { mimeType: 'image/png', data: base64Data }
+          });
+          charInstructions += `- Character "${char.name}": Reference image provided. Maintain facial identity but ADAPT CLOTHING/POSE to the thumbnail composition.\n`;
+        }
       }
     }
   }

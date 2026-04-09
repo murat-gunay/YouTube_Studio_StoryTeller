@@ -205,26 +205,38 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
 
   const styles = getBoxClasses();
 
-  const renderComicBox = (text: string, index: number) => (
-    <div key={index} className={`absolute ${getPositionClass(index)} z-20 max-w-[85%] md:max-w-[60%] animate-fade-in`}>
-      <div className={`bg-[#fdfcdc] border-black ${styles.container} transform rotate-[-1deg]`}>
-        <p className={`font-sans font-bold text-black uppercase tracking-wide ${styles.text}`}>
-          {text}
-        </p>
-      </div>
-    </div>
-  );
+  const renderComicBox = (text: string, index: number) => {
+    const isTop = index === 0;
+    const posClass = isTop ? (isLargePlayer ? "top-8 left-8" : "top-4 left-4") : (isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4");
+    const rotation = index % 2 === 0 ? '-rotate-1' : 'rotate-1';
 
-  const renderSpeechBubble = (text: string, index: number) => (
-    <div key={index} className={`absolute ${getPositionClass(index)} z-20 max-w-[85%] md:max-w-[60%] animate-fade-in`}>
-      <div className={`relative bg-white text-black border-black shadow-lg ${styles.bubbleContainer}`}>
-        <p className={`font-comic font-medium text-black text-center ${styles.text}`}>
-          {text}
-        </p>
-        <div className={`absolute bg-white border-black transform rotate-45 ${styles.tail}`}></div>
+    return (
+      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%] animate-fade-in`}>
+        <div className={`bg-[#fdfcdc] border-black ${styles.container} transform ${rotation}`}>
+          <p className={`font-sans font-bold text-black uppercase tracking-wide ${styles.text}`}>
+            {text}
+          </p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderSpeechBubble = (text: string, index: number) => {
+    const isTop = index === 0;
+    const posClass = isTop ? (isLargePlayer ? "top-8 left-8" : "top-4 left-4") : (isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4");
+
+    return (
+      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%] animate-fade-in`}>
+        <div className={`relative bg-white text-black border-black shadow-lg ${styles.bubbleContainer}`}>
+          <p className={`font-comic font-medium text-black text-center ${styles.text}`}>
+            {text}
+          </p>
+          {/* Adapted tail based on position */}
+          <div className={`absolute bg-white border-black transform rotate-45 ${styles.tail} ${isTop ? '-top-4 border-l-4 border-t-4 border-r-0 border-b-0 right-10' : ''}`}></div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full h-full overflow-hidden relative bg-black group select-none animate-scene-fade">

@@ -9,14 +9,14 @@ export const MODELS = {
   scriptGen: 'gemini-3.1-flash-lite-preview',
   contentRefine: 'gemini-3.1-flash-lite-preview',
   imageGen: 'gemini-3.1-flash-image-preview', // For aspect ratio control
-  imageEdit: 'gemini-3-pro-image-preview', // Upgraded to Pro for better instruction following
+  imageEdit: 'gemini-3.1-flash-image-preview', // Upgraded to Pro for better instruction following
   videoGen: 'veo-3.1-lite-generate-preview',
   tts: 'gemini-2.5-pro-preview-tts',
   live: 'gemini-2.5-flash-native-audio-preview-12-2025'
 };
 
 export const ART_STYLES = Object.entries(ArtStyle).map(([key, value]) => ({
-  label: key,
+  label: key.replace(/([A-Z0-9])/g, ' $1').trim(),
   value: value,
 }));
 

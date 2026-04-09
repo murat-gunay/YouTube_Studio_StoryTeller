@@ -70,7 +70,7 @@ const App: React.FC = () => {
   // Video Rendering State
   const [isRenderingVideo, setIsRenderingVideo] = useState(false);
   const [renderProgress, setRenderProgress] = useState("");
-  const [renderResolution, setRenderResolution] = useState<'720p' | '1080p'>('720p');
+  const [renderResolution, setRenderResolution] = useState<'720p' | '1080p' | '1440p'>('720p');
   const [renderedVideoUrl, setRenderedVideoUrl] = useState<string | null>(null);
 
   // Preview Mode State
@@ -476,6 +476,8 @@ const App: React.FC = () => {
         scenes: scenes.map(s => ({
           ...s,
           imageUrl: s.imageUrl ? `images/scene_${s.id}_image.png` : null,
+          imageUrlEnd: s.imageUrlEnd ? `images/scene_${s.id}_image_end.png` : null,
+          videoUrl: s.videoUrl ? `videos/scene_${s.id}_video.mp4` : null,
           ttsAudioUrl: s.ttsAudioUrl ? `audio/scene_${s.id}_audio.wav` : null,
           characterRefId: s.characterRefId,
           overlays: s.overlays || [],
@@ -499,6 +501,7 @@ const App: React.FC = () => {
 
       const audioFolder = root.folder("audio");
       const imageFolder = root.folder("images");
+      const videoFolder = root.folder("videos");
 
       const dataUrlToBlob = async (dataUrl: string) => {
         const res = await fetch(dataUrl);
@@ -509,6 +512,14 @@ const App: React.FC = () => {
         if (scene.imageUrl && imageFolder) {
           const blob = await dataUrlToBlob(scene.imageUrl);
           imageFolder.file(`scene_${scene.id}_image.png`, blob);
+        }
+        if (scene.imageUrlEnd && imageFolder) {
+          const blob = await dataUrlToBlob(scene.imageUrlEnd);
+          imageFolder.file(`scene_${scene.id}_image_end.png`, blob);
+        }
+        if (scene.videoUrl && videoFolder) {
+          const blob = await dataUrlToBlob(scene.videoUrl);
+          videoFolder.file(`scene_${scene.id}_video.mp4`, blob);
         }
         if (scene.ttsAudioUrl && audioFolder) {
           const blob = await dataUrlToBlob(scene.ttsAudioUrl);
@@ -615,13 +626,38 @@ const App: React.FC = () => {
       const imgPath = findFile(`images/scene_${i}_image.png`);
       if (imgPath) {
         const b = await zip.file(imgPath)?.async('blob');
-        if (b) scene.imageUrl = await blobToDataUrl(b);
+        if (b) {
+          const typedBlob = new Blob([b], { type: 'image/png' });
+          scene.imageUrl = await AssetStorage.saveAsset(`img_recover_${i}_${Date.now()}`, typedBlob);
+        }
+      }
+
+      const imgEndPath = findFile(`images/scene_${i}_image_end.png`);
+      if (imgEndPath) {
+        const b = await zip.file(imgEndPath)?.async('blob');
+        if (b) {
+          const typedBlob = new Blob([b], { type: 'image/png' });
+          scene.imageUrlEnd = await AssetStorage.saveAsset(`img_end_recover_${i}_${Date.now()}`, typedBlob);
+        }
+      }
+
+      const videoPath = findFile(`videos/scene_${i}_video.mp4`);
+      if (videoPath) {
+        const b = await zip.file(videoPath)?.async('blob');
+        if (b) {
+          const typedBlob = new Blob([b], { type: 'video/mp4' });
+          scene.videoUrl = await AssetStorage.saveAsset(`video_recover_${i}_${Date.now()}`, typedBlob);
+          scene.hasShortVideo = true;
+        }
       }
 
       const audioPath = findFile(`audio/scene_${i}_audio.wav`);
       if (audioPath) {
         const b = await zip.file(audioPath)?.async('blob');
-        if (b) scene.ttsAudioUrl = await blobToDataUrl(b);
+        if (b) {
+          const typedBlob = new Blob([b], { type: 'audio/wav' });
+          scene.ttsAudioUrl = await AssetStorage.saveAsset(`audio_recover_${i}_${Date.now()}`, typedBlob);
+        }
       }
 
       newScenes.push(scene);
@@ -682,7 +718,7 @@ const App: React.FC = () => {
       const prefixEndIndex = jsonPath.toLowerCase().lastIndexOf('project_data.json');
       const rootPrefix = jsonPath.substring(0, prefixEndIndex);
 
-      const loadBlobUrl = async (relativePath: string | null) => {
+      const loadBlobUrl = async (relativePath: string | null, storagePrefix: string = 'restored') => {
         if (!relativePath) return undefined;
         const fullPath = rootPrefix + relativePath;
         let fileData = zip.file(fullPath);
@@ -693,24 +729,36 @@ const App: React.FC = () => {
         if (!fileData) return undefined;
 
         const blob = await fileData.async("blob");
-        return await blobToDataUrl(blob);
+        
+        // Ensure correct MIME type for the browser
+        let mimeType = blob.type;
+        const lowerPath = relativePath.toLowerCase();
+        if (lowerPath.endsWith('.wav')) mimeType = 'audio/wav';
+        else if (lowerPath.endsWith('.mp4')) mimeType = 'video/mp4';
+        else if (lowerPath.endsWith('.png')) mimeType = 'image/png';
+        else if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg')) mimeType = 'image/jpeg';
+        
+        const typedBlob = new Blob([blob], { type: mimeType });
+        const id = `${storagePrefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        return await AssetStorage.saveAsset(id, typedBlob);
       };
 
       setInputs(data.inputs);
+      setThumbnailStyle(data.inputs.artStyle || "");
       setStoryContext(data.storyContext || "");
 
       const restoredChars: Character[] = await Promise.all(data.charactersData.map(async (c: any) => ({
         ...c,
-        referenceImageUrl: await loadBlobUrl(c.referenceImageUrl)
+        referenceImageUrl: await loadBlobUrl(c.referenceImageUrl, `char_${c.id}`)
       })));
       setCharacters(restoredChars);
 
       const restoredScenes: Scene[] = await Promise.all(data.scenes.map(async (s: any) => ({
         ...s,
-        imageUrl: await loadBlobUrl(s.imageUrl),
-        imageUrlEnd: await loadBlobUrl(s.imageUrlEnd),
-        ttsAudioUrl: await loadBlobUrl(s.ttsAudioUrl),
-        videoUrl: await loadBlobUrl(s.videoUrl),
+        imageUrl: await loadBlobUrl(s.imageUrl, `img_${s.id}`),
+        imageUrlEnd: await loadBlobUrl(s.imageUrlEnd, `img_end_${s.id}`),
+        ttsAudioUrl: await loadBlobUrl(s.ttsAudioUrl, `audio_${s.id}`),
+        videoUrl: await loadBlobUrl(s.videoUrl, `video_restored_${s.id}`),
         overlays: s.overlays || [],
         animationStyles: s.animationStyles || (s.animationStyle ? [s.animationStyle] : ['animate-kb-zoom-in']),
         animationConfig: s.animationConfig || {},
@@ -764,6 +812,7 @@ const App: React.FC = () => {
     setAudioEnded(!firstScene?.ttsAudioUrl);
     setVideoEnded(false);
     setTtsDuration(0);
+    setLastTransitionTime(Date.now()); // Reset watchdog timer
   };
 
   const startPresentation = async () => {
@@ -787,9 +836,12 @@ const App: React.FC = () => {
     setAudioEnded(!firstScene?.ttsAudioUrl);
     setVideoEnded(false);
     setTtsDuration(0);
+    setLastTransitionTime(Date.now()); // Reset watchdog timer
 
     setTimeout(() => {
       setIsPreviewPlaying(true);
+      // Re-reset watchdog after the 7s delay to ensure it doesn't expire during silence
+      setLastTransitionTime(Date.now());
     }, 7000);
   };
 
@@ -822,7 +874,7 @@ const App: React.FC = () => {
     const activeScene = scenes[currentPreviewIndex];
     if (!activeScene) return;
 
-    const isEndVideo = activeScene.videoUrl && activeScene.videoOptions?.placement === 'end';
+    const isEndVideo = activeScene.videoUrl && (activeScene.videoOptions?.placement === 'end' || !activeScene.videoOptions?.placement);
     const hasAudio = !!activeScene.ttsAudioUrl;
 
     // Condition to advance:

@@ -7,7 +7,7 @@ import { AudioRecorder } from './components/AudioRecorder';
 import { SceneCard } from './components/SceneCard';
 import { LiveAssistant } from './components/LiveAssistant';
 import { KenBurnsPlayer } from './components/KenBurnsPlayer';
-import { transcribeAudio, generateStoryScript, generateImage, generateVideo, generateTTS, generateThumbnail, generateCharacterReference, generateTitle } from './services/geminiService';
+import { transcribeAudio, generateStoryScript, generateImage, generateVideo, generateTTS, generateThumbnail, generateCharacterReference, generateTitle, refineContent } from './services/geminiService';
 import { renderFullVideo } from './services/videoRenderService';
 
 const blobToDataUrl = (blob: Blob): Promise<string> => {
@@ -294,6 +294,50 @@ const App = () => {
         try {
             const url = await generateCharacterReference(char, inputs.artStyle, storyContext);
             updateCharacter(charId, { referenceImageUrl: url, isGenerating: false });
+        } catch(e) {
+            updateCharacter(charId, { isGenerating: false });
+            throw e;
+        }
+    });
+  };
+
+  const handleAutoExpandCharacter = async (charId: string) => {
+    const char = characters.find(c => c.id === charId);
+    if (!char || !char.description) return;
+
+    updateCharacter(charId, { isGenerating: true });
+    await executeWithAuthHandler(async () => {
+        try {
+            // Expand existing brief description into detailed visual prompt
+            const refined = await refineContent(
+                char.description, 
+                "Expand this character description into a professional, highly detailed visual prompt for high-fidelity image generation. Focus on physical features, clothing, specific details, and unique traits while maintaining the core identity. Output ONLY the refined prompt text in English.",
+                'visual'
+            );
+            updateCharacter(charId, { description: refined, isGenerating: false });
+        } catch(e) {
+            updateCharacter(charId, { isGenerating: false });
+            throw e;
+        }
+    });
+  };
+
+  const handleInstructRefineCharacter = async (charId: string) => {
+    const char = characters.find(c => c.id === charId);
+    if (!char) return;
+
+    const instruction = window.prompt(`Enter specific modification for "${char.name}" (e.g., 'give him a scar', 'wear a lab coat'):`);
+    if (!instruction) return;
+
+    updateCharacter(charId, { isGenerating: true });
+    await executeWithAuthHandler(async () => {
+        try {
+            const refined = await refineContent(
+                char.description || "", 
+                instruction, 
+                'visual'
+            );
+            updateCharacter(charId, { description: refined, isGenerating: false });
         } catch(e) {
             updateCharacter(charId, { isGenerating: false });
             throw e;
@@ -1016,6 +1060,35 @@ const App = () => {
                                     <span className="text-[10px] mt-1">No Reference</span>
                                 </div>
                             )}
+                        </div>
+                        <div className="mt-1 flex-1 flex flex-col min-h-0">
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Visual Prompt / Appearance</label>
+                                <div className="flex gap-1">
+                                    <button 
+                                        onClick={() => handleAutoExpandCharacter(char.id)} 
+                                        disabled={char.isGenerating} 
+                                        className="text-[9px] bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 transition-all flex items-center gap-1"
+                                        title="AI Auto-Expand into detail"
+                                    >
+                                        {char.isGenerating ? <div className="animate-spin h-2 w-2 border-2 border-current border-t-transparent rounded-full" /> : <span>✨ Auto-Expand</span>}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleInstructRefineCharacter(char.id)} 
+                                        disabled={char.isGenerating} 
+                                        className="text-[9px] bg-slate-700/50 hover:bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded border border-slate-600 transition-all"
+                                        title="Refine with specific instructions"
+                                    >
+                                        🛠️ Add Detail
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea 
+                                value={char.description} 
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateCharacter(char.id, { description: e.target.value })} 
+                                className="w-full h-24 bg-slate-800 border border-slate-700 rounded p-2 text-[11px] text-slate-300 outline-none focus:border-indigo-500 resize-none scrollbar-thin shadow-inner"
+                                placeholder="Describe character's appearance (age, hair, clothes)..."
+                            />
                         </div>
                         <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
                             <span className="text-[10px] text-slate-500">{char.referenceImageUrl ? 'Ready' : 'Draft'}</span>
