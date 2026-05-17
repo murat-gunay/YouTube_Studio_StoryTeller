@@ -86,7 +86,11 @@ export enum ArtStyle {
 
   Surrealism = 'Dream-like surrealist painting featuring impossible geometry, melting objects, and illogical compositions. Vibrant yet haunting atmosphere inspired by masters like Dali and Magritte.',
 
-  VectorGraphic = 'Flat, clean vector illustration style with sharp edges and minimal gradients. Professional corporate aesthetic with a modern, friendly look suitable for educational storytelling.'
+  VectorGraphic = 'Flat, clean vector illustration style with sharp edges and minimal gradients. Professional corporate aesthetic with a modern, friendly look suitable for educational storytelling.',
+  
+  StickmanSimple = 'Minimalist hand-drawn stickman figure in black ink on a clean white background. Simple lines, expressive poses, and a clean whiteboard-style aesthetic.',
+  
+  StickmanElite = 'A bit more detailed and colored version of the simple stickman. Maintains the hand-drawn feel but with cleaner lines, subtle colors (like a blue shirt or red hat), and more expressive facial features.'
 }
 
 export enum AspectRatio {
@@ -95,6 +99,11 @@ export enum AspectRatio {
   Landscape = "16:9",
   Portrait = "9:16",
   Cinematic = "21:9"
+}
+
+export enum AppMode {
+  Static = 'Static',
+  Animated = 'Animated'
 }
 
 export interface UserInput {
@@ -107,6 +116,7 @@ export interface UserInput {
   aspectRatio: AspectRatio;
   useSearchGrounding: boolean;
   targetLanguage: Language;
+  appMode: AppMode;
 }
 
 export interface Character {
@@ -175,6 +185,8 @@ export interface Scene {
   videoOptions?: VideoOptions; // Options for this specific scene
   hasShortVideo: boolean; // Toggle for short video generation
   isMuted?: boolean; // Mute state for video playback
+  isAnimated?: boolean; // Flag for Animated Mode scene
+  imageOverlayText?: string; // Short engaging text rendered on the image
 }
 
 export interface GeneratedScriptResponse {
@@ -185,6 +197,8 @@ export interface GeneratedScriptResponse {
     caption_context: string;
     caption_dialogue: string;
     visual_description: string;
+    video_prompt: string;
+    image_overlay_text: string;
     background_audio_id: string;
     sfx_audio_id: string;
   }[];

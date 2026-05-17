@@ -301,6 +301,19 @@ const App = () => {
     });
   };
 
+  const handleUploadCharacterRef = async (charId: string, file: File) => {
+    if (!file) return;
+    updateCharacter(charId, { isGenerating: true });
+    try {
+        const url = await blobToDataUrl(file);
+        updateCharacter(charId, { referenceImageUrl: url, isGenerating: false });
+    } catch (e) {
+        console.error("Upload failed", e);
+        alert("Failed to upload character reference image.");
+        updateCharacter(charId, { isGenerating: false });
+    }
+  };
+
   const handleAutoExpandCharacter = async (charId: string) => {
     const char = characters.find(c => c.id === charId);
     if (!char || !char.description) return;
@@ -1053,13 +1066,27 @@ const App = () => {
                             <input type="text" value={char.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCharacter(char.id, { name: e.target.value })} className="bg-transparent border-b border-slate-700 focus:border-indigo-500 text-sm font-bold text-white w-[85%] outline-none pb-1" placeholder="Name" />
                             <button onClick={() => deleteCharacter(char.id)} className="text-slate-600 hover:text-red-400" title="Delete Character"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                         </div>
-                        <div className="aspect-video bg-black rounded overflow-hidden relative group border border-slate-800">
-                            {char.referenceImageUrl ? (<img src={char.referenceImageUrl} className="w-full h-full object-cover" onClick={() => window.open(char.referenceImageUrl, '_blank')} />) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 text-xs text-center p-2 bg-slate-800/50">
+                        <div 
+                            className="aspect-video bg-black rounded overflow-hidden relative group border border-slate-800 cursor-pointer"
+                            onClick={() => !char.isGenerating && document.getElementById(`upload-char-${char.id}`)?.click()}
+                            title="Click to Upload Reference Image"
+                        >
+                            {char.referenceImageUrl ? (<img src={char.referenceImageUrl} className="w-full h-full object-cover" />) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 text-xs text-center p-2 bg-slate-800/50 group-hover:bg-slate-800 transition-colors">
                                     {char.isGenerating ? (<div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full mb-2"></div>) : (<svg className="w-8 h-8 opacity-20 mb-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 11-14 0 7 7 0 0114 0z" clipRule="evenodd" /></svg>)}
-                                    <span className="text-[10px] mt-1">No Reference</span>
+                                    <span className="text-[10px] mt-1">{char.isGenerating ? 'Processing...' : 'Click to Upload'}</span>
                                 </div>
                             )}
+                            <input 
+                                id={`upload-char-${char.id}`}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleUploadCharacterRef(char.id, file);
+                                }}
+                            />
                         </div>
                         <div className="mt-1 flex-1 flex flex-col min-h-0">
                             <div className="flex justify-between items-center mb-1">
@@ -1092,7 +1119,19 @@ const App = () => {
                         </div>
                         <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
                             <span className="text-[10px] text-slate-500">{char.referenceImageUrl ? 'Ready' : 'Draft'}</span>
-                            <button onClick={() => handleGenerateCharacterRef(char.id)} disabled={char.isGenerating} className="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded disabled:opacity-50">{char.isGenerating ? '...' : (char.referenceImageUrl ? 'Regenerate' : 'Generate')}</button>
+                            <div className="flex items-center gap-1">
+                                <button 
+                                    onClick={() => document.getElementById(`upload-char-${char.id}`)?.click()} 
+                                    disabled={char.isGenerating} 
+                                    className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-all"
+                                    title="Upload Reference Image"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                </button>
+                                <button onClick={() => handleGenerateCharacterRef(char.id)} disabled={char.isGenerating} className="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded disabled:opacity-50">{char.isGenerating ? '...' : (char.referenceImageUrl ? 'Regenerate' : 'Generate')}</button>
+                            </div>
                         </div>
                     </div>
                 ))}
