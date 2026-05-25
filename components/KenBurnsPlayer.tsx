@@ -23,6 +23,7 @@ interface KenBurnsProps {
   isPlaying?: boolean;
   isMuted?: boolean;
   onToggleMute?: (muted: boolean) => void;
+  videoVolume?: number;
 }
 
 export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
@@ -44,6 +45,7 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
   isLargePlayer = false,
   isPlaying = true,
   isMuted: isMutedProp = false,
+  videoVolume = 1.0,
 }) => {
 
   // State to track if we are currently playing the video
@@ -205,31 +207,63 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
 
   const styles = getBoxClasses();
 
-  const renderComicBox = (text: string, index: number) => {
-    const isTop = index === 0;
-    const posClass = isTop ? (isLargePlayer ? "top-8 left-8" : "top-4 left-4") : (isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4");
+  const renderComicBox = (overlay: Overlay, index: number) => {
+    let posClass = "";
+    if (index === 0) {
+      posClass = isLargePlayer ? "top-8 left-8" : "top-4 left-4";
+    } else if (index === 1) {
+      posClass = isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4";
+    } else {
+      posClass = "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-max";
+    }
+    
     const rotation = index % 2 === 0 ? '-rotate-1' : 'rotate-1';
+    const startS = overlay.startSecond || 0;
+    const durS = overlay.duration || 5;
+
+    // Use CSS animation with delays for intro/outro
+    const animationStyle: React.CSSProperties = {
+      opacity: 0,
+      animation: `bubbleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${startS}s forwards, bubbleOut 0.5s ease-in ${startS + durS}s forwards`,
+      animationPlayState: isPlaying ? 'running' : 'paused'
+    };
 
     return (
-      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%] animate-fade-in`}>
+      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%]`} style={animationStyle}>
         <div className={`bg-[#fdfcdc] border-black ${styles.container} transform ${rotation}`}>
           <p className={`font-sans font-bold text-black uppercase tracking-wide ${styles.text}`}>
-            {text}
+            {overlay.text}
           </p>
         </div>
       </div>
     );
   };
 
-  const renderSpeechBubble = (text: string, index: number) => {
+  const renderSpeechBubble = (overlay: Overlay, index: number) => {
+    let posClass = "";
+    if (index === 0) {
+      posClass = isLargePlayer ? "top-8 left-8" : "top-4 left-4";
+    } else if (index === 1) {
+      posClass = isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4";
+    } else {
+      posClass = "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-max";
+    }
+    
+    const startS = overlay.startSecond || 0;
+    const durS = overlay.duration || 5;
     const isTop = index === 0;
-    const posClass = isTop ? (isLargePlayer ? "top-8 left-8" : "top-4 left-4") : (isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4");
+
+    const animationStyle: React.CSSProperties = {
+      opacity: 0,
+      animation: `bubbleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${startS}s forwards, bubbleOut 0.5s ease-in ${startS + durS}s forwards`,
+      animationPlayState: isPlaying ? 'running' : 'paused'
+    };
 
     return (
-      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%] animate-fade-in`}>
+      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%]`} style={animationStyle}>
         <div className={`relative bg-white text-black border-black shadow-lg ${styles.bubbleContainer}`}>
           <p className={`font-comic font-medium text-black text-center ${styles.text}`}>
-            {text}
+            {overlay.text}
           </p>
           {/* Adapted tail based on position */}
           <div className={`absolute bg-white border-black transform rotate-45 ${styles.tail} ${isTop ? '-top-4 border-l-4 border-t-4 border-r-0 border-b-0 right-10' : ''}`}></div>
@@ -247,6 +281,7 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
           autoPlay
           preload="auto"
           muted={isMutedProp} // Controlled by parent checkbox
+          volume={videoVolume}
           onEnded={() => {
             setShowVideo(false);
             setShouldPlayVideo(false);
@@ -308,8 +343,9 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
 
       {/* Overlays */}
       {activeOverlays.map((overlay, idx) => {
-        if (overlay.style === 'speech-bubble') return renderSpeechBubble(overlay.text, idx);
-        return renderComicBox(overlay.text, idx);
+        if (!overlay.text) return null; // Skip empty overlays
+        if (overlay.style === 'speech-bubble') return renderSpeechBubble(overlay, idx);
+        return renderComicBox(overlay, idx);
       })}
 
       {!isCleanMode && (

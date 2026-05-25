@@ -11,7 +11,7 @@ export const MODELS = {
   imageGen: 'gemini-3.1-flash-image-preview', // For aspect ratio control
   imageEdit: 'gemini-3.1-flash-image-preview', // Upgraded to Pro for better instruction following
   videoGen: 'veo-3.1-lite-generate-preview',
-  tts: 'gemini-2.5-pro-preview-tts',
+  tts: 'gemini-3.1-flash-tts-preview',
   live: 'gemini-2.5-flash-native-audio-preview-12-2025'
 };
 
@@ -62,6 +62,7 @@ export const ALL_ANIMATION_OPTIONS = ANIMATION_GROUPS.flatMap(g => g.options);
 // These replace local files to solve the 10MB limit issue.
 export const AUDIO_LIBRARY: AudioAsset[] = [
   // --- MUSIC (GitHub Raw) ---
+  { id: 'none_music', url: '', category: 'music', label: '🔇 None (No Music)' },
   { id: 'music_happy', url: 'https://raw.githubusercontent.com/murat-gunay/VideoSoundMusic/main/music_acoustic_happy.mp3', category: 'music', label: '😊 Acoustic Happy / Bright' },
   { id: 'music_dark_epic', url: 'https://raw.githubusercontent.com/murat-gunay/VideoSoundMusic/main/music_cinematic_dark_epic.mp3', category: 'music', label: '🌑 Cinematic Dark Epic' },
   { id: 'music_sad', url: 'https://raw.githubusercontent.com/murat-gunay/VideoSoundMusic/main/music_cinematic_sad.mp3', category: 'music', label: '😢 Cinematic Sad / Emotional' },
@@ -70,6 +71,7 @@ export const AUDIO_LIBRARY: AudioAsset[] = [
   { id: 'music_mystical', url: 'https://raw.githubusercontent.com/murat-gunay/VideoSoundMusic/main/music_desert_mystical_arabic.mp3', category: 'music', label: '🔮 Desert Mystical / Arabic' },
 
   // --- AMBIENCE / SFX (Google Actions) ---
+  { id: 'none_sfx', url: '', category: 'sfx', label: '🔇 None (No SFX)' },
   { id: 'sfx_magic', url: 'https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg', category: 'sfx', label: '✨ Magic Chime' },
   { id: 'sfx_battle_sword', url: 'https://actions.google.com/sounds/v1/crowds/battle_intimidation_forest.ogg', category: 'sfx', label: '⚔️ Ancient Battle (Swords/Forest)' },
   { id: 'sfx_battle_cry', url: 'https://actions.google.com/sounds/v1/crowds/battle_cry_high_pitch.ogg', category: 'sfx', label: '🗣️ Battle Cry (Loud)' },
@@ -84,4 +86,7 @@ export const AUDIO_LIBRARY: AudioAsset[] = [
   { id: 'ambience_rain', url: 'https://actions.google.com/sounds/v1/weather/rain_on_roof.ogg', category: 'ambience', label: '🌧️ Rain on Roof' },
   { id: 'ambience_jungle', url: 'https://actions.google.com/sounds/v1/ambiences/jungle_atmosphere_night.ogg', category: 'ambience', label: '🌴 Forest/Jungle Night' },
   { id: 'ambience_crowd', url: 'https://actions.google.com/sounds/v1/crowds/crowd_talking.ogg', category: 'ambience', label: '👥 Interior Crowd Talking' },
+  { id: 'ambience_sport_playing', url: 'https://actions.google.com/sounds/v1/ambiences/kids_playing.ogg', category: 'ambience', label: '⚽ Crowd/Kids Playing' },
+  { id: 'sfx_crowd_yelling', url: 'https://actions.google.com/sounds/v1/crowds/crowd_yelling_series.ogg', category: 'sfx', label: '🗣️ Crowd Yelling' },
+  { id: 'sfx_female_crowd_cheering', url: 'https://actions.google.com/sounds/v1/crowds/female_crowd_cheering.ogg', category: 'sfx', label: '🎉 Female Crowd Cheering' },
 ];

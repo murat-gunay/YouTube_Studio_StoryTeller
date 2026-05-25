@@ -1,0 +1,38 @@
+{
+  "team_name": "Switzerland National Football Team",
+  "head_coach": {
+    "name": "Murat Yakin",
+    "preferred_formation": "3-4-3",
+    "play_style_summary": "Flexible and possession-oriented approach focusing on building from the back, maintaining defensive organization, utilizing Granit Xhaka and Remo Freuler as a controlling midfield double-pivot, and using wing-backs to create attacking width."
+  },
+  "key_players": [
+    {
+      "name": "Gregor Kobel",
+      "position": "Goalkeeper",
+      "market_value": "€40.00m",
+      "performance_stats": "The most valuable player in the Swiss squad, starring for Borussia Dortmund and serving as a crucial, consistent shot-stopper during Switzerland's unbeaten World Cup qualifying matches."
+    },
+    {
+      "name": "Ardon Jashari",
+      "position": "Midfielder",
+      "market_value": "€30.00m",
+      "performance_stats": "Joined Italian giants AC Milan following a spectacular tenure in Belgium with Club Brugge where he earned Player of the Year honors, solidifying his spot as one of Switzerland's brightest young midfield talents."
+    },
+    {
+      "name": "Manuel Akanji",
+      "position": "Defender",
+      "market_value": "€18.00m",
+      "performance_stats": "A world-class center-back who recently clinched the Italian Serie A title during his loan spell with Inter Milan, cementing his status as the foundational leader of the Swiss defense."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Noah Okafor",
+      "absence_reason": "Sidelined during late May due to a persistent calf injury/strain suffered with Leeds United, though still named to the preliminary World Cup squad."
+    },
+    {
+      "player_name": "Luca Jaquez",
+      "absence_reason": "Sustained a worrying knee injury during the DFB Pokal final with VfB Stuttgart on May 23, 2026, putting his World Cup participation in major doubt."
+    }
+  ]
+}

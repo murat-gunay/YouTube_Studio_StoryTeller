@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
         'Cross-Origin-Embedder-Policy': 'require-corp',
         'Cross-Origin-Opener-Policy': 'same-origin',
       },
+      watch: {
+        ignored: ['**/remotion-server/temp/**'],
+      },
     },
     plugins: [react()],
     optimizeDeps: {

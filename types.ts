@@ -103,7 +103,15 @@ export enum AspectRatio {
 
 export enum AppMode {
   Static = 'Static',
-  Animated = 'Animated'
+  Animated = 'Animated',
+  Football = 'Football'
+}
+
+export interface FootballInput {
+  teamA: string;
+  teamB: string;
+  competition: string;
+  extraContext: string;
 }
 
 export interface UserInput {
@@ -133,6 +141,8 @@ export type OverlayStyle = 'comic-box' | 'speech-bubble';
 export interface Overlay {
   text: string;
   style: OverlayStyle;
+  startSecond?: number;
+  duration?: number;
 }
 
 export interface AnimationConfigEntry {
@@ -154,6 +164,14 @@ export interface VideoOptions {
   aspectRatio: '16:9' | '9:16';
   numVideos: 1 | 2;
   placement: 'start' | 'end';
+}
+
+export interface SceneLocalization {
+  voiceoverScript: string;
+  overlays: Overlay[];
+  imageOverlayText?: string;
+  ttsAudioUrl?: string;
+  isGeneratingTTS?: boolean;
 }
 
 export interface Scene {
@@ -187,6 +205,7 @@ export interface Scene {
   isMuted?: boolean; // Mute state for video playback
   isAnimated?: boolean; // Flag for Animated Mode scene
   imageOverlayText?: string; // Short engaging text rendered on the image
+  localizations?: Partial<Record<Language, SceneLocalization>>;
 }
 
 export interface GeneratedScriptResponse {

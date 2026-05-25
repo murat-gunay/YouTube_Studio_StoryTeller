@@ -1,0 +1,38 @@
+{
+  "team_name": "Paraguay National Football Team",
+  "head_coach": {
+    "name": "Gustavo Alfaro",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "Focuses on exceptional defensive compactness, physical intensity, and a low-block structure to absorb pressure, combined with rapid verticality to catch opponents off guard during transitions."
+  },
+  "key_players": [
+    {
+      "name": "Diego Gómez",
+      "position": "Central Midfield",
+      "market_value": "€25.00m",
+      "performance_stats": "Brighton & Hove Albion midfielder who serves as the engine of the team, known for breaking defensive lines and connecting midfield play to attack."
+    },
+    {
+      "name": "Julio Enciso",
+      "position": "Attacking Midfield",
+      "market_value": "€22.00m",
+      "performance_stats": "RC Strasbourg Alsace playmaker and set-piece specialist, providing creative flair and dynamic threat in the final third."
+    },
+    {
+      "name": "Omar Alderete",
+      "position": "Centre-Back",
+      "market_value": "€15.00m",
+      "performance_stats": "Sunderland AFC defender who acts as the cornerstone of the defensive unit, offering strong aerial ability and robust spatial organization."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Diego Gómez",
+      "absence_reason": "Knee injury (recovering, expected return June 2026)"
+    },
+    {
+      "player_name": "Miguel Almirón",
+      "absence_reason": "Knee problems"
+    }
+  ]
+}

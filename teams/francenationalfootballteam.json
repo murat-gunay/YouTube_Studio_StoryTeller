@@ -1,0 +1,42 @@
+{
+  "team_name": "France National Football Team",
+  "head_coach": {
+    "name": "Didier Deschamps",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Pragmatic approach emphasizing defensive solidity, structured transitions, and exploiting individual quality and pace on the counter-attack."
+  },
+  "key_players": [
+    {
+      "name": "Kylian Mbappé",
+      "position": "Centre-Forward",
+      "market_value": "€200.00m",
+      "performance_stats": "Scored 42 goals and provided 7 assists in 44 matches for Real Madrid in the 2025-26 season, and 5 goals in 4 matches for France."
+    },
+    {
+      "name": "William Saliba",
+      "position": "Centre-Back",
+      "market_value": "€90.00m",
+      "performance_stats": "Anchors the defense for both Arsenal and France, establishing himself as one of the premier center-backs in world football."
+    },
+    {
+      "name": "Aurélien Tchouaméni",
+      "position": "Defensive Midfield",
+      "market_value": "€90.00m",
+      "performance_stats": "Serves as a crucial tactical anchor and deep-lying playmaker for Real Madrid and the French national team."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Hugo Ekitiké",
+      "absence_reason": "Sidelined with a ruptured Achilles tendon, officially ruling him out of the 2026 World Cup."
+    },
+    {
+      "player_name": "Lucas Chevalier",
+      "absence_reason": "Ruled out of the squad selection due to a thigh injury."
+    },
+    {
+      "player_name": "Eduardo Camavinga",
+      "absence_reason": "Excluded from the final World Cup squad following a difficult season with Real Madrid."
+    }
+  ]
+}

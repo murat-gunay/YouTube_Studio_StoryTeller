@@ -1,0 +1,42 @@
+{
+  "team_name": "United States Men's National Soccer Team",
+  "head_coach": {
+    "name": "Mauricio Pochettino",
+    "preferred_formation": "4-2-3-1 / 4-3-3",
+    "play_style_summary": "Attack-minded and possession-based style. Aims to dominate the game, retain possession close to the opposition's goal, press high up the pitch, and transition quickly."
+  },
+  "key_players": [
+    {
+      "name": "Christian Pulisic",
+      "position": "Right Winger",
+      "market_value": "€50.00m",
+      "performance_stats": "Serving as AC Milan's biggest star, recording elite goal involvement numbers and displaying spectacular form in Serie A."
+    },
+    {
+      "name": "Weston McKennie",
+      "position": "Central Midfield",
+      "market_value": "€30.00m",
+      "performance_stats": "A key creative force for Juventus, providing 15 assists in 38 appearances across all competitions while securing a long-term contract extension."
+    },
+    {
+      "name": "Folarin Balogun",
+      "position": "Centre-Forward",
+      "market_value": "€30.00m",
+      "performance_stats": "Showing highly dangerous striker form for AS Monaco in Ligue 1, demonstrating consistent and clinical attacking threat."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Chris Richards",
+      "absence_reason": "Torn ligaments in his left ankle suffered during a match with Crystal Palace, casting heavy doubt on his fitness."
+    },
+    {
+      "player_name": "Johnny Cardoso",
+      "absence_reason": "Recovering from ankle surgery following an injury setback suffered with his club team."
+    },
+    {
+      "player_name": "Tanner Tessmann",
+      "absence_reason": "Dealing with a muscle injury sustained with Lyon at the end of the club season, which ultimately led to his omission from the national squad."
+    }
+  ]
+}

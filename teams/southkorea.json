@@ -1,0 +1,42 @@
+{
+  "team_name": "South Korea",
+  "head_coach": {
+    "name": "Hong Myung-bo",
+    "preferred_formation": "3-4-3",
+    "play_style_summary": "A defense-first, highly structured approach that relies on a flexible three-back system to sit in a compact mid-to-low block while enabling swift, fluid transitions to attack using the squad's elite individual skill up front."
+  },
+  "key_players": [
+    {
+      "name": "Lee Kang-in",
+      "position": "Attacking Midfielder / Winger",
+      "market_value": "€28 million",
+      "performance_stats": "The most valuable player in the squad, rotating between starting and key roles for Paris Saint-Germain; serves as South Korea's main creative hub and primary set-piece taker."
+    },
+    {
+      "name": "Kim Min-jae",
+      "position": "Centre-Back",
+      "market_value": "€25 million",
+      "performance_stats": "Defensive linchpin for Bayern Munich; acts as the absolute leader and guaranteed starter in South Korea's back-three defensive setup."
+    },
+    {
+      "name": "Son Heung-min",
+      "position": "Forward / Winger",
+      "market_value": "€17 million",
+      "performance_stats": "National team captain currently playing for LAFC in MLS, where he recorded a dominant 12 goals and 4 assists in 13 matches during his debut campaign."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Park Yong-woo",
+      "absence_reason": "Sidelined long-term due to a torn cruciate ligament"
+    },
+    {
+      "player_name": "Won Du-jae",
+      "absence_reason": "Sidelined long-term following major shoulder surgery"
+    },
+    {
+      "player_name": "Kim Ju-seong",
+      "absence_reason": "Excluded from the final World Cup squad roster due to an unresolved club injury"
+    }
+  ]
+}

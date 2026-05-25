@@ -1,0 +1,50 @@
+{
+  "team_name": "Canada Men's National Soccer Team",
+  "head_coach": {
+    "name": "Jesse Marsch",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "High-intensity aggressive pressing (often referred to as 'Maplepressing'), vertical build-up play, mid-to-high compact defensive blocks, and a high backline to compress spaces."
+  },
+  "key_players": [
+    {
+      "name": "Alphonso Davies",
+      "position": "Left-Back / Winger",
+      "market_value": "€45.00m",
+      "performance_stats": "Canada's captain and primary dynamic threat down the flank, playing for FC Bayern Munich."
+    },
+    {
+      "name": "Jonathan David",
+      "position": "Centre-Forward",
+      "market_value": "€35.00m",
+      "performance_stats": "The team's primary goal scorer and talisman forward, currently playing in Serie A for Juventus."
+    },
+    {
+      "name": "Ismaël Koné",
+      "position": "Central Midfield",
+      "market_value": "€20.00m",
+      "performance_stats": "A key midfield engine driving transitions, currently playing for US Sassuolo."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Alphonso Davies",
+      "absence_reason": "Left hamstring tear suffered in early May 2026 with Bayern Munich, facing a 4-to-6 week recovery timeline."
+    },
+    {
+      "player_name": "Luc de Fougerolles",
+      "absence_reason": "Concussion sustained in mid-May 2026 while playing for Belgian club Dender."
+    },
+    {
+      "player_name": "Kamal Miller",
+      "absence_reason": "Hamstring injury sustained in mid-May 2026 during a match for the Portland Timbers."
+    },
+    {
+      "player_name": "Richie Laryea",
+      "absence_reason": "Hamstring injury."
+    },
+    {
+      "player_name": "Ralph Priso",
+      "absence_reason": "Hamstring strain."
+    }
+  ]
+}

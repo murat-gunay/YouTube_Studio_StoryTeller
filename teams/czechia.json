@@ -1,0 +1,42 @@
+{
+  "team_name": "Czechia",
+  "head_coach": {
+    "name": "Miroslav Koubek",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Under Miroslav Koubek, Czechia utilizes a direct, physical, and vertical playstyle, focused heavily on coordinated pressing, wing-play with overlapping wing-backs, direct crossing to aerial targets, and set-piece efficiency."
+  },
+  "key_players": [
+    {
+      "name": "Patrik Schick",
+      "position": "Centre-Forward",
+      "market_value": "€20.00m",
+      "performance_stats": "The main attacking focal point for the national team, renowned for his clinical finishing, positioning, and aerial strength in the box."
+    },
+    {
+      "name": "Pavel Šulc",
+      "position": "Attacking Midfielder",
+      "market_value": "€20.00m",
+      "performance_stats": "In-form creative spark for both Olympique Lyon and Czechia, driving transitions and creating scoring chances from midfield."
+    },
+    {
+      "name": "Tomáš Souček",
+      "position": "Defensive Midfielder",
+      "market_value": "€12.00m",
+      "performance_stats": "Experienced team leader and defensive anchor, providing aerial dominance in midfield and a constant threat from set-pieces."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Martin Vitík",
+      "absence_reason": "Ankle Injury"
+    },
+    {
+      "player_name": "Vítězslav Jaroš",
+      "absence_reason": "Knee Injury"
+    },
+    {
+      "player_name": "Lukáš Provod",
+      "absence_reason": "Undergoing rehabilitation for muscle injury"
+    }
+  ]
+}

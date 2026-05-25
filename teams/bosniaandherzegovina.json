@@ -1,0 +1,42 @@
+{
+  "team_name": "Bosnia and Herzegovina",
+  "head_coach": {
+    "name": "Sergej Barbarez",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "Barbarez employs a highly physical, direct, and high-energy style of football emphasizing quick transitions. The system utilizes a compact defensive block with two banks of four, applying intense, coordinated high-pressing waves to force errors and transition rapidly to direct vertical attacks via the strikers."
+  },
+  "key_players": [
+    {
+      "name": "Ermedin Demirović",
+      "position": "Centre-Forward",
+      "market_value": "€22.00m",
+      "performance_stats": "Key starting forward who has shown clinical form for both VfB Stuttgart and the national team, leading Bosnia's front-line attack [2.2.4]."
+    },
+    {
+      "name": "Tarik Muharemović",
+      "position": "Centre-Back",
+      "market_value": "€20.00m",
+      "performance_stats": "The most valuable defender in the squad, performing as a commanding central defender for US Sassuolo."
+    },
+    {
+      "name": "Amar Dedić",
+      "position": "Right-Back",
+      "market_value": "€15.00m",
+      "performance_stats": "Dynamic, attacking full-back playing for SL Benfica, known for providing defensive solidity and essential width going forward."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Amir Hadžiahmetović",
+      "absence_reason": "Ruled out of the upcoming World Cup due to a meniscus knee injury requiring surgery and a lengthy recovery period [3.1.1]."
+    },
+    {
+      "player_name": "Haris Tabaković",
+      "absence_reason": "Expected to miss the World Cup after sustaining an ankle fracture while playing for Borussia Mönchengladbach."
+    },
+    {
+      "player_name": "Edin Džeko",
+      "absence_reason": "Doubtful or racing against time after suffering a shoulder injury during the qualification play-off final against Italy."
+    }
+  ]
+}

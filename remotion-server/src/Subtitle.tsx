@@ -1,23 +1,63 @@
 import React from 'react';
-import { AbsoluteFill } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
 
 interface Overlay {
     text: string;
     style: 'comic-box' | 'speech-bubble';
+    startSecond?: number;
+    duration?: number;
 }
 
 export const Subtitle: React.FC<{ overlays?: Overlay[] }> = ({ overlays }) => {
+    const frame = useCurrentFrame();
+    const { fps } = useVideoConfig();
+
     if (!overlays || overlays.length === 0) return null;
 
     return (
         <AbsoluteFill>
             {overlays.map((overlay, index) => {
-                const offset = index * 20;
-                const isTopLeft = index === 0;
+                if (!overlay.text) return null;
+
+                const startS = overlay.startSecond || 0;
+                const durS = overlay.duration || 5;
+
+                const startFrame = startS * fps;
+                const endFrame = (startS + durS) * fps;
+
+                // Scale Intro
+                const scaleIn = spring({
+                    frame: frame - startFrame,
+                    fps,
+                    config: { damping: 12, mass: 0.5, stiffness: 100 }
+                });
+
+                // Scale Outro
+                const scaleOut = spring({
+                    frame: frame - endFrame,
+                    fps,
+                    config: { damping: 12, mass: 0.5, stiffness: 100 }
+                });
+
+                // If before start frame, hide it entirely
+                if (frame < startFrame) return null;
+
+                const scale = frame < endFrame ? scaleIn : interpolate(scaleOut, [0, 1], [1, 0]);
+                if (scale <= 0) return null;
+
+                let positionStyle: React.CSSProperties = {};
+                if (index === 0) {
+                    positionStyle = { top: '40px', left: '40px' };
+                } else if (index === 1) {
+                    positionStyle = { bottom: '60px', right: '60px' };
+                } else {
+                    positionStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+                }
                 
-                const positionStyle: React.CSSProperties = isTopLeft 
-                    ? { top: `${40 + offset}px`, left: `${40 + offset}px` }
-                    : { bottom: `${60 + offset}px`, right: `${60 + offset}px` };
+                const rotation = index % 2 === 0 ? '-1deg' : '1deg';
+                const transformStyle = index === 2 
+                    ? `translate(-50%, -50%) scale(${scale}) rotate(${rotation})` 
+                    : `scale(${scale}) rotate(${rotation})`;
 
                 if (overlay.style === 'comic-box') {
                     return (
@@ -31,7 +71,8 @@ export const Subtitle: React.FC<{ overlays?: Overlay[] }> = ({ overlays }) => {
                                 padding: '10px 20px',
                                 maxWidth: '40%',
                                 boxShadow: '8px 8px 0px rgba(0,0,0,0.2)',
-                                transform: `rotate(${(index % 2 === 0 ? -1 : 1)}deg)`,
+                                transform: transformStyle,
+                                transformOrigin: 'center center',
                                 zIndex: 10 + index,
                             }}
                         >
@@ -50,6 +91,7 @@ export const Subtitle: React.FC<{ overlays?: Overlay[] }> = ({ overlays }) => {
                 }
 
                 if (overlay.style === 'speech-bubble') {
+                    const isTopLeft = index === 0;
                     return (
                         <div
                             key={index}
@@ -65,6 +107,8 @@ export const Subtitle: React.FC<{ overlays?: Overlay[] }> = ({ overlays }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                transform: transformStyle,
+                                transformOrigin: 'center center',
                                 zIndex: 10 + index,
                             }}
                         >

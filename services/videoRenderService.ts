@@ -9,9 +9,18 @@ const FPS = 30;
  * Fetches a URL and converts it to a Blob.
  */
 const fetchAsBlob = async (url: string): Promise<Blob> => {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to fetch asset: ${url}`);
-    return await response.blob();
+    const urlPreview = url.startsWith('data:') ? `data:${url.substring(5, 40)}...(${url.length} chars)` : url.substring(0, 120);
+    console.debug(`  📥 [fetchAsBlob] Fetching: ${urlPreview}`);
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Failed to fetch asset (HTTP ${response.status}): ${urlPreview}`);
+        const blob = await response.blob();
+        console.debug(`  📥 [fetchAsBlob] OK → ${blob.type}, ${blob.size} bytes`);
+        return blob;
+    } catch (e: any) {
+        console.error(`  ❌ [fetchAsBlob] FAILED for: ${urlPreview}`, e.message);
+        throw e;
+    }
 };
 
 /**
@@ -56,8 +65,13 @@ export const buildRenderFormData = async (
 
     const sceneData: any[] = [];
 
-    for (const scene of scenes) {
-        if (!scene.imageUrl || !scene.ttsAudioUrl) continue;
+    for (let i = 0; i < scenes.length; i++) {
+        const scene = scenes[i];
+        console.info(`📦 [VideoRender] Processing scene ${i}/${scenes.length}: id=${scene.id}, hasImage=${!!scene.imageUrl}, hasAudio=${!!scene.ttsAudioUrl}, hasVideo=${!!scene.videoUrl}, musicId=${scene.selectedMusicId}, sfxId=${scene.selectedSfxId}`);
+        if (!scene.imageUrl || !scene.ttsAudioUrl) {
+            console.warn(`📦 [VideoRender] ⚠️ Skipping scene ${scene.id}: missing imageUrl or ttsAudioUrl`);
+            continue;
+        }
 
         // Fetch Blobs for binary transmission
         const imageBlob = await fetchAsBlob(scene.imageUrl);
@@ -83,7 +97,7 @@ export const buildRenderFormData = async (
         // Handle Background Music
         if (scene.selectedMusicId && musicKey) {
             const asset = AUDIO_LIBRARY.find(a => a.id === scene.selectedMusicId);
-            if (asset) {
+            if (asset && asset.url) {
                 try {
                     const musicBlob = await fetchAsBlob(asset.url);
                     formData.append(musicKey, musicBlob, `music_${scene.id}.mp3`);
@@ -96,7 +110,7 @@ export const buildRenderFormData = async (
         // Handle SFX
         if (scene.selectedSfxId && sfxKey) {
             const asset = AUDIO_LIBRARY.find(a => a.id === scene.selectedSfxId);
-            if (asset) {
+            if (asset && asset.url) {
                 try {
                     const sfxBlob = await fetchAsBlob(asset.url);
                     const ext = asset.url.endsWith('.ogg') ? 'ogg' : 'mp3';
@@ -273,21 +287,29 @@ export const buildAnimatedRenderFormData = async (
 export const renderFullVideo = async (
     scenes: Scene[],
     aspectRatio: AspectRatio,
-    resolution: '720p' | '1080p',
+    resolution: '720p' | '1080p' | '1440p',
     onProgress: (msg: string) => void,
     isAnimated: boolean = false
-): Promise<Blob> => {
+): Promise<{ blob: Blob | null; filename: string | null }> => {
     const modeLabel = isAnimated ? 'Animated' : 'Static';
     onProgress(`Packaging ${modeLabel} assets (Binary Mode)...`);
     console.info(`🚀 [VideoRender:${modeLabel}] Starting Full Video Render Process...`);
+    console.info(`🚀 [VideoRender:${modeLabel}] Scenes count: ${scenes.length}, aspectRatio: ${aspectRatio}, resolution: ${resolution}, isAnimated: ${isAnimated}`);
+    
+    // Debug: log scene summary
+    scenes.forEach((s, i) => {
+        console.info(`🚀 [VideoRender:${modeLabel}] Scene[${i}] id=${s.id} imageUrl=${s.imageUrl ? s.imageUrl.substring(0, 50) + '...' : 'NULL'} ttsAudioUrl=${s.ttsAudioUrl ? s.ttsAudioUrl.substring(0, 50) + '...' : 'NULL'} videoUrl=${s.videoUrl ? s.videoUrl.substring(0, 50) + '...' : 'NULL'}`);
+    });
+    
     console.time(`🚀 [VideoRender:${modeLabel}] Total Render Service Duration`);
     try {
+        console.info(`🚀 [VideoRender:${modeLabel}] Step 1: Building FormData...`);
         const formData = isAnimated
             ? await buildAnimatedRenderFormData(scenes, aspectRatio, resolution)
             : await buildRenderFormData(scenes, aspectRatio, resolution);
         
+        console.info(`🚀 [VideoRender:${modeLabel}] Step 2: FormData built. Sending to Remotion...`);
         onProgress(`Sending ${modeLabel} request to Remotion Backend...`);
-        console.info(`🚀 [VideoRender:${modeLabel}] Sending POST request to Remotion API (http://localhost:3001/api/render)...`);
         console.time(`🚀 [VideoRender:${modeLabel}] Remotion API Call Duration`);
 
         const response = await fetch('http://localhost:3001/api/render', {
@@ -296,20 +318,52 @@ export const renderFullVideo = async (
         });
 
         console.timeEnd(`🚀 [VideoRender:${modeLabel}] Remotion API Call Duration`);
+        console.info(`🚀 [VideoRender:${modeLabel}] Step 3: Response received. Status: ${response.status} ${response.statusText}`);
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `Server error: ${response.statusText}`);
+            let errorBody = '';
+            try {
+                errorBody = await response.text();
+                console.error(`🚀 [VideoRender:${modeLabel}] Error response body:`, errorBody);
+            } catch (_) {}
+            const errorData = errorBody ? JSON.parse(errorBody).error : response.statusText;
+            throw new Error(errorData || `Server error: ${response.statusText}`);
         }
 
-        onProgress("Server-side rendering in progress...");
-        console.info(`🚀 [VideoRender:${modeLabel}] API returned success. Downloading video blob...`);
+        onProgress("Server-side rendering initiated...");
+        console.info(`🚀 [VideoRender:${modeLabel}] Step 4: Decoding job response...`);
         
-        const videoBlob = await response.blob();
-        console.info(`🚀 [VideoRender:${modeLabel}] Render complete and Blob received (${Math.round(videoBlob.size / 1024 / 1024)} MB)`);
-        return videoBlob;
-    } catch (e) {
-        console.error(`❌ [VideoRender:${modeLabel}] Render Full Video failed:`, e);
+        const initialResult = await response.json();
+        const jobId = initialResult.jobId;
+        if (!jobId) {
+            throw new Error("No jobId received from Remotion server.");
+        }
+
+        console.info(`🚀 [VideoRender:${modeLabel}] Job ${jobId} registered. Starting status polling...`);
+        let pollCount = 0;
+        
+        while (true) {
+            await new Promise(r => setTimeout(r, 5000));
+            pollCount++;
+            
+            onProgress(`Server-side rendering in progress (polling, elapsed: ${pollCount * 5}s)...`);
+            
+            const statusRes = await fetch(`http://localhost:3001/api/render/status/${jobId}`);
+            if (!statusRes.ok) {
+                throw new Error(`Failed to check render status (HTTP ${statusRes.status}): ${statusRes.statusText}`);
+            }
+            
+            const jobStatus = await statusRes.json();
+            if (jobStatus.status === 'completed') {
+                console.info(`🚀 [VideoRender:${modeLabel}] ✅ Render complete! Filename: ${jobStatus.filename}`);
+                return { blob: null, filename: jobStatus.filename || null };
+            } else if (jobStatus.status === 'failed') {
+                throw new Error(jobStatus.error || "Server rendering process encountered an error.");
+            }
+        }
+    } catch (e: any) {
+        console.error(`❌ [VideoRender:${modeLabel}] Render Full Video FAILED at:`, e.message);
+        console.error(`❌ [VideoRender:${modeLabel}] Full error:`, e);
         throw e;
     } finally {
         console.timeEnd(`🚀 [VideoRender:${modeLabel}] Total Render Service Duration`);

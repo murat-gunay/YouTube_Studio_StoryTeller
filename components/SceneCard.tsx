@@ -307,8 +307,15 @@ export const SceneCard: React.FC<SceneCardProps> = ({
                 />
 
                 <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
-                  <button onClick={() => onGenerateImage(scene.id, scene.visualPrompt)} disabled={scene.isGeneratingImage} className="bg-black/60 text-white p-2 rounded hover:bg-black/80 backdrop-blur-sm disabled:opacity-50">
+                  <button onClick={() => onGenerateImage(scene.id, scene.visualPrompt)} disabled={scene.isGeneratingImage} className="bg-black/60 text-white p-2 rounded hover:bg-black/80 backdrop-blur-sm disabled:opacity-50" title="Regenerate Image">
                     {scene.isGeneratingImage ? <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full block"></span> : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
+                  </button>
+                  <button 
+                    onClick={() => handleDownload(scene.imageUrl!, `scene_${scene.id + 1}_image.png`)}
+                    className="bg-black/60 text-white p-2 rounded hover:bg-black/80 backdrop-blur-sm shadow-lg"
+                    title="Download Image"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                   </button>
                 </div>
               </div>
@@ -329,13 +336,23 @@ export const SceneCard: React.FC<SceneCardProps> = ({
                 <div className="flex justify-between items-center">
                   <h4 className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Video Studio (Veo 3.1)</h4>
                   {scene.videoUrl && (
-                    <button
-                      onClick={() => onPreviewVideo(scene.id)}
-                      className="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-indigo-400/30 flex items-center gap-1 transition-all"
-                    >
-                      <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
-                      Play Preview
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onPreviewVideo(scene.id)}
+                        className="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-indigo-400/30 flex items-center gap-1 transition-all"
+                      >
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
+                        Play Preview
+                      </button>
+                      <button
+                        onClick={() => handleDownload(scene.videoUrl!, `scene_${scene.id + 1}_video.mp4`)}
+                        className="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-indigo-400/30 flex items-center gap-1 transition-all"
+                        title="Download Video"
+                      >
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Download
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -453,12 +470,32 @@ export const SceneCard: React.FC<SceneCardProps> = ({
             <textarea value={scene.visualPrompt} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onUpdatePrompt(scene.id, e.target.value)} className="w-full h-16 bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 focus:border-indigo-500 outline-none resize-none scrollbar-thin transition-colors font-mono leading-relaxed" placeholder="Describe the scene..." />
           </div>
 
-          {/* Dual Overlay Editor */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Overlays Editor */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {(scene.overlays || []).map((overlay, idx) => (
-              <div key={idx} className="relative">
-                <label className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1 block">{idx === 0 ? "Overlay 1 (Context)" : "Overlay 2 (Dialogue)"}</label>
-                <textarea value={overlay.text} onChange={(e) => handleOverlayChange(idx, e.target.value)} className={`w-full h-16 bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-black focus:border-indigo-500 outline-none resize-none scrollbar-thin ${overlay.style === 'comic-box' ? 'bg-[#fdfcdc]' : 'bg-white'}`} placeholder={idx === 0 ? "Narration..." : "Dialogue..."} />
+              <div key={idx} className="relative bg-slate-800/50 p-2 rounded-lg border border-slate-700">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Overlay {idx + 1}</label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1" title="Start Second">
+                      <span className="text-[9px] text-slate-500">Start:</span>
+                      <input type="number" value={overlay.startSecond !== undefined ? overlay.startSecond : 0} onChange={(e) => {
+                        const updated = [...scene.overlays];
+                        updated[idx] = { ...updated[idx], startSecond: parseFloat(e.target.value) || 0 };
+                        onUpdateOverlays(scene.id, updated);
+                      }} className="w-12 bg-slate-900 border border-slate-700 text-[10px] text-white rounded px-1 py-0.5 outline-none" step="0.5" min="0" />
+                    </div>
+                    <div className="flex items-center gap-1" title="Duration">
+                      <span className="text-[9px] text-slate-500">Dur:</span>
+                      <input type="number" value={overlay.duration !== undefined ? overlay.duration : 5} onChange={(e) => {
+                        const updated = [...scene.overlays];
+                        updated[idx] = { ...updated[idx], duration: parseFloat(e.target.value) || 5 };
+                        onUpdateOverlays(scene.id, updated);
+                      }} className="w-12 bg-slate-900 border border-slate-700 text-[10px] text-white rounded px-1 py-0.5 outline-none" step="0.5" min="0.5" />
+                    </div>
+                  </div>
+                </div>
+                <textarea value={overlay.text} onChange={(e) => handleOverlayChange(idx, e.target.value)} className={`w-full h-12 bg-slate-900 border border-slate-700 rounded p-2 text-[10px] text-black focus:border-indigo-500 outline-none resize-none scrollbar-thin ${overlay.style === 'comic-box' ? 'bg-[#fdfcdc]' : 'bg-white'}`} placeholder={`Overlay ${idx + 1} text...`} />
               </div>
             ))}
           </div>

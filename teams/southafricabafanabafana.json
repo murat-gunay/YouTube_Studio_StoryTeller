@@ -1,0 +1,42 @@
+{
+  "team_name": "South Africa (Bafana Bafana)",
+  "head_coach": {
+    "name": "Hugo Broos",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "A hybrid, high-energy system focusing on a disciplined double-pivot midfield, fluid winger movements, and quick transitions, with the flexibility to occasionally switch to a back-three setup depending on the opposition."
+  },
+  "key_players": [
+    {
+      "name": "Lyle Foster",
+      "position": "Centre-Forward",
+      "market_value": "€10.00m",
+      "performance_stats": "Serves as Bafana Bafana's primary goal threat and spearheads the attack, utilizing his physicality and top-flight European experience."
+    },
+    {
+      "name": "Teboho Mokoena",
+      "position": "Defensive/Central Midfielder",
+      "market_value": "€2.50m",
+      "performance_stats": "The core engine in the central double-pivot, responsible for dictating tempo, breaking up opposition plays, and taking penalties."
+    },
+    {
+      "name": "Relebohile Mofokeng",
+      "position": "Left Winger / Second Striker",
+      "market_value": "€2.00m",
+      "performance_stats": "A highly creative young talent who brings exceptional dribbling, pace, and agility to open up dense defensive blocks."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Mohau Nkota",
+      "absence_reason": "Excluded from the preliminary World Cup squad while recovering from a knee injury."
+    },
+    {
+      "player_name": "Tshepang Moremi",
+      "absence_reason": "Facing a race against time and remains highly doubtful due to an injury picked up in club action."
+    },
+    {
+      "player_name": "Bathusi Aubaas",
+      "absence_reason": "Sidelined and ruled out of contention due to an ongoing long-term injury recovery."
+    }
+  ]
+}

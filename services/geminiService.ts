@@ -480,6 +480,500 @@ export const generateCharacterReference = async (
 };
 
 
+// ⚽ AI Football Simulation Script Generator (Multi-stage Pipeline)
+export const generateFootballScript = async (
+  teamA: string,
+  teamB: string,
+  competition: string,
+  extraContext: string,
+  sceneCount: number,
+  durationMinutes: number,
+  useSearch: boolean,
+  defaultVoice: VoiceOption,
+  targetLanguage: Language
+): Promise<{ scenes: Scene[], storyContext: string, characters: Character[] }> => {
+  console.info(`⚽ [Script:Football] Generating "${teamA} vs ${teamB}". Scenes: ${sceneCount}`);
+  console.time('⚽ [Script:Football] Generation Duration');
+
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    // Define JSON schema using SDK Type
+    const teamSchema = {
+      type: Type.OBJECT,
+      properties: {
+        team_name: { type: Type.STRING },
+        head_coach: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING },
+            preferred_formation: { type: Type.STRING },
+            play_style_summary: { type: Type.STRING }
+          },
+          required: ["name", "preferred_formation", "play_style_summary"]
+        },
+        key_players: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING },
+              position: { type: Type.STRING },
+              market_value: { type: Type.STRING },
+              performance_stats: { type: Type.STRING }
+            },
+            required: ["name", "position", "market_value", "performance_stats"]
+          }
+        },
+        injuries_and_absences: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              player_name: { type: Type.STRING },
+              absence_reason: { type: Type.STRING }
+            },
+            required: ["player_name", "absence_reason"]
+          }
+        }
+      },
+      required: ["team_name", "head_coach", "key_players", "injuries_and_absences"]
+    };
+
+    const getTeamSearchPrompt = (name: string): string => `
+You are an expert football data researcher. Using the Google Search tool, you MUST perform three SEPARATE and distinct searches to gather verified information about the ${name} football team for the 2026 season. 
+
+Execute the following searches step-by-step:
+
+1. First Search Query: "${name} national team current squad transfermarkt 2026" or "${name} football club squad 2026"
+   -> Task: Extract the top 3 most valuable and in-form players currently in the squad. Note their positions, market values, and a brief performance or form highlight.
+
+2. Second Search Query: "${name} football team current injuries 2026"
+   -> Task: Identify key players who are currently injured, suspended, or officially excluded from the squad. Note the reason for their absence.
+
+3. Third Search Query: "${name} football team head coach tactics formation"
+   -> Task: Determine the head coach's name, their preferred tactical formation (e.g., 4-3-3), and core playing style.
+
+CRITICAL INSTRUCTION: You MUST synthesize your findings and output the final response STRICTLY as a valid JSON object matching the requested schema.
+    `;
+
+    // Fetch list of cached teams from server
+    let cachedTeamsList: { filename: string; team_name: string }[] = [];
+    try {
+      const listRes = await fetch('http://localhost:3001/api/teams');
+      if (listRes.ok) {
+        cachedTeamsList = await listRes.json();
+      }
+    } catch (err) {
+      console.warn('⚠️ [Script:Football] Failed to fetch cached teams list from server:', err);
+    }
+
+    const findCachedTeam = async (name: string): Promise<{ filename: string; team_name: string } | null> => {
+      if (cachedTeamsList.length === 0) return null;
+
+      // Ask Gemini to match the input name with any of the cached names semantically
+      const cachedNames = cachedTeamsList.map(t => t.team_name);
+      const prompt = `
+        You are a football data assistant.
+        A user is searching for information about the team: "${name}".
+        We have a list of cached teams: ${JSON.stringify(cachedNames)}.
+        
+        Task: Determine if the team "${name}" is semantically the same as one of the cached teams (even if the names are slightly different, e.g. "Galatasaray SK" vs "Galatasaray", or "Real Madrid CF" vs "Real Madrid").
+        
+        Response format:
+        Return ONLY a JSON object with:
+        {
+          "isMatched": true,
+          "matchedTeamName": "The exact team name from the cached list"
+        }
+        or:
+        {
+          "isMatched": false,
+          "matchedTeamName": null
+        }
+      `;
+
+      try {
+        const response = await ai.models.generateContent({
+          model: MODELS.scriptGen,
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json"
+          }
+        });
+        const result = robustParseJson(response.text || "{}");
+        if (result.isMatched && result.matchedTeamName) {
+          const match = cachedTeamsList.find(t => t.team_name.toLowerCase() === result.matchedTeamName.toLowerCase());
+          if (match) {
+            console.info(`⚽ [Script:Football] Semantic match found: "${name}" maps to cached "${match.team_name}"`);
+            return match;
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error using Gemini to match cached team:", err);
+      }
+
+      // Fallback direct match (case-insensitive)
+      const directMatch = cachedTeamsList.find(t => t.team_name.toLowerCase() === name.toLowerCase());
+      if (directMatch) {
+        console.info(`⚽ [Script:Football] Direct string match found: "${name}" maps to cached "${directMatch.team_name}"`);
+      }
+      return directMatch || null;
+    };
+
+    const getTeamProfile = async (name: string): Promise<any> => {
+      // 1. Semantic cache check
+      const cachedTeam = await findCachedTeam(name);
+      if (cachedTeam) {
+        try {
+          const res = await fetch(`http://localhost:3001/api/teams/${encodeURIComponent(cachedTeam.team_name)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.team_name) {
+              console.info(`⚽ [Script:Football] Using cached profile for: ${cachedTeam.team_name}`);
+              return data;
+            }
+          }
+        } catch (err) {
+          console.warn(`⚠️ [Script:Football] Failed to load cached file for ${cachedTeam.team_name}:`, err);
+        }
+      }
+
+      // 2. Not found: fetch using Gemini + Google Search (default tools on)
+      console.info(`⚽ [Script:Football] Cache miss for "${name}". Running Google Search to gather profile...`);
+      const searchPrompt = getTeamSearchPrompt(name);
+      const searchTools = [{ googleSearch: {} }];
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: searchPrompt,
+        config: {
+          tools: searchTools,
+          responseMimeType: 'application/json',
+          responseSchema: teamSchema,
+          thinkingConfig: { thinkingBudget: 2048 }
+        }
+      });
+
+      const parsedData = robustParseJson(response.text || "{}");
+
+      // 3. Save to server cache
+      if (parsedData && parsedData.team_name) {
+        try {
+          await fetch(`http://localhost:3001/api/teams/${encodeURIComponent(parsedData.team_name)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parsedData)
+          });
+          console.info(`⚽ [Script:Football] Successfully cached profile for team: ${parsedData.team_name}`);
+        } catch (err) {
+          console.warn(`⚠️ [Script:Football] Failed to save team cache for ${parsedData.team_name}:`, err);
+        }
+      }
+
+      return parsedData;
+    };
+
+    // ── STEP 1: PARALLEL TEAM DATA COLLECTION ──
+    console.info(`⚽ [Script:Football] Step 1: Gathering team profiles...`);
+    const [teamAData, teamBData] = await Promise.all([
+      getTeamProfile(teamA),
+      getTeamProfile(teamB)
+    ]);
+
+    // ── STEP 2: CONTEXT INJECTION & CHARACTER AUTO-EXTRACTION ──
+    console.info(`⚽ [Script:Football] Step 2: Injecting context and building character registry...`);
+    const teamAJsonString = JSON.stringify(teamAData, null, 2);
+    const teamBJsonString = JSON.stringify(teamBData, null, 2);
+
+    const characters: Character[] = [];
+    const addTeamCharacters = (data: any, teamLabel: string) => {
+      if (data.head_coach && data.head_coach.name) {
+        characters.push({
+          id: `char_coach_${teamLabel.replace(/\s+/g, '_')}`,
+          name: data.head_coach.name,
+          description: `${data.head_coach.name}, Head Coach of ${teamLabel}. Preferred formation: ${data.head_coach.preferred_formation || 'Unknown'}. Play style: ${data.head_coach.play_style_summary || 'Unknown'}`
+        });
+      }
+      if (Array.isArray(data.key_players)) {
+        data.key_players.forEach((p: any, idx: number) => {
+          if (p.name) {
+            characters.push({
+              id: `char_player_${teamLabel.replace(/\s+/g, '_')}_${idx}`,
+              name: p.name,
+              description: `${p.name}, key player for ${teamLabel}. Position: ${p.position || 'Unknown'}. Market value: ${p.market_value || 'Unknown'}. Form/Stats: ${p.performance_stats || 'Unknown'}`
+            });
+          }
+        });
+      }
+    };
+
+    addTeamCharacters(teamAData, teamA);
+    addTeamCharacters(teamBData, teamB);
+
+    // ── STEP 2.5: DECIDE MATCH SCORE & TIMELINE (gemini-3.1-flash-lite-preview, High Thinking) ──
+    console.info(`⚽ [Script:Football] Step 2.5: Determining match simulation score and timeline...`);
+    const simulationSchema = {
+      type: Type.OBJECT,
+      properties: {
+        winner: { type: Type.STRING },
+        finalScore: { type: Type.STRING },
+        halfTimeScore: { type: Type.STRING },
+        matchTimeline: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              minute: { type: Type.INTEGER },
+              team: { type: Type.STRING },
+              event: { type: Type.STRING },
+              detail: { type: Type.STRING }
+            },
+            required: ["minute", "team", "event", "detail"]
+          }
+        },
+        tacticalSummary: { type: Type.STRING }
+      },
+      required: ["winner", "finalScore", "halfTimeScore", "matchTimeline", "tacticalSummary"]
+    };
+
+    const simulationPrompt = `
+You are an advanced football simulation data engine.
+Using the team squad, tactical, and injury profiles provided below in JSON format, run a simulated match reasoning process.
+We want to simulate the fixture between ${teamA} and ${teamB} ${competition ? `in ${competition}` : ''} extremely realistically, taking into account tactical styles, coaching, key players' forms, and missing players due to injuries.
+
+--- TEAM DATA INPUTS ---
+TEAM A (${teamA}):
+${teamAJsonString}
+
+TEAM B (${teamB}):
+${teamBJsonString}
+
+ADDITIONAL CONTEXT:
+${extraContext || "None"}
+-------------------------
+
+Task:
+1. Reason about the matchup: how do the formations, playstyles, and squads clash?
+2. Run a detailed match simulation to decide:
+   - The winner ("${teamA}", "${teamB}", or "Draw").
+   - The final score (formatted as "Team A Score - Team B Score", e.g. "2-1").
+   - The halftime score (formatted similarly, e.g. "1-0").
+   - A realistic timeline of events (e.g., goals, red cards, key substitutions/injuries during the match) with exact minutes. Ensure it is chronologically ordered and matches the final score exactly.
+   - A brief tactical summary explaining how the goals were scored or why the match ended this way based on the squads.
+
+Return the result strictly as a valid JSON matching the requested schema. Do not include any formatting other than the JSON itself.
+    `;
+
+    const simulationResponse = await ai.models.generateContent({
+      model: MODELS.scriptGen,
+      contents: simulationPrompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: simulationSchema,
+        thinkingConfig: { thinkingBudget: 8192 } // High thinking enabled for high-quality simulation
+      }
+    });
+
+    const scoreDecision = robustParseJson(simulationResponse.text || "{}");
+    console.info(`⚽ [Script:Football] Simulation result decided: ${scoreDecision.finalScore} (HT: ${scoreDecision.halfTimeScore})`);
+
+    // ── STEP 3: SCRIPT GENERATION (Google Search OFF, gemini-3.1-flash-lite, High Thinking) ──
+    console.info(`⚽ [Script:Football] Step 3: Generating commentary script...`);
+
+    const totalDurationSeconds = durationMinutes * 60;
+    const durationPerSceneSeconds = totalDurationSeconds / sceneCount;
+    const targetWordCount = Math.floor((durationPerSceneSeconds / 60) * 135); // 135 WPM speaking rate
+
+    const formatTime = (totalMinutes: number) => {
+      const totalSeconds = Math.round(totalMinutes * 60);
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const musicList = AUDIO_LIBRARY.filter(a => a.category === 'music').map(a => `- ID: "${a.id}" (${a.label})`).join('\n');
+    const sfxList = AUDIO_LIBRARY.filter(a => a.category !== 'music').map(a => `- ID: "${a.id}" (${a.label})`).join('\n');
+
+    const finalPrompt = `
+You are an expert football tactical analyst and a highly passionate match commentator for a popular YouTube football simulation channel (think Gary Neville meets ESPN FC). 
+
+Your task is to simulate a match between ${teamA} and ${teamB} ${competition ? `in ${competition}` : ''} and write a highly engaging, play-by-play commentary script. You MUST base your entire simulation STRICTLY on the real-world data and pre-decided score timeline provided below.
+
+--- MATCH DATA INPUTS ---
+TEAM A (${teamA}) DATA:
+${teamAJsonString}
+
+TEAM B (${teamB}) DATA:
+${teamBJsonString}
+-------------------------
+
+--- PRE-DECIDED MATCH SIMULATION RESULTS (MUST FOLLOW STRICTLY) ---
+FINAL SCORE: ${scoreDecision.finalScore}
+HALFTIME SCORE: ${scoreDecision.halfTimeScore}
+MATCH EVENTS TIMELINE:
+${JSON.stringify(scoreDecision.matchTimeline, null, 2)}
+TACTICAL PLAYOUT SUMMARY:
+${scoreDecision.tacticalSummary}
+-------------------------------------------------------------------
+
+ADDITIONAL USER CONTEXT:
+${extraContext || "None"}
+
+Using the provided data, execute the following instructions:
+1. Mention about 10,000 times played simulation results to establish analysis credibility.
+2. Pre-Match Analysis: Briefly analyze the tactical matchup based on the head coaches' preferred formations. Highlight how the identified key players and specific injuries/absences will impact the game's dynamic.
+3. Match Flow & Simulation: Construct a logical and realistic narrative for the match. If a team is missing a star player due to injury, reflect that struggle in the narrative. Allow the key players mentioned in the data to shine or influence the game.
+4. Final Score & Event Timeline Constraints: You MUST strictly conform the commentary story to the pre-decided final score (${scoreDecision.finalScore}), halftime score (${scoreDecision.halfTimeScore}), and the events timeline. All goals, cards, and milestones in the commentary scenes MUST match the timeline exactly. Under no circumstances should any other goals be scored or the score be different in any scene. The last scene (outro) MUST explicitly state/show the final score of ${scoreDecision.finalScore}.
+5. Commentary Script: Write a thrilling, dynamic play-by-play commentary script designed to be narrated for the video.
+   - Include an exciting Intro welcoming the viewers to the simulation.
+   - Cover the first half, second half, and key dramatic moments (goals, near misses, tactical shifts).
+   - Ensure the tone is energetic, professional, and uses authentic football terminology.
+   - Conclude with an Outro summarizing the match, the final score, and asking viewers to subscribe (using standard outro phrases like "subscribe", "thanks for joining", "watching", etc.).
+     - CRITICAL RULES FOR THE LAST SCENE (OUTRO):
+       1. The voiceover script MUST be normal and warm, without any excited or dramatic extreme emotions. DO NOT use any voice bracket inflections (like [excitedly], [dramatically], [sighs], [gasps], etc.) in the last scene.
+       2. The visual_description (image prompt) MUST depict a big scoreboard design displaying the final simulated score of the match.
+       3. The visual_description (image prompt) for the last scene MUST NOT depict, describe, or include any logo, text overlay (except the scoreboard numbers/names itself), or commentator/spiker/host/narrator characters.
+
+── VOICE INFLECTION GUIDE (CRITICAL — use bracket notation IN the voiceover text) ──
+Use these throughout every scene except the last scene for a human, pundit-like feel:
+[excitedly] — exciting revelations, big stats
+[sarcastically] — ironic takes, overconfident claims
+[sighs] — disappointment, hard truths
+[laughs] — light moments, surprising facts
+[dramatically] — big predictions, pivotal moments
+[coughs] — awkward truths, reality checks
+[gasps] — shocking stats, surprise factors
+
+EXAMPLE STYLE:
+"[excitedly] This is the clash football fans have been dreaming about!
+But here's what nobody is talking about...
+[sighs] The xG numbers tell a brutal story.
+[dramatically] And Gemini's prediction? [gasps] You are NOT ready for this."
+
+── NARRATIVE STRUCTURE (distribute evenly across ${sceneCount} scenes) ──
+Cover ALL of the following beats, merging or expanding based on scene count:
+1. PRE-MATCH SETUP — Why is ${teamA} the favorite or how do they stack up? Recent form, squad stats.
+2. SECRET WEAPON — Tactical surprises or underrated players from either team.
+3. PLAYER DUEL — Head-to-head comparison of key players from both teams.
+4. COACH BATTLE — Tactics: formations, pressing intensity, set-piece threats, mind games.
+5. WEAKNESSES EXPOSED — Both teams' vulnerabilities, missing players, fatigue, defensive frailty.
+6. CONDITIONS & REFEREE — Stadium atmosphere, referee factor or external conditions if relevant.
+7. 🤖 SIMULATION PREDICTION — Final score prediction based on 10,000 simulations, key turning point, MVP pick, upset probability %.
+
+── LANGUAGE RULES ──
+- 'voiceover' → in ${targetLanguage} (with bracket inflections for non-outro scenes)
+- 'visual_description' → in ENGLISH (for image generation)
+- 'overlays' → array of exactly 3 text overlays in ${targetLanguage}. Format MUST be context/informational, not dialogue.
+
+── AUDIO SELECTION ──
+[BACKGROUND MUSIC] - Select one per scene based on emotion:
+${musicList}
+
+[SFX / AMBIENCE] - Select one per scene based on setting:
+${sfxList}
+
+Prefer 'music_thrilling' or 'music_tension' for most scenes. Use 'ambience_crowd' or 'sfx_battle_cry' for intense moments. Vary across scenes.
+
+── OUTPUT FORMAT ──
+Each scene voiceover MUST be exactly ${targetWordCount} words.
+Output JSON:
+{
+  "scenes": [
+    {
+      "narrative_beat": "e.g. Pre-Match Setup",
+      "voiceover": "The spoken narration in ${targetLanguage} with [bracket inflections] mixed in naturally...",
+      "overlays": [
+        { "text": "Context Info 1", "startSecond": 1.5, "duration": 5.0 },
+        { "text": "Context Info 2", "startSecond": 6.0, "duration": 5.0 },
+        { "text": "Context Info 3", "startSecond": 10.0, "duration": 5.0 }
+      ],
+      "visual_description": "A detailed image generation prompt in ENGLISH. Include team colors, stadium, players by name, scoreboard, tactical diagrams, or split comparison visuals. Be specific.",
+      "background_audio_id": "music_thrilling",
+      "sfx_audio_id": "ambience_crowd"
+    }
+  ]
+}
+
+CRITICAL RULE: Do not hallucinate player names, statistics, or injuries that are not present in the provided JSON data. Make the commentary feel alive, as if the match is unfolding in real-time.
+    `;
+
+    const finalResponse = await ai.models.generateContent({
+      model: MODELS.scriptGen, // mapped to 'gemini-3.1-flash-lite-preview'
+      contents: finalPrompt,
+      config: {
+        responseMimeType: 'application/json',
+        thinkingConfig: { thinkingBudget: 24576 } // High thinking enabled for high-quality writing
+      }
+    });
+
+    console.debug('🔬 [Script:Football] Final Script Raw:', finalResponse.text);
+    const rawData = robustParseJson(finalResponse.text || "{}");
+    const rawScenes = Array.isArray(rawData.scenes) ? rawData.scenes : [];
+
+    const movementAnimations = [
+      'animate-kb-zoom-in', 'animate-kb-zoom-out',
+      'animate-kb-pan-right', 'animate-kb-pan-left',
+      'animate-kb-diag-right-up', 'animate-kb-zoom-pan-right'
+    ];
+
+    const scenes: Scene[] = rawScenes.map((s: any, index: number) => {
+      const startMin = (index * durationPerSceneSeconds) / 60;
+      const endMin = ((index + 1) * durationPerSceneSeconds) / 60;
+      const timeRange = `${formatTime(startMin)} - ${formatTime(endMin)}`;
+
+      const overlays: Overlay[] = (s.overlays || []).slice(0, 3).map((o: any) => ({
+        text: o.text || '',
+        style: 'comic-box',
+        startSecond: typeof o.startSecond === 'number' ? o.startSecond : 0,
+        duration: typeof o.duration === 'number' ? o.duration : 5
+      }));
+      while(overlays.length < 3) {
+        overlays.push({ text: '', style: 'comic-box', startSecond: 0, duration: 5 });
+      }
+
+      return {
+        id: index,
+        timeRange,
+        voiceoverScript: s.voiceover || '',
+        overlays,
+        visualPrompt: s.visual_description || '',
+        visualPromptEnd: undefined,
+        animationStyles: [movementAnimations[index % movementAnimations.length]],
+        isGeneratingImage: false,
+        isGeneratingImageEnd: false,
+        isGeneratingVideo: false,
+        isGeneratingVideoPrompt: false,
+        isGeneratingTTS: false,
+        selectedTone: index === sceneCount - 1 ? TTSTone.Warm : TTSTone.Enthusiastic,
+        selectedVoice: defaultVoice,
+        selectedMusicId: s.background_audio_id || 'music_thrilling',
+        selectedSfxId: s.sfx_audio_id || 'ambience_crowd',
+        videoOptions: {
+          duration: 6 as 4 | 6 | 8,
+          resolution: '1080p' as '720p' | '1080p',
+          generateAudio: true,
+          aspectRatio: '16:9' as '16:9' | '9:16',
+          numVideos: 1 as 1 | 2,
+          placement: 'end' as 'start' | 'end'
+        },
+        hasShortVideo: false
+      };
+    });
+
+    console.info(`⚽ [Script:Football] Complete. ${scenes.length} scenes, ${characters.length} characters.`);
+    return {
+      scenes: scenes.length > 0 ? scenes : [],
+      storyContext: `Tactical simulation analysis of ${teamA} vs ${teamB} in ${competition || 'friendly'}.`,
+      characters
+    };
+  } catch (error) {
+    console.error(`❌ [Script:Football] Generation failed:`, error);
+    throw error;
+  } finally {
+    console.timeEnd('⚽ [Script:Football] Generation Duration');
+  }
+};
 // 3b. Edit Image (Updated to use Gemini 3 Pro for high quality "Edit by Instruction")
 export const editImage = async (base64Image: string, prompt: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -617,7 +1111,9 @@ export const generateVideoPrompt = async (storyContext: string, scene: Scene): P
 export const generateTTS = async (text: string, voiceName: string, tone: TTSTone): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  const textWithTone = `(Spoken in a ${tone} tone) ${text}`;
+  // Clean [whisper] or [whispers] out of the voiceover prompt to prevent it from being spoken/generating issues
+  const sanitizedText = text.replace(/\[whispers?\]/gi, '');
+  const textWithTone = `(Spoken in a ${tone} tone) ${sanitizedText}`;
 
   const response = await ai.models.generateContent({
     model: MODELS.tts,
@@ -665,7 +1161,7 @@ export const refineContent = async (
   return response.text?.trim() || originalText;
 };
 
-// 3a. Generate YouTube Thumbnail
+// 3a. Generate YouTube Thumbnail (High-CTR, template-based with custom context injection)
 export const generateThumbnail = async (
   projectTitle: string,
   style: string,
@@ -680,7 +1176,6 @@ export const generateThumbnail = async (
   const contentParts: any[] = [];
   let charInstructions = "";
 
-  // 1. Add Character References
   // Filter for valid references and maybe limit to keep composition clean, though we'll send all valid ones.
   const charsWithRefs = characters.filter(c => c.referenceImageUrl);
 
@@ -699,57 +1194,62 @@ export const generateThumbnail = async (
     }
   }
 
-  // 2. Text Instructions
-  let textInstructions = "";
-  if (titleText) {
-    textInstructions += `\n- VISIBLE TEXT: Render the title text "${titleText}" prominently in the image. Use a font style matching the art style.`;
-  }
-  if (subtitleText) {
-    textInstructions += `\n- VISIBLE TEXT: Render the subtitle text "${subtitleText}" clearly.`;
-  }
+  // Segment characters to focus on players as the primary focal point, coaches/referees in the background
+  let characterFocusPrompt = "";
+  if (characters.length > 0) {
+    const players = characters.filter(c => 
+      c.description.toLowerCase().includes("player") || 
+      c.description.toLowerCase().includes("striker") || 
+      c.description.toLowerCase().includes("goalkeeper") || 
+      c.description.toLowerCase().includes("midfielder") || 
+      c.description.toLowerCase().includes("defender") || 
+      c.description.toLowerCase().includes("captain")
+    );
+    const secondary = characters.filter(c => !players.includes(c));
 
-  // If no text provided, let the model decide or create a text-free version
-  if (!titleText && !subtitleText) {
-    textInstructions += `\n- TEXT HANDLING: You may choose to render the project title "${projectTitle}" if it enhances the composition, or leave the image text-free for post-production. Use your creative judgment.`;
-  }
+    const mainFocusChar = players.length > 0 ? players[0] : characters[0];
+    const otherFocusChars = players.slice(1, 3);
+    const backgroundChars = secondary.length > 0 ? secondary : characters.slice(3);
 
-  let prompt = "";
-
-  if (customVisualPrompt) {
-    // User overrides the description part but we still respect style and text/char constraints
-    prompt = `
-        Create a high-impact YouTube Thumbnail.
-        
-        VISUAL DESCRIPTION (Must be interpreted in ENGLISH): ${customVisualPrompt}
-        
-        Art Style: ${style}.
-        
-        ${charInstructions}
-        
-        Requirements:
-        - High contrast, vibrant colors, click-worthy.
-        - Aspect Ratio: 16:9.
-        ${textInstructions}
-     `;
-  } else {
-    prompt = `
-        Create a high-impact YouTube Thumbnail for a video project titled "${projectTitle}".
-        
-        Art Style: ${style}.
-        Story Context: ${storyContext}
-        
-        ${charInstructions}
-        
-        Requirements:
-        - High contrast, vibrant colors, click-worthy.
-        - Composition: Rule of thirds, dynamic lighting.
-        - Aspect Ratio: 16:9.
-        ${textInstructions}
-        - If characters are included, ensure they look consistent with the provided references but in a dramatic pose suitable for a cover.
-     `;
+    characterFocusPrompt = `
+      CHARACTER COMPOSITION & STORY ROLES:
+      - PRIMARY FOCAL CHARACTER: ${mainFocusChar.name}. Place them in sharp, hyper-detailed focus in the foreground with an intense, raw emotional reaction (screaming in passion, wide-eyed in celebration, or shock).
+    `;
+    if (otherFocusChars.length > 0) {
+      characterFocusPrompt += `- SUPPORTING CHARACTER(S): ${otherFocusChars.map(c => c.name).join(", ")}. Positioned near the center-ground, sharing dynamic spotlight. \n`;
+    }
+    if (backgroundChars.length > 0) {
+      characterFocusPrompt += `- BACKGROUND CHARACTERS: ${backgroundChars.map(c => c.name).join(", ")} (e.g. head coaches, referees). Place them in the secondary background looking stressed, angry, or pointing, slightly out of focus to create deep dynamic field separation. \n`;
+    }
   }
 
-  contentParts.push({ text: prompt });
+  const premiumTemplate = `
+      ROLE: Master YouTube CTR Thumbnail Artist.
+      TASK: Create a professional, high-impact YouTube Thumbnail in 16:9 widescreen format designed for maximum CTR.
+
+      ART STYLE RULE:
+      ${style}. Widescreen cinematic CGI render, octane render, rich textures, deep shadows, dramatic highlights, volumetric light shafts.
+
+      VISUAL STAGE DIRECTIVE (Variable Context Injected):
+      ${customVisualPrompt || storyContext}
+
+      ${characterFocusPrompt}
+
+      ${charInstructions}
+
+      HIGH-CTR COMPOSITION & LIGHTING PROTOCOLS:
+      1. RULE OF THIRDS: The primary face and character must be positioned off-center (left or right third) with clear sightlines.
+      2. DRAMATIC split-screen or color contrast dividing the background with saturated glowing colors (e.g., neon team-colored energy clashing).
+      3. CINEMATIC DEPTH: Moody stadium atmosphere at night, volumetric fog/dust particles catching the bright spotlights, shallow depth of field.
+      4. TEXT LAYOUT SPACE: Keep the middle-left area clean and high-contrast to allow bold text overlays without obscuring important character faces.
+      
+      REQUIREMENTS:
+      - 16:9 widescreen ratio.
+      - Vibrant colors, ultra-high contrast, hyper-realistic skin textures, sweat and emotion.
+      - NO spelling text or graphics generated directly on the image. Make it a clean, professional, text-free visual cover.
+  `;
+
+  contentParts.push({ text: premiumTemplate });
 
   const response = await ai.models.generateContent({
     model: MODELS.imageGen,
@@ -769,6 +1269,132 @@ export const generateThumbnail = async (
   }
   throw new Error("Thumbnail generation failed");
 };
+
+export const generateFootballThumbnailSuggestions = async (
+  teamA: string,
+  teamB: string,
+  competition: string,
+  extraContext: string,
+  characters: Character[],
+  targetLanguage: Language
+): Promise<{ titleText: string; subtitleText: string; topRightText: string; customVisualPrompt: string }> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
+  const charListStr = characters.map(c => `- ${c.name}: ${c.description}`).join('\n');
+
+  const parsedComp = competition.trim() || 'FIFA-2026 World Cup, Group-A';
+
+  const prompt = `
+    You are an expert YouTube Thumbnail Designer and Growth Analyst specialized in high-CTR football content.
+    Given this football match context, generate a high-impact click-worthy YouTube Thumbnail Design.
+
+    MATCH DETAILS:
+    - Team A: ${teamA}
+    - Team B: ${teamB}
+    - Competition: ${parsedComp}
+    - Extra Context: ${extraContext}
+
+    EXTRACTED CHARACTERS (PLAYERS & COACHES & STAFF):
+    ${charListStr}
+
+    CTR STRATEGY RULES:
+    1. Focus on the best and most powerful players (superstars, playmakers, top scorers) as the primary focal point of the thumbnail with intense emotional facial expressions (screaming, celebration, shock).
+    2. Place secondary prominent characters (coaches, referees, or supporting players) in the secondary background looking tense or frustrated.
+    3. Generate a highly clickable, dramatic Title Text in the target language: ${targetLanguage}. The Title Text MUST follow the format "Team A vs Team B" (translated/localized for the target language if necessary, e.g. "TEAM A vs TEAM B", "TEAM A contra TEAM B", "TEAM A vs. TEAM B" etc.). Do NOT add any extra slogan, suffix, or descriptive text (such as ": World Cup Clash" or similar). Maintain case sensitivity.
+    4. Generate a Subtitle Text in the target language: ${targetLanguage}. Default to translating/localizing the template "${parsedComp}". Maintain case sensitivity.
+    5. Generate a Top-Right badge text in the target language: ${targetLanguage}. Default to translating/localizing the template "10K Times Simulated with AI". Maintain case sensitivity.
+    6. Generate a highly detailed, professional visual prompt in ENGLISH for an image generator (like Imagen 3) describing the visual composition perfectly.
+    
+    VISUAL PROMPT TEMPLATE to follow:
+    "An epic, high-contrast YouTube Thumbnail for the ${parsedComp} match between ${teamA} and ${teamB}. Split-screen or diagonal dynamic split composition.
+    [Vivid description of the main star player from Team A or B in sharp focus, screaming in triumph/emotion, hyper-detailed face, wearing their team kit].
+    In the background/secondary field, [vivid description of secondary characters like head coaches or referees with shocked/frustrated facial expressions].
+    Background: A massive, packed football stadium at night under bright stadium floodlights with dramatic volumetric fog, neon stadium lights representing [Team A color] and [Team B color] clashing.
+    Cinematic lighting, dynamic low-angle wide shot, rule of thirds, highly detailed, Unreal Engine 5 style."
+
+    Return a JSON response exactly in this format:
+    {
+      "titleText": "Strictly format as '${teamA} vs ${teamB}' localized in ${targetLanguage}",
+      "subtitleText": "High-CTR subtitle in ${targetLanguage} (default/translating '${parsedComp}')",
+      "topRightText": "High-CTR top-right badge text in ${targetLanguage} (default/translating '10K Times Simulated with AI')",
+      "customVisualPrompt": "A highly detailed, context-aware prompt in ENGLISH strictly following the template above."
+    }
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODELS.scriptGen,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  const parsed = robustParseJson(response.text || "{}");
+  return {
+    titleText: parsed.titleText || `${teamA} vs ${teamB}`,
+    subtitleText: parsed.subtitleText || parsedComp,
+    topRightText: parsed.topRightText || `10K Times Simulated with AI`,
+    customVisualPrompt: parsed.customVisualPrompt || `A cinematic YouTube thumbnail for ${teamA} vs ${teamB} in ${parsedComp}.`
+  };
+};
+
+// 3c. Localize YouTube thumbnail metadata text for other language tabs
+export const localizeThumbnailMetadata = async (
+  titleText: string,
+  subtitleText: string,
+  topRightText: string,
+  targetLanguage: Language
+): Promise<{ titleText: string; subtitleText: string; topRightText: string }> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const targetLangStr = targetLanguage === Language.Portuguese ? "Portuguese (specifically Brazilian Portuguese, Português Brasileiro)" : targetLanguage;
+  const prompt = `
+    You are a professional localizer and growth hacker.
+    Translate and adapt these three YouTube thumbnail texts to ${targetLangStr}.
+    Maintain the same high emotional energy and click-worthiness. 
+    Keep them concise but fully translated, preserving the meaning and case structure of the original texts.
+
+    CRITICAL RULE FOR TITLE: The titleText MUST follow the format "Team A vs Team B" (where 'vs' is translated/adapted to target language if necessary, e.g. 'vs', 'vs.', 'contra', 'karşı karşıya'). Do NOT add any extra slogan, suffix, or descriptive text (such as ": World Cup Clash" or similar).
+
+    Original Title: "${titleText}"
+    Original Subtitle: "${subtitleText}"
+    Original Top-Right Badge: "${topRightText}"
+
+    Output JSON format:
+    {
+      "titleText": "Translated title in the strict format 'Team A vs Team B'",
+      "subtitleText": "Translated subtitle",
+      "topRightText": "Translated top-right badge"
+    }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: MODELS.scriptGen,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+    const parsed = robustParseJson(response.text || "{}");
+    let finalTopRight = parsed.topRightText || topRightText;
+    if (targetLanguage === Language.Turkish && (!parsed.topRightText || parsed.topRightText.includes("10K") || parsed.topRightText.includes("Simulated") || parsed.topRightText.includes("10 Kez") || parsed.topRightText.includes("10 bin") || parsed.topRightText.includes("10Bin"))) {
+      finalTopRight = "10B Kez AI ile Simüle Edildi";
+    }
+    return {
+      titleText: parsed.titleText || titleText,
+      subtitleText: parsed.subtitleText || subtitleText,
+      topRightText: finalTopRight
+    };
+  } catch (err) {
+    console.error("Failed to localize thumbnail:", err);
+    let fallbackTopRight = topRightText;
+    if (targetLanguage === Language.Turkish && (topRightText.includes("10K") || topRightText.includes("Simulated"))) {
+      fallbackTopRight = "10B Kez AI ile Simüle Edildi";
+    }
+    return { titleText, subtitleText, topRightText: fallbackTopRight };
+  }
+};
+
 
 export const generateAnimatedStoryScript = async (
   transcription: string,
@@ -986,6 +1612,130 @@ export const generateAnimatedStoryScript = async (
     throw error;
   } finally {
     console.timeEnd('📜 [Script:Animated] Generation Duration');
+  }
+};
+
+// 5. Localize Script
+export const localizeScript = async (
+  scenes: Scene[],
+  targetLanguage: Language
+): Promise<Record<number, any>> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
+  const sceneData = scenes.map(s => ({
+    id: s.id,
+    voiceover: s.voiceoverScript,
+    overlays: s.overlays.map(o => o.text),
+    imageOverlayText: s.imageOverlayText
+  }));
+
+  const targetLangStr = targetLanguage === Language.Portuguese ? "Portuguese (specifically Brazilian Portuguese, Português Brasileiro)" : targetLanguage;
+  const prompt = `
+    You are an expert translator and localizer for YouTube videos.
+    Translate and localize the following scene voiceovers and overlays from English to ${targetLangStr}.
+    
+    Strict Translation Rules:
+    1. Localize the script for the target language to make it sound as natural, native, and local as possible. Do not perform a literal word-for-word translation. Use native idioms, conversational vocabulary, and a style suitable for an engaging video voiceover.
+    2. The voiceover contains emotional/tone expressions enclosed in brackets (such as "[excitedly]", "[whispering]", "[sighs]", etc.). You MUST preserve these emotion and tone definers EXACTLY as they are in English inside the translated script.
+    3. Do NOT translate or modify any text inside the square brackets. Keep them in the correct semantic/syntactic position of the sentence where they belong in the target language.
+    4. Keep the pacing and length as close to the original as possible.
+    
+    Scenes Data:
+    ${JSON.stringify(sceneData, null, 2)}
+    
+    Output JSON format:
+    {
+      "localizations": [
+        {
+          "id": 0,
+          "voiceover": "Translated voiceover preserving English brackets exactly...",
+          "overlays": ["Translated overlay 1", "Translated overlay 2"],
+          "imageOverlayText": "Translated image overlay text"
+        }
+      ]
+    }
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODELS.scriptGen,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  const rawData = robustParseJson(response.text || "{}");
+  
+  const results: Record<number, any> = {};
+  
+  if (rawData.localizations && Array.isArray(rawData.localizations)) {
+    rawData.localizations.forEach((loc: any) => {
+      const originalScene = scenes.find(s => s.id === loc.id);
+      if (!originalScene) return;
+      
+      const newOverlays = originalScene.overlays.map((o, idx) => ({
+        ...o,
+        text: loc.overlays?.[idx] || o.text
+      }));
+      
+      results[loc.id] = {
+        voiceoverScript: loc.voiceover || originalScene.voiceoverScript,
+        overlays: newOverlays,
+        imageOverlayText: loc.imageOverlayText || originalScene.imageOverlayText,
+        ttsAudioUrl: undefined,
+        isGeneratingTTS: false
+      };
+    });
+  }
+  
+  return results;
+};
+
+// 6. Localize YouTube Metadata (Title, Description, Tags)
+export const localizeMetadata = async (
+  metadata: { title: string; description: string; tags: string },
+  targetLanguage: string
+): Promise<{ title: string; description: string; tags: string }> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
+  const targetLangStr = targetLanguage === 'Portuguese' || targetLanguage === Language.Portuguese ? "Portuguese (specifically Brazilian Portuguese, Português Brasileiro)" : targetLanguage;
+  const prompt = `
+    You are an expert localizer for YouTube video metadata.
+    Translate and localize the following YouTube video metadata (Title, Description, Tags) into the target language: ${targetLangStr}.
+    
+    Guidelines:
+    1. Make the translation sound natural, professional, and highly engaging/click-worthy to football fans in ${targetLanguage}. Use proper localized football/soccer terms (e.g. use "fútbol" for Spanish, "futbol" for Turkish, "futebol" for Portuguese).
+    2. Do NOT translate brand/product names like "AI Creator Studio", "Football Simulator", "Gemini", or "FIFA-2026". Keep them exactly as they are.
+    3. Ensure tags are localized into search-friendly tags/keywords in the target language.
+    4. CRITICAL: Keep the exact line-by-line structure, paragraph spacing, casing, and format of the description. Preserve the emoji 🎬 at the beginning of the description. Do NOT remove or modify any non-text structural lines.
+    5. The translated title MUST be under 100 characters in length.
+
+    Metadata to localize:
+    {
+      "title": "${metadata.title.replace(/"/g, '\\"')}",
+      "description": "${metadata.description.replace(/\n/g, '\\n').replace(/"/g, '\\"')}",
+      "tags": "${metadata.tags.replace(/"/g, '\\"')}"
+    }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: MODELS.scriptGen,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const parsed = robustParseJson(response.text || "{}");
+    return {
+      title: parsed.title || metadata.title,
+      description: parsed.description || metadata.description,
+      tags: parsed.tags || metadata.tags
+    };
+  } catch (err) {
+    console.error("Failed to localize metadata:", err);
+    return metadata;
   }
 };
 

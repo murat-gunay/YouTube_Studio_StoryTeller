@@ -32,3 +32,17 @@ dist-ssr/
 .env
 .env.*
 !.env.example
+node_modules/
+.env
+.env.local
+*.key
+*.pem
+*.p12
+*.pfx
+*.secret
+*.passwords
+dist/
+build/
+.DS_Store
+remotion-server/temp/youtube-tokens.json
+remotion-server/temp/*.json

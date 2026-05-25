@@ -1,0 +1,26 @@
+Tournament: FIFA-2026 World Cup
+  
+Group A, Mexico - South Africa, 11 June 2026, Banorte Stadium | Done
+Group A, South Korea - Czechia, 12 June 2026, Akron Stadium | Done
+Group B, Canada - Bosnia and Herzegovina, 12 June 2026, BMO Field | Done
+Group D, United States - Paraguay, 13 June 2026, SoFi Stadium | Done
+Group B, Qatar - Switzerland, 13 June 2026, Levi's Stadium | Done
+Group C, Brazil - Morocco, 14 June 2026, MetLife Stadium
+Group C, Haiti - Scotland, 14 June 2026, Gillette Stadium
+Group D, Australia - Türkiye, 14 June 2026, BC Place
+Group E, Germany - Curaçao, 14 June 2026, NRG Stadium
+Group F, Netherlands - Japan, 14 June 2026, AT&T Stadium
+Group E, Ivory Coast - Ecuador, 15 June 2026, Lincoln Financial Field
+Group F, Sweden - Tunisia, 15 June 2026, Estadio BBVA
+Group H, Spain - Cape Verde, 15 June 2026, Mercedes-Benz Stadium
+Group G, Belgium - Egypt, 15 June 2026, Lumen Field
+Group H, Saudi Arabia - Uruguay, 16 June 2026, Hard Rock Stadium
+Group G, Iran - New Zealand, 16 June 2026, SoFi Stadium
+Group I, France - Senegal, 16 June 2026, MetLife Stadium
+Group I, Iraq - Norway, 17 June 2026, Gillette Stadium,
+Group J, Argentina - Algeria, 17 June 2026, Kansas City Stadium
+Group J, Austria - Jordan, 17 June 2026, Levi's Stadium
+Group K, Portugal - DR Congo, 17 June 2026, NRG Stadium
+Group L, England - Croatia, 17 June 2026, AT&T Stadium
+Group L, Ghana - Panama, 18 June 2026, BMO Field
+Group K, Uzbekistan - Colombia, 18 June 2026, Banorte Stadium
