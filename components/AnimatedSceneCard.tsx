@@ -1,8 +1,8 @@
 /// <reference lib="dom" />
 import React, { useState } from 'react';
-import { Scene, AspectRatio, TTSTone, VoiceOption, Overlay, AnimationConfigEntry } from '../types';
+import { Scene, AspectRatio, TTSTone, VoiceOption, Overlay, AnimationConfigEntry, ArtStyle, AppMode } from '../types';
 import { refineContent } from '../services/geminiService';
-import { TTS_TONES, VOICE_OPTIONS, AUDIO_LIBRARY } from '../constants';
+import { TTS_TONES, VOICE_OPTIONS, AUDIO_LIBRARY, ART_STYLES } from '../constants';
 
 interface AnimatedSceneCardProps {
   scene: Scene;
@@ -16,6 +16,7 @@ interface AnimatedSceneCardProps {
   onUpdateScript: (id: number, newScript: string) => void;
   onUpdateTone: (id: number, tone: TTSTone) => void;
   onUpdateVoice: (id: number, voice: VoiceOption) => void;
+  onUpdateArtStyle: (id: number, style: ArtStyle) => void;
   onUpdateAudioSelection: (id: number, type: 'music' | 'sfx', audioId: string) => void;
   onUpdateVideoOptions: (id: number, updates: Partial<Scene['videoOptions']>) => void;
   onUpdateVideoPrompt: (id: number, newPrompt: string) => void;
@@ -30,6 +31,7 @@ interface AnimatedSceneCardProps {
   onUpdateAnimationStyle?: (id: number, styles: string[], config?: Record<string, AnimationConfigEntry>) => void;
   onUpdateShortVideoToggle?: (id: number, hasShortVideo: boolean) => void;
   videoOptions?: Scene['videoOptions'];
+  appMode?: AppMode;
 }
 
 export const AnimatedSceneCard: React.FC<AnimatedSceneCardProps> = ({
@@ -43,12 +45,14 @@ export const AnimatedSceneCard: React.FC<AnimatedSceneCardProps> = ({
   onUpdateScript,
   onUpdateTone,
   onUpdateVoice,
+  onUpdateArtStyle,
   onUpdateAudioSelection,
   onUpdateVideoOptions,
   onUpdateVideoPrompt,
   onPreviewVideo,
   onUpdateMute,
   onUpdateImageOverlayText,
+  appMode
 }) => {
   const [enrichInput, setEnrichInput] = useState<{ show: boolean, type: 'voiceover' | 'visual', loading: boolean }>({ show: false, type: 'visual', loading: false });
   const [enrichInstruction, setEnrichInstruction] = useState("");
@@ -131,6 +135,18 @@ export const AnimatedSceneCard: React.FC<AnimatedSceneCardProps> = ({
             title="Select Voice Tone"
           >
             {TTS_TONES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <select
+            value={scene.selectedArtStyle || ''}
+            onChange={(e) => onUpdateArtStyle(scene.id, e.target.value as ArtStyle)}
+            className="bg-slate-800 text-xs text-slate-300 border border-slate-700 rounded px-2 py-1 outline-none focus:border-pink-500 max-w-[120px]"
+            title="Select Scene Art Style"
+          >
+            <option value="">Inherit Global Style</option>
+            {ART_STYLES.filter(style => appMode !== AppMode.Football || style.value !== ArtStyle.VectorGraphic).map(style => (
+              <option key={style.value} value={style.value}>{style.label}</option>
+            ))}
           </select>
 
           {!scene.ttsAudioUrl || scene.isGeneratingTTS ? (

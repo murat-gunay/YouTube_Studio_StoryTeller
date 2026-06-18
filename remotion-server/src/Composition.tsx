@@ -119,12 +119,12 @@ export const MainComposition: React.FC<any> = ({ scenes, globalAudioPath, isAnim
                         <>
                             {musicTracks.map((t, i) => (
                                 <Sequence key={`music-${i}`} from={t.start} durationInFrames={t.end - t.start}>
-                                    <Audio src={t.path} volume={0.074} />
+                                    <Audio src={t.path} volume={0.037} />
                                 </Sequence>
                             ))}
                             {sfxTracks.map((t, i) => (
                                 <Sequence key={`sfx-${i}`} from={t.start} durationInFrames={t.end - t.start}>
-                                    <Audio src={t.path} volume={0.3} />
+                                    <Audio src={t.path} volume={0.15} />
                                 </Sequence>
                             ))}
                         </>
@@ -148,14 +148,20 @@ export const MainComposition: React.FC<any> = ({ scenes, globalAudioPath, isAnim
                                 isFirst={index === 0}
                                 isLast={index === scenes.length - 1}
                             >
-                                <Scene {...scene} isContinuousAudio={true} />
+                                <Scene 
+                                    {...scene} 
+                                    allScenes={scenes}
+                                    isContinuousAudio={true} 
+                                    isFirst={index === 0} 
+                                    isLast={index === scenes.length - 1} 
+                                />
                             </TransitionWrapper>
                         </Sequence>
                     );
                 })}
 
                 {globalAudioPath && (
-                    <Audio src={globalAudioPath} volume={0.1} />
+                    <Audio src={globalAudioPath} volume={0.05} />
                 )}
             </AbsoluteFill>
         );
@@ -177,13 +183,18 @@ export const MainComposition: React.FC<any> = ({ scenes, globalAudioPath, isAnim
                         from={startFrame}
                         durationInFrames={durationInFrames}
                     >
-                        <Scene {...scene} />
+                        <Scene 
+                            {...scene} 
+                            allScenes={scenes}
+                            isFirst={index === 0} 
+                            isLast={index === scenes.length - 1} 
+                        />
                     </Sequence>
                 );
             })}
             
             {globalAudioPath && (
-                <Audio src={globalAudioPath} volume={0.1} />
+                <Audio src={globalAudioPath} volume={0.05} />
             )}
         </AbsoluteFill>
     );

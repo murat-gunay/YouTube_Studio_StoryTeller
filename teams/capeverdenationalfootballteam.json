@@ -1,0 +1,38 @@
+{
+  "team_name": "Cape Verde National Football Team",
+  "head_coach": {
+    "name": "Bubista (Pedro Leitão Brito)",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Focuses on strong defensive organization, tactical versatility, disciplined shape, and rapid transitions utilizing speed and creativity on the wings."
+  },
+  "key_players": [
+    {
+      "name": "Logan Costa",
+      "position": "Centre-Back",
+      "market_value": "€18.00m",
+      "performance_stats": "Considered the defensive anchor for Villarreal CF and Cape Verde, maintaining a high market value while being a crucial starter."
+    },
+    {
+      "name": "Jovane Cabral",
+      "position": "Left Winger",
+      "market_value": "€800k",
+      "performance_stats": "Scored 7 goals in 27 appearances for CF Estrela Amadora in Liga Portugal, providing essential attacking output."
+    },
+    {
+      "name": "Dailon Livramento",
+      "position": "Centre-Forward",
+      "market_value": "€800k",
+      "performance_stats": "Recorded 7 goals in 20 international caps for Cape Verde, acting as a decisive goalscorer during World Cup qualification."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Logan Costa",
+      "absence_reason": "Nursing a long-term injury but gambled on and included in the 2026 World Cup squad while undergoing rehabilitation."
+    },
+    {
+      "player_name": "Bruno Varela",
+      "absence_reason": "Sidelined with an unknown injury and missing matches."
+    }
+  ]
+}

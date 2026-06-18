@@ -1,0 +1,51 @@
+{
+  "team_name": "Canada",
+  "head_coach": {
+    "name": "Jesse Marsch",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "High-intensity 'Maplepressing' system centered on high pressing from the front, compact lines of four in a mid-block, quick vertical transitions, a high defensive line, and rapid attacking play utilizing pace out wide to exploit spaces immediately after turnovers."
+  },
+  "key_players": [
+    {
+      "name": "Alphonso Davies",
+      "position": "Left-Back",
+      "market_value": "€40.00m",
+      "performance_stats": "Average FotMob rating of 7.11 in Bundesliga, covers the left flank with elite speed and carries the ball into the final third. Outstanding progressiveness with 266 career chances created.",
+      "age": 25,
+      "goals": 1,
+      "assists": 5
+    },
+    {
+      "name": "Jonathan David",
+      "position": "Centre-Forward",
+      "market_value": "€30.00m",
+      "performance_stats": "Lethal finisher with intelligent movement off the ball. Energetic in leading the high press from the front, dropping deep to connect play, and exploiting spaces behind defences.",
+      "age": 26,
+      "goals": 8,
+      "assists": 5
+    },
+    {
+      "name": "Ismaël Koné",
+      "position": "Central Midfield",
+      "market_value": "€25.00m",
+      "performance_stats": "Robust box-to-box midfielder with high pass completion rate (~85%). Excelled in carrying the ball forward and shielding the defensive unit during transitional moments.",
+      "age": 24,
+      "goals": 6,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Alphonso Davies",
+      "absence_reason": "Recovering from a right hamstring strain sustained in May 2026; missed the World Cup opener and remains in return-to-play protocol."
+    },
+    {
+      "player_name": "Marcelo Flores",
+      "absence_reason": "Ruled out of the 2026 World Cup after undergoing surgery to repair a ruptured anterior cruciate ligament (ACL) suffered in late May 2026."
+    },
+    {
+      "player_name": "Moïse Bombito",
+      "absence_reason": "Recovering from a fractured left tibia sustained in October; although on the roster, his availability is limited due to sensitivity and modified training."
+    }
+  ]
+}

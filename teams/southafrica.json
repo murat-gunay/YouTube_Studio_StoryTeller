@@ -1,0 +1,59 @@
+{
+  "team_name": "South Africa",
+  "head_coach": {
+    "name": "Hugo Broos",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Direct and vertical play style focused on rapid transition from defense to offense, utilising quick wing play and a compact midfield block to apply high pressure."
+  },
+  "key_players": [
+    {
+      "name": "Lyle Foster",
+      "position": "Centre-Forward",
+      "market_value": "€8.00m",
+      "performance_stats": "Played 26 league matches for Burnley in the 2025/26 season, registering 1,371 minutes. He excels in physical duels, space exploitation, and holds a high pressing rate.",
+      "age": 25,
+      "goals": 2,
+      "assists": 2
+    },
+    {
+      "name": "Relebohile Mofokeng",
+      "position": "Left Winger",
+      "market_value": "€3.00m",
+      "performance_stats": "Named the Transfermarkt Player of the Season for the 2025/26 Betway Premiership, registering 18 goal contributions. Known for exceptional dribbling, creative key passes, and agility on the flanks.",
+      "age": 21,
+      "goals": 10,
+      "assists": 8
+    },
+    {
+      "name": "Teboho Mokoena",
+      "position": "Defensive Midfielder",
+      "market_value": "€2.80m",
+      "performance_stats": "Midfield engine who started 23 league matches for Mamelodi Sundowns in 2025/26. Boasts high pass completion rate, excellent ball recovery, and strong defensive tackles.",
+      "age": 29,
+      "goals": 4,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Themba Zwane",
+      "absence_reason": "Suspended (Received a 3-match FIFA ban following a red card for violent conduct against Mexico in the World Cup opener)"
+    },
+    {
+      "player_name": "Sphephelo Sithole",
+      "absence_reason": "Suspended (Received a 1-match ban following a red card for a professional foul against Mexico)"
+    }
+  ],
+  "kit_colors": {
+    "home": {
+      "primary_color": "Yellow",
+      "secondary_color": "Green",
+      "pattern": "Solid with a subtle tonal graphic pattern of linear motifs integrated into the fabric referencing the country's linguistic diversity"
+    },
+    "away": {
+      "primary_color": "Dark Green",
+      "secondary_color": "Gold",
+      "pattern": "Solid with detailed white and gold trims on the collar and sleeve cuffs resembling the 2010 design"
+    }
+  }
+}

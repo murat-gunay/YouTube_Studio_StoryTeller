@@ -1,0 +1,42 @@
+{
+  "team_name": "Germany National Football Team",
+  "head_coach": {
+    "name": "Julian Nagelsmann",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Characteristics of his tactical approach include high pressing (gegenpressing), positional fluidity, rapid transitions, and dominating possession in the opponent's half to generate frequent attacking rotations."
+  },
+  "key_players": [
+    {
+      "name": "Jamal Musiala",
+      "position": "Attacking Midfielder",
+      "market_value": "€120.00m",
+      "performance_stats": "Considered a pivotal, creative playmaker for Germany and Bayern Munich; known for elite dribbling, technical agility, and regular goal contributions."
+    },
+    {
+      "name": "Florian Wirtz",
+      "position": "Attacking Midfielder",
+      "market_value": "€110.00m",
+      "performance_stats": "A key young star for the national team and Liverpool; highly productive in providing goals and assists, building on strong seasons in European football."
+    },
+    {
+      "name": "Nico Schlotterbeck",
+      "position": "Centre-Back",
+      "market_value": "€55.00m",
+      "performance_stats": "Establishes himself as a premier starting defender in Germany's backline with dominant performances for Borussia Dortmund and robust physical presence."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Serge Gnabry",
+      "absence_reason": "Ruled out of the tournament due to a severe right adductor tear."
+    },
+    {
+      "player_name": "Anton Stach",
+      "absence_reason": "Sidelined following a serious leg and knee injury sustained during a Premier League match in mid-May."
+    },
+    {
+      "player_name": "Manuel Neuer",
+      "absence_reason": "Recently managing calf problems, though expected to be fit for the main tournament as the potential starting goalkeeper."
+    }
+  ]
+}

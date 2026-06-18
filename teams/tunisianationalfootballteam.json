@@ -1,0 +1,38 @@
+{
+  "team_name": "Tunisia National Football Team",
+  "head_coach": {
+    "name": "Sabri Lamouchi",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "Under Lamouchi, the team emphasizes defensive compactness, utilizing a structured mid-to-deep block that transitions rapidly into vertical and direct counter-attacks using high pressing in the middle of the pitch."
+  },
+  "key_players": [
+    {
+      "name": "Hannibal Mejbri",
+      "position": "Attacking Midfield",
+      "market_value": "€16.00m",
+      "performance_stats": "Emerged as a primary creative force, logging 25 appearances for Burnley FC in the English Premier League as an essential playmaker."
+    },
+    {
+      "name": "Montassar Talbi",
+      "position": "Centre-Back",
+      "market_value": "€7.00m",
+      "performance_stats": "Plays as the rock of the defense for FC Lorient, featuring in over 60 caps and serving as the primary defensive leader with strong aerial qualities."
+    },
+    {
+      "name": "Ellyes Skhiri",
+      "position": "Defensive Midfield",
+      "market_value": "€6.00m",
+      "performance_stats": "Serves as the experienced team captain, operating as a vital ball-winner and defensive screen for Bundesliga side Eintracht Frankfurt."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Naïm Sliti",
+      "absence_reason": "Officially announced his retirement from international duty in March 2026."
+    },
+    {
+      "player_name": "Ferjani Sassi",
+      "absence_reason": "Excluded from the squad by head coach Sabri Lamouchi as part of a squad rejuvenation and transition strategy."
+    }
+  ]
+}

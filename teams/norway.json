@@ -1,0 +1,43 @@
+{
+  "team_name": "Norway",
+  "head_coach": {
+    "name": "Ståle Solbakken",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Pragmatic northern European style focused on structured zonal defending and highly intense, vertical transition play. Solbakken deploys a fluid 4-3-3 setup that can transition to a 4-4-2 block off-the-ball or a 3-5-2 shape in possession, designed to maximize Ødegaard's playmaking in midfield and Haaland's direct attacking threat in behind the defensive lines."
+  },
+  "key_players": [
+    {
+      "name": "Erling Haaland",
+      "position": "Centre-Forward",
+      "market_value": "€200.00m",
+      "performance_stats": "Staggering 27 goals and 8 assists in 35 Premier League matches during the 2025/26 season for Manchester City. Outstanding shot conversion rate, physical dominance, and clinical finishing. Also scored 16 goals in 8 matches during Norway's World Cup qualification campaign.",
+      "age": 25,
+      "goals": 27,
+      "assists": 8
+    },
+    {
+      "name": "Martin Ødegaard",
+      "position": "Attacking Midfielder",
+      "market_value": "€65.00m",
+      "performance_stats": "Recorded 1 goal and 6 assists in 24 Premier League matches during an injury-hampered 2025/26 season with Arsenal. Created 39 chances with an 84.7% pass completion rate, and serves as Norway's captain and primary creative engine.",
+      "age": 27,
+      "goals": 1,
+      "assists": 6
+    },
+    {
+      "name": "Alexander Sørloth",
+      "position": "Centre-Forward",
+      "market_value": "€18.00m",
+      "performance_stats": "Scored 13 goals with 51% shot accuracy in 35 La Liga matches during the 2025/26 season for Atlético Madrid. Registered a 58.4% aerial duel success rate, demonstrating immense physical target-man presence.",
+      "age": 30,
+      "goals": 13,
+      "assists": 0
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Morten Thorsby",
+      "absence_reason": "Calf injury"
+    }
+  ]
+}

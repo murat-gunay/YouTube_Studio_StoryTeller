@@ -3,40 +3,57 @@
   "head_coach": {
     "name": "Miroslav Koubek",
     "preferred_formation": "3-4-2-1",
-    "play_style_summary": "Under Miroslav Koubek, Czechia utilizes a direct, physical, and vertical playstyle, focused heavily on coordinated pressing, wing-play with overlapping wing-backs, direct crossing to aerial targets, and set-piece efficiency."
+    "play_style_summary": "A pragmatic, defensively resilient, and physically dominant direct style. Heavy reliance on route-one aerial football towards a target man to win second balls, alongside structured transitions, and intensive set-piece execution (scoring more set-piece goals than any other European team in qualifying). Out of possession, the team drops into a compact 5-3-2 defensive low-block with disciplined man-to-man marking."
   },
   "key_players": [
     {
-      "name": "Patrik Schick",
-      "position": "Centre-Forward",
-      "market_value": "€20.00m",
-      "performance_stats": "The main attacking focal point for the national team, renowned for his clinical finishing, positioning, and aerial strength in the box."
+      "name": "Ladislav Krejčí",
+      "position": "Centre-Back",
+      "market_value": "€22.00m",
+      "performance_stats": "National team captain who anchors the backline. Recorded 28 Premier League appearances (2721 minutes) in the 25/26 season. Won 35 possessions in his team's defensive third during World Cup qualifying—the highest in UEFA—while providing a massive aerial threat on set pieces.",
+      "age": 27,
+      "goals": 2,
+      "assists": 1
     },
     {
-      "name": "Pavel Šulc",
-      "position": "Attacking Midfielder",
-      "market_value": "€20.00m",
-      "performance_stats": "In-form creative spark for both Olympique Lyon and Czechia, driving transitions and creating scoring chances from midfield."
+      "name": "Patrik Schick",
+      "position": "Centre-Forward",
+      "market_value": "€18.00m",
+      "performance_stats": "Standout goalscoring talisman with elite movement inside the penalty area. Registered 9 goals and 3 assists in 21 Bundesliga matches for Bayer Leverkusen during the 25/26 season, presenting an elite aerial and tactical focal point for the offense.",
+      "age": 30,
+      "goals": 9,
+      "assists": 3
     },
     {
       "name": "Tomáš Souček",
-      "position": "Defensive Midfielder",
-      "market_value": "€12.00m",
-      "performance_stats": "Experienced team leader and defensive anchor, providing aerial dominance in midfield and a constant threat from set-pieces."
+      "position": "Defensive Midfield",
+      "market_value": "€10.00m",
+      "performance_stats": "The indispensable midfield engine. Played 39 matches (2532 minutes) in the 25/26 season, registering 6 goals, 158 duels won, 81 aerial duels won, 78 recoveries, and 25 tackles. Celebrated as the all-time top Czech goalscorer in the Premier League.",
+      "age": 31,
+      "goals": 6,
+      "assists": 0
     }
   ],
   "injuries_and_absences": [
     {
+      "player_name": "Václav Černý",
+      "absence_reason": "Excluded from the squad due to a serious long-term knee injury."
+    },
+    {
       "player_name": "Martin Vitík",
-      "absence_reason": "Ankle Injury"
-    },
-    {
-      "player_name": "Vítězslav Jaroš",
-      "absence_reason": "Knee Injury"
-    },
-    {
-      "player_name": "Lukáš Provod",
-      "absence_reason": "Undergoing rehabilitation for muscle injury"
+      "absence_reason": "Excluded from the squad due to an ankle injury."
     }
-  ]
+  ],
+  "kit_colors": {
+    "home": {
+      "primary_color": "Dark Red",
+      "secondary_color": "Navy Blue",
+      "pattern": "Solid base with textured all-over abstract pattern"
+    },
+    "away": {
+      "primary_color": "Icy White",
+      "secondary_color": "Matte Gold",
+      "pattern": "Crystal-inspired graphic pattern"
+    }
+  }
 }

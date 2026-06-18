@@ -1,0 +1,55 @@
+{
+  "team_name": "Colombia",
+  "head_coach": {
+    "name": "Néstor Lorenzo",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Lorenzo employs a quick-transition style focusing on wing pace, verticality, and high-energy pressing. Midfield control is emphasized with a playmaker pulling the strings to orchestrate attacks while maintaining defensive discipline in a structured block."
+  },
+  "key_players": [
+    {
+      "name": "Luis Díaz",
+      "position": "Left Winger",
+      "market_value": "€70.00m",
+      "performance_stats": "Averaged a 7.75 FotMob rating in the 2025/2026 Bundesliga season with Bayern Munich. Known for explosive dribbling, rapid transitions, and elite work rate off the ball.",
+      "age": 29,
+      "goals": 15,
+      "assists": 14
+    },
+    {
+      "name": "Richard Ríos",
+      "position": "Defensive Midfield",
+      "market_value": "€25.00m",
+      "performance_stats": "Averaged a 7.34 FotMob rating in the 2025/2026 season for SL Benfica. Excelled in midfield duels, interception, and linking defense to attack via long-range diagonal passes.",
+      "age": 26,
+      "goals": 5,
+      "assists": 4
+    },
+    {
+      "name": "Daniel Muñoz",
+      "position": "Right-Back",
+      "market_value": "€22.00m",
+      "performance_stats": "Averaged a 7.15 FotMob rating during the 2025/2026 season for Crystal Palace. Distinguished by his high work rate, overlapping runs, and strong tackle completion rate.",
+      "age": 30,
+      "goals": 4,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Yaser Asprilla",
+      "absence_reason": "Omitted from the final World Cup 2026 squad due to a persistent knee edema sustained in April."
+    },
+    {
+      "player_name": "Cristian Borja",
+      "absence_reason": "Left out of the squad after sustaining a ruptured medial collateral ligament in his right knee in May 2026."
+    },
+    {
+      "player_name": "Jhon Durán",
+      "absence_reason": "Omitted from the final World Cup 2026 roster."
+    },
+    {
+      "player_name": "Juan Cuadrado",
+      "absence_reason": "Omitted from the final 26-man tournament selection."
+    }
+  ]
+}

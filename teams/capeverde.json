@@ -1,0 +1,47 @@
+{
+  "team_name": "Cape Verde",
+  "head_coach": {
+    "name": "Pedro Leitão Brito (Bubista)",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "A balanced and highly structured style built on defensive compactness, a deep compact block, and quick transitions. Bubista's side relies heavily on rapid direct counter-attacks and wing exploitation, focusing on tactical discipline and team unity over high possession."
+  },
+  "key_players": [
+    {
+      "name": "Logan Costa",
+      "position": "Centre-Back",
+      "market_value": "€15.00m",
+      "performance_stats": "Widely regarded as the nation's premier defender. Costa is known for his elite technical composure, physical dominance, and aerial ability, registering over 85% passing accuracy. He recently completed a lengthy rehab program to return to competitive play.",
+      "age": 25,
+      "goals": 2,
+      "assists": 0
+    },
+    {
+      "name": "Dailon Livramento",
+      "position": "Forward",
+      "market_value": "€800k",
+      "performance_stats": "Cape Verde's primary source of goals in qualifiers, netting 4 key goals. During his club campaign with Casa Pia, he proved highly active, winning 59 duels, creating 10 chances, and logging 22 shots with 32% on target.",
+      "age": 25,
+      "goals": 4,
+      "assists": 1
+    },
+    {
+      "name": "Jovane Cabral",
+      "position": "Left Winger",
+      "market_value": "€1.00m",
+      "performance_stats": "A creative force who registered 1,678 minutes of domestic play with Estrela Amadora. Cabral maintained a 79.2% passing accuracy, created 20 chances, won 136 duels, and successfully converted 7 goals in Liga Portugal.",
+      "age": 27,
+      "goals": 7,
+      "assists": 1
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Logan Costa",
+      "absence_reason": "Selected for the final tournament roster but remains a significant fitness gamble and precaution after recovering from a complete ACL rupture sustained in July 2025."
+    },
+    {
+      "player_name": "Bruno Varela",
+      "absence_reason": "Sidelined from recent competitive call-ups and match squads due to an unresolved, unknown injury."
+    }
+  ]
+}

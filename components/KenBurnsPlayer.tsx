@@ -192,17 +192,17 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
 
   const getBoxClasses = () => ({
     container: isLargePlayer
-      ? "px-6 py-4 border-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-      : "px-3 py-2 border-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+      ? "px-12 py-8 border-[8px] shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]"
+      : "px-6 py-4 border-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
     text: isLargePlayer
-      ? "text-xl md:text-2xl lg:text-3xl leading-tight"
-      : "text-xs md:text-sm leading-snug",
+      ? "text-4xl md:text-5xl lg:text-6xl leading-tight font-extrabold"
+      : "text-base md:text-lg lg:text-xl leading-snug font-bold",
     bubbleContainer: isLargePlayer
-      ? "px-6 py-4 rounded-[2.5rem] border-4"
-      : "px-4 py-2 rounded-[1.5rem] border-2",
+      ? "px-12 py-8 rounded-[5rem] border-[8px]"
+      : "px-8 py-4 rounded-[2.5rem] border-4",
     tail: isLargePlayer
-      ? "w-8 h-8 -bottom-4 right-10 border-r-4 border-b-4"
-      : "w-4 h-4 -bottom-2.5 right-6 border-r-2 border-b-2"
+      ? "w-16 h-16 -bottom-8 right-20 border-r-[8px] border-b-[8px]"
+      : "w-8 h-8 -bottom-4 right-10 border-r-4 border-b-4"
   });
 
   const styles = getBoxClasses();
@@ -212,14 +212,44 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
     if (index === 0) {
       posClass = isLargePlayer ? "top-8 left-8" : "top-4 left-4";
     } else if (index === 1) {
-      posClass = isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4";
-    } else {
       posClass = "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-max";
+    } else {
+      posClass = isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4";
     }
     
     const rotation = index % 2 === 0 ? '-rotate-1' : 'rotate-1';
-    const startS = overlay.startSecond || 0;
-    const durS = overlay.duration || 5;
+    let startS = typeof overlay.startSecond === 'number' ? overlay.startSecond : 0;
+    let durS = typeof overlay.duration === 'number' ? overlay.duration : 5;
+
+    const sceneDur = actualDuration || (durationMinutes || 0.16) * 60;
+    const exceeds = (startS + durS) > sceneDur;
+    const isDefaultSequential = (index === 1 && startS >= 5.0) || (index === 2 && startS >= 9.0);
+    const isDefaultTiming = 
+      (index === 0 && startS === 0.5 && durS === 7.0) ||
+      (index === 1 && startS === 3.0 && durS === 4.5) ||
+      (index === 2 && startS === 5.5 && durS === 2.0) ||
+      (index === 0 && startS === 1.5 && durS === 5.0) ||
+      (index === 1 && startS === 6.0 && durS === 5.0) ||
+      (index === 2 && startS === 10.0 && durS === 5.0) ||
+      (startS === 0 && durS === 5.0);
+
+    if (exceeds || isDefaultSequential || isDefaultTiming) {
+      const count = overlays.length;
+      if (index === 0) {
+        startS = 0.5;
+        durS = Math.min(2.5, sceneDur * 0.35);
+      } else if (index === 1) {
+        startS = sceneDur * 0.35;
+        durS = Math.min(2.5, sceneDur * 0.3);
+      } else if (index === 2) {
+        startS = sceneDur * 0.65;
+        durS = Math.min(2.5, sceneDur - startS - 0.5);
+      } else {
+        const slot = sceneDur / count;
+        startS = slot * index + (slot * 0.1);
+        durS = slot * 0.8;
+      }
+    }
 
     // Use CSS animation with delays for intro/outro
     const animationStyle: React.CSSProperties = {
@@ -229,7 +259,7 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
     };
 
     return (
-      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%]`} style={animationStyle}>
+      <div key={index} className={`absolute ${posClass} z-20 max-w-[90%] md:max-w-[80%]`} style={animationStyle}>
         <div className={`bg-[#fdfcdc] border-black ${styles.container} transform ${rotation}`}>
           <p className={`font-sans font-bold text-black uppercase tracking-wide ${styles.text}`}>
             {overlay.text}
@@ -244,14 +274,44 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
     if (index === 0) {
       posClass = isLargePlayer ? "top-8 left-8" : "top-4 left-4";
     } else if (index === 1) {
-      posClass = isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4";
-    } else {
       posClass = "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-max";
+    } else {
+      posClass = isLargePlayer ? "bottom-8 right-8" : "bottom-4 right-4";
     }
     
-    const startS = overlay.startSecond || 0;
-    const durS = overlay.duration || 5;
+    let startS = typeof overlay.startSecond === 'number' ? overlay.startSecond : 0;
+    let durS = typeof overlay.duration === 'number' ? overlay.duration : 5;
     const isTop = index === 0;
+
+    const sceneDur = actualDuration || (durationMinutes || 0.16) * 60;
+    const exceeds = (startS + durS) > sceneDur;
+    const isDefaultSequential = (index === 1 && startS >= 5.0) || (index === 2 && startS >= 9.0);
+    const isDefaultTiming = 
+      (index === 0 && startS === 0.5 && durS === 7.0) ||
+      (index === 1 && startS === 3.0 && durS === 4.5) ||
+      (index === 2 && startS === 5.5 && durS === 2.0) ||
+      (index === 0 && startS === 1.5 && durS === 5.0) ||
+      (index === 1 && startS === 6.0 && durS === 5.0) ||
+      (index === 2 && startS === 10.0 && durS === 5.0) ||
+      (startS === 0 && durS === 5.0);
+
+    if (exceeds || isDefaultSequential || isDefaultTiming) {
+      const count = overlays.length;
+      if (index === 0) {
+        startS = 0.5;
+        durS = Math.min(2.5, sceneDur * 0.35);
+      } else if (index === 1) {
+        startS = sceneDur * 0.35;
+        durS = Math.min(2.5, sceneDur * 0.3);
+      } else if (index === 2) {
+        startS = sceneDur * 0.65;
+        durS = Math.min(2.5, sceneDur - startS - 0.5);
+      } else {
+        const slot = sceneDur / count;
+        startS = slot * index + (slot * 0.1);
+        durS = slot * 0.8;
+      }
+    }
 
     const animationStyle: React.CSSProperties = {
       opacity: 0,
@@ -260,7 +320,7 @@ export const KenBurnsPlayer: React.FC<KenBurnsProps> = ({
     };
 
     return (
-      <div key={index} className={`absolute ${posClass} z-20 max-w-[85%] md:max-w-[60%]`} style={animationStyle}>
+      <div key={index} className={`absolute ${posClass} z-20 max-w-[90%] md:max-w-[80%]`} style={animationStyle}>
         <div className={`relative bg-white text-black border-black shadow-lg ${styles.bubbleContainer}`}>
           <p className={`font-comic font-medium text-black text-center ${styles.text}`}>
             {overlay.text}

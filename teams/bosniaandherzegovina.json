@@ -3,40 +3,53 @@
   "head_coach": {
     "name": "Sergej Barbarez",
     "preferred_formation": "4-4-2",
-    "play_style_summary": "Barbarez employs a highly physical, direct, and high-energy style of football emphasizing quick transitions. The system utilizes a compact defensive block with two banks of four, applying intense, coordinated high-pressing waves to force errors and transition rapidly to direct vertical attacks via the strikers."
+    "play_style_summary": "Aggressive and structured defensive mid-block system focusing on physical organization and rapid transitions. Utilizes a direct approach, launching long balls and early crosses to capitalize on the aerial strength of physical forwards."
   },
   "key_players": [
     {
       "name": "Ermedin Demirović",
       "position": "Centre-Forward",
       "market_value": "€22.00m",
-      "performance_stats": "Key starting forward who has shown clinical form for both VfB Stuttgart and the national team, leading Bosnia's front-line attack [2.2.4]."
-    },
-    {
-      "name": "Tarik Muharemović",
-      "position": "Centre-Back",
-      "market_value": "€20.00m",
-      "performance_stats": "The most valuable defender in the squad, performing as a commanding central defender for US Sassuolo."
+      "performance_stats": "12 goals and 3 assists in 1,498 minutes over 25 Bundesliga matches for VfB Stuttgart in the 2025/26 season, averaging 0.9 goal involvements per 90 minutes. Rank in the top 98th percentile for expected goals (10.71 xG).",
+      "age": 28,
+      "goals": 12,
+      "assists": 3
     },
     {
       "name": "Amar Dedić",
       "position": "Right-Back",
-      "market_value": "€15.00m",
-      "performance_stats": "Dynamic, attacking full-back playing for SL Benfica, known for providing defensive solidity and essential width going forward."
+      "market_value": "€16.00m",
+      "performance_stats": "1 goal and 4 assists over 1,903 minutes in the 2025/26 Liga Portugal season with SL Benfica, recording a pass completion rate of 84.54% and averaging 1.18 key passes per match.",
+      "age": 23,
+      "goals": 1,
+      "assists": 4
+    },
+    {
+      "name": "Benjamin Tahirović",
+      "position": "Defensive Midfielder",
+      "market_value": "€4.50m",
+      "performance_stats": "1 goal and 1 assist in 2,379 minutes played across all competitions for Brøndby IF in 2025/26, registering an 86% pass completion rate and providing highly stable mid-block coverage.",
+      "age": 23,
+      "goals": 1,
+      "assists": 1
     }
   ],
   "injuries_and_absences": [
     {
-      "player_name": "Amir Hadžiahmetović",
-      "absence_reason": "Ruled out of the upcoming World Cup due to a meniscus knee injury requiring surgery and a lengthy recovery period [3.1.1]."
+      "player_name": "Haris Tabaković",
+      "absence_reason": "Metatarsal fracture (sustained in May 2026, under physical rehabilitation and highly doubtful)"
     },
     {
-      "player_name": "Haris Tabaković",
-      "absence_reason": "Expected to miss the World Cup after sustaining an ankle fracture while playing for Borussia Mönchengladbach."
+      "player_name": "Ivan Šunjić",
+      "absence_reason": "Muscle injury (sustained in late May 2026, limited to light team activities)"
     },
     {
       "player_name": "Edin Džeko",
-      "absence_reason": "Doubtful or racing against time after suffering a shoulder injury during the qualification play-off final against Italy."
+      "absence_reason": "Shoulder injury (recovering, limited to individual training and playing through restrictions)"
+    },
+    {
+      "player_name": "Sead Kolašinac",
+      "absence_reason": "Knock (doubtful for upcoming fixtures, monitored closely by the medical staff)"
     }
   ]
 }

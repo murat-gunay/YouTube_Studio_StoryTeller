@@ -1,0 +1,51 @@
+{
+  "team_name": "Argentina",
+  "head_coach": {
+    "name": "Lionel Scaloni",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "A highly versatile and liquid tactical system focusing on aggressive mid-to-high pressing, rapid three-second transitions, and a solid midfield engine (De Paul, Mac Allister, Enzo Fernández) that acts as a defensive shield and facilitates vertical progression, giving playmaker Lionel Messi creative freedom."
+  },
+  "key_players": [
+    {
+      "name": "Julián Álvarez",
+      "position": "Centre-Forward",
+      "market_value": "€100m",
+      "performance_stats": "An incredibly dynamic and mobile forward who achieved a landmark 20-goal campaign in all competitions with Atlético de Madrid during the 2025/26 season, setting a club record in the UEFA Champions League with 10 goals in a single season. Renowned for high-intensity pressing, defensive work-rate, and intelligent movement.",
+      "age": 26,
+      "goals": 20,
+      "assists": 4
+    },
+    {
+      "name": "Enzo Fernández",
+      "position": "Central Midfield",
+      "market_value": "€90m",
+      "performance_stats": "A creative orchestrator in the engine room for Chelsea, boasting an exceptional 10 goals and 4 assists in the 2025/26 Premier League. Excels at progressive line-breaking passes, dictating match tempo with a high passing accuracy, and initiating high-press recoveries.",
+      "age": 25,
+      "goals": 10,
+      "assists": 4
+    },
+    {
+      "name": "Lautaro Martínez",
+      "position": "Centre-Forward",
+      "market_value": "€85m",
+      "performance_stats": "The clinical captain of Inter Milan, who netted 14 goals and delivered 4 assists in 25 matches during the 2025/26 Serie A campaign. Known for exceptional shot conversion rate, robust physical hold-up play, aerial threat, and leading defensive pressing structures.",
+      "age": 28,
+      "goals": 14,
+      "assists": 4
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Leonardo Balerdi",
+      "absence_reason": "Suffered a right soleus (calf) muscle injury during Argentina's World Cup training camp in Texas, ruling him out of the entire tournament."
+    },
+    {
+      "player_name": "Nicolás Otamendi",
+      "absence_reason": "Suspended for the World Cup opening match against Algeria due to a red card received in Argentina's final South American qualifier against Ecuador in September 2025."
+    },
+    {
+      "player_name": "Juan Foyth",
+      "absence_reason": "Ruled out of the 2026 World Cup tournament due to injury."
+    }
+  ]
+}

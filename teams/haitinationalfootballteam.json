@@ -1,0 +1,38 @@
+{
+  "team_name": "Haiti National Football Team",
+  "head_coach": {
+    "name": "Sébastien Migné",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Aggressive, high-pressing, and highly direct tactical style prioritizing vertical play, rapid transitions, and overloading the opposition box to force defensive errors."
+  },
+  "key_players": [
+    {
+      "name": "Jean-Ricner Bellegarde",
+      "position": "Central Midfielder",
+      "market_value": "€15.00m",
+      "performance_stats": "A highly creative Premier League midfielder for Wolves who acts as the primary link between midfield transition and direct attacking moves."
+    },
+    {
+      "name": "Danley Jean Jacques",
+      "position": "Defensive Midfielder",
+      "market_value": "€3.00m",
+      "performance_stats": "Robust defensive anchor for Philadelphia Union with 29 international caps and 6 goals, serving as the core shield for the defense."
+    },
+    {
+      "name": "Frantzdy Pierrot",
+      "position": "Centre-Forward",
+      "market_value": "€2.50m",
+      "performance_stats": "Clinical target man playing for Çaykur Rizespor with a prolific international record of 33 goals in 49 caps for the national team."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Johny Placide",
+      "absence_reason": "Sidelined due to a knee injury."
+    },
+    {
+      "player_name": "Odsonne Édouard",
+      "absence_reason": "Declined call-up to represent Haiti at the World Cup, stating he felt it was unfair to players who fought through the qualifiers."
+    }
+  ]
+}

@@ -141,7 +141,12 @@ export const buildRenderFormData = async (
             generateAudio: scene.videoOptions?.generateAudio ?? true,
             overlays: scene.overlays || [],
             kenBurns,
-            isAnimated: scene.isAnimated
+            isAnimated: scene.isAnimated,
+            matchMinute: scene.matchMinute,
+            language: (scene as any).language,
+            teamA: (scene as any).teamA,
+            teamB: (scene as any).teamB,
+            voiceover: scene.voiceoverScript
         });
     }
 
@@ -264,6 +269,11 @@ export const buildAnimatedRenderFormData = async (
                 generateAudio: scene.videoOptions?.generateAudio ?? true,
                 overlays: scene.overlays || [],
                 isAnimated: true,
+                matchMinute: scene.matchMinute,
+                language: (scene as any).language,
+                teamA: (scene as any).teamA,
+                teamB: (scene as any).teamB,
+                voiceover: scene.voiceoverScript
             });
         }
 
@@ -341,10 +351,15 @@ export const renderFullVideo = async (
 
         console.info(`🚀 [VideoRender:${modeLabel}] Job ${jobId} registered. Starting status polling...`);
         let pollCount = 0;
+        const MAX_POLLS = 720; // 720 * 5s = 3600s (60 minutes maximum render timeout)
         
         while (true) {
             await new Promise(r => setTimeout(r, 5000));
             pollCount++;
+            
+            if (pollCount > MAX_POLLS) {
+                throw new Error(`Rendering timed out after 60 minutes. The server is not responding or the render job is hung.`);
+            }
             
             onProgress(`Server-side rendering in progress (polling, elapsed: ${pollCount * 5}s)...`);
             

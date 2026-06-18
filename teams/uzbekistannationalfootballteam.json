@@ -1,0 +1,51 @@
+{
+  "team_name": "Uzbekistan National Football Team",
+  "head_coach": {
+    "name": "Fabio Cannavaro",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Prioritizes a highly disciplined, defensively organized structure emphasizing compact lines and structured positioning. Focuses on organized defensive transitions to limit opponents' space, relying heavily on rapid transitions and vertical counter-attacks to exploit offensive spaces."
+  },
+  "key_players": [
+    {
+      "name": "Abdukodir Khusanov",
+      "position": "Centre-Back",
+      "market_value": "€50.00m",
+      "performance_stats": "Played 42 games in the 2025/2026 season for Manchester City. Anchors the defense with exceptional strength and reading of the game, recording a 91.73% pass completion rate, 1,429 Premier League minutes, and keeping 19 clean sheets.",
+      "age": 22,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "name": "Eldor Shomurodov",
+      "position": "Centre-Forward",
+      "market_value": "€7.00m",
+      "performance_stats": "Uzbekistan's captain and all-time top scorer. Had an incredibly clinical 2025/2026 season for Istanbul Basaksehir, scoring 22 goals to finish as joint-top scorer in the Turkish Süper Lig, showing exceptional hold-up play and aerial presence.",
+      "age": 30,
+      "goals": 22,
+      "assists": 5
+    },
+    {
+      "name": "Abbosbek Fayzullaev",
+      "position": "Right Winger",
+      "market_value": "€7.00m",
+      "performance_stats": "Dynamic, highly creative winger. Recorded 3 goals and 5 assists across 22 appearances in the 2025/2026 season for Istanbul Basaksehir. Outstanding in dribbling, key passes, and quick transitions down the flanks.",
+      "age": 22,
+      "goals": 3,
+      "assists": 5
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Jaloliddin Masharipov",
+      "absence_reason": "Excluded from the final 2026 World Cup 26-man roster due to a spinal disc herniation relapse (acute back injury) and replaced by Ruslanbek Jiyanov."
+    },
+    {
+      "player_name": "Husniddin Aliqulov",
+      "absence_reason": "Missed the final tournament squad selection after undergoing knee surgery in February 2026."
+    },
+    {
+      "player_name": "Ibrokhimkhalil Yuldoshev",
+      "absence_reason": "Sidelined and excluded from the tournament roster due to an injury sustained during pre-tournament preparations."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "team_name": "Croatia national football team",
+  "head_coach": {
+    "name": "Zlatko Dalić",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Zlatko Dalić favors a possession-based, versatile tactical approach built around an elite, highly experienced midfield core. Under Dalić, Croatia excels in ball retention, high-tempo passing, and tactical adaptability. His style heavily utilizes situational third-player combinations to break defensive lines, shifting between a solid 4-2-3-1 and a 4-3-3 structure while maintaining a disciplined, compact defensive shape."
+  },
+  "key_players": [
+    {
+      "name": "Joško Gvardiol",
+      "position": "Defender",
+      "market_value": "€70.00m",
+      "performance_stats": "Maintained an 89.11% pass completion rate, 1.05 tackles per 90, 0.98 interceptions per 90, and 4.00 clearances per game [4.2.4]. Kept 13 clean sheets across 30 total matches in the 2025/2026 season.",
+      "age": 24,
+      "goals": 3,
+      "assists": 2
+    },
+    {
+      "name": "Martin Baturina",
+      "position": "Attacking Midfield",
+      "market_value": "€30.00m",
+      "performance_stats": "Recorded an 87.7% pass completion rate, created 62 chances, and registered 8 big chances. Achieved an average FotMob rating of 7.24 across 41 matches in the 2025/2026 season.",
+      "age": 23,
+      "goals": 8,
+      "assists": 4
+    },
+    {
+      "name": "Luka Modrić",
+      "position": "Central Midfield",
+      "market_value": "€3.50m",
+      "performance_stats": "Averaged a 7.58 FotMob rating over 2,816 minutes in 34 matches for AC Milan, showcasing exceptional playmaking, deep-lying distribution, and high-frequency chance creation.",
+      "age": 40,
+      "goals": 2,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Duje Ćaleta-Car",
+      "absence_reason": "Suffered physical discomfort/minor injury that sidelined him for pre-tournament friendlies against Belgium and Slovenia, raising minor fitness concerns [8.1.2]."
+    },
+    {
+      "player_name": "Josip Šutalo",
+      "absence_reason": "Sidelined since mid-May 2026 due to an undisclosed minor injury, requiring load monitoring ahead of early tournament fixtures."
+    },
+    {
+      "player_name": "Lovro Majer",
+      "absence_reason": "Officially omitted from the final 26-man tournament roster and placed on the standby player list."
+    },
+    {
+      "player_name": "Luka Stojković",
+      "absence_reason": "Despite a breakthrough season at Dinamo Zagreb, he was excluded from the final 26-man tournament squad due to high competition in the attacking midfield department and placed on the standby list."
+    }
+  ]
+}

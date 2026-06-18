@@ -1,0 +1,38 @@
+{
+  "team_name": "Iran",
+  "head_coach": {
+    "name": "Amir Ghalenoei",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Blends structural defensive stability with rapid transition play. He primarily favors a compact 4-2-3-1 system, but exhibits tactical flexibility by employing a defensive 3-6-1 against stronger opponents or a direct 4-4-2 depending on match dynamics."
+  },
+  "key_players": [
+    {
+      "name": "Mehdi Ghayedi",
+      "position": "Left Winger",
+      "market_value": "€4.50m",
+      "performance_stats": "Playing for Al-Nasr SC (UAE) [1.2.3], he is a highly dynamic attacker who recently marked his return to the national team with a spectacular goal against Costa Rica in March."
+    },
+    {
+      "name": "Mehdi Taremi",
+      "position": "Centre-Forward",
+      "market_value": "€2.50m",
+      "performance_stats": "The team's main attacking talisman who plays for Olympiakos. Highly experienced with over 100 caps, he excels at stretching opposition lines and contributing to defensive pressing."
+    },
+    {
+      "name": "Mohammad Mohebi",
+      "position": "Left Winger",
+      "market_value": "€2.50m",
+      "performance_stats": "A consistent and highly physical winger playing for FC Rostov. He is a core tactical outlet for width and transition play in Ghalenoei's attacking setup."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ali Gholizadeh",
+      "absence_reason": "Suffered a torn anterior cruciate ligament (ACL) in his left knee while playing for Polish club Lech Poznan in May 2026, ruling him out of the World Cup [2.1.3]."
+    },
+    {
+      "player_name": "Sardar Azmoun",
+      "absence_reason": "Omitted from the squad following a major political controversy and disciplinary storm regarding an Instagram post with the ruler of the UAE, alongside minor fitness concerns."
+    }
+  ]
+}

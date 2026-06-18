@@ -1,0 +1,47 @@
+{
+  "team_name": "Senegal",
+  "head_coach": {
+    "name": "Pape Thiaw",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Built around physical intensity, defensive compact compactness, and high-pressing tempo. Under Thiaw, the style has evolved into a possession-based game with dynamic movement, encouraging central midfielders to take creative risks in the final third while remaining highly organized in transitions."
+  },
+  "key_players": [
+    {
+      "name": "Iliman Ndiaye",
+      "position": "Right Winger",
+      "market_value": "€55.00m",
+      "performance_stats": "Averages 0.96 chances created per 90 minutes [6.3.3]. Exceptional ball carrier and creator, achieving a +€33m rise in market value across the 2025/2026 Premier League season with Everton.",
+      "age": 26,
+      "goals": 6,
+      "assists": 3
+    },
+    {
+      "name": "Nicolas Jackson",
+      "position": "Centre-Forward",
+      "market_value": "€40.00m",
+      "performance_stats": "Recorded a highly productive 82.28 minutes per goal contribution during his season-long loan at Bayern Munich. Highly valued for his physical presence, pressing, and penalty-box movement.",
+      "age": 24,
+      "goals": 10,
+      "assists": 4
+    },
+    {
+      "name": "Lamine Camara",
+      "position": "Central Midfield",
+      "market_value": "€40.00m",
+      "performance_stats": "Dynamic double-pivot midfielder for AS Monaco. Praised for his elite passing range, work-rate, defensive disruptions, and tactical vision; won AFCON Best Young Player.",
+      "age": 22,
+      "goals": 3,
+      "assists": 4
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Kalidou Koulibaly",
+      "absence_reason": "Sidelined since April 8, 2026, due to a severe leg/thigh injury (thigh contusion with hematoma) [5.2.8]. Though he has returned to light individual training, his match fitness for the start of the 2026 World Cup remains highly uncertain."
+    },
+    {
+      "player_name": "Idrissa Gana Gueye",
+      "absence_reason": "Recently returned to training after recovering from a muscle injury that sidelined him for over six weeks from late April to June 2026. Still regaining full match-sharpness."
+    }
+  ]
+}

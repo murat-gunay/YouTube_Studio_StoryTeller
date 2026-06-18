@@ -88,6 +88,8 @@ export enum ArtStyle {
 
   VectorGraphic = 'Flat, clean vector illustration style with sharp edges and minimal gradients. Professional corporate aesthetic with a modern, friendly look suitable for educational storytelling.',
   
+  FlatLayPaperCut = 'Flat lay paper cut art style with delicate layered paper textures, soft drop shadows, and clean organic shapes. Minimalist and modern composition with high contrast paper layers.',
+
   StickmanSimple = 'Minimalist hand-drawn stickman figure in black ink on a clean white background. Simple lines, expressive poses, and a clean whiteboard-style aesthetic.',
   
   StickmanElite = 'A bit more detailed and colored version of the simple stickman. Maintains the hand-drawn feel but with cleaner lines, subtle colors (like a blue shirt or red hat), and more expressive facial features.'
@@ -125,6 +127,9 @@ export interface UserInput {
   useSearchGrounding: boolean;
   targetLanguage: Language;
   appMode: AppMode;
+  speaker1Voice?: VoiceOption;
+  speaker2Voice?: VoiceOption;
+  imageGenerator?: 'xAI' | 'Gemini';
 }
 
 export interface Character {
@@ -136,7 +141,7 @@ export interface Character {
   isCustom?: boolean; // New flag for manually added characters
 }
 
-export type OverlayStyle = 'comic-box' | 'speech-bubble';
+export type OverlayStyle = 'comic-box' | 'speech-bubble' | 'tactical-card' | 'goal-banner' | 'scoreboard' | 'stats-board';
 
 export interface Overlay {
   text: string;
@@ -172,6 +177,11 @@ export interface SceneLocalization {
   imageOverlayText?: string;
   ttsAudioUrl?: string;
   isGeneratingTTS?: boolean;
+  visualPrompt?: string;
+  imageUrl?: string;
+  isGeneratingImage?: boolean;
+  involvedCharacterIds?: string[];
+  matchMinute?: number;
 }
 
 export interface Scene {
@@ -195,6 +205,7 @@ export interface Scene {
   isGeneratingTTS: boolean;
   selectedTone: TTSTone;
   selectedVoice: VoiceOption;
+  selectedArtStyle?: ArtStyle; // Scene-specific art style selection
   characterRefId?: string;
   // Audio Tracks
   selectedMusicId?: string; // Background Music
@@ -206,6 +217,8 @@ export interface Scene {
   isAnimated?: boolean; // Flag for Animated Mode scene
   imageOverlayText?: string; // Short engaging text rendered on the image
   localizations?: Partial<Record<Language, SceneLocalization>>;
+  matchMinute?: number;
+  involvedCharacterIds?: string[];
 }
 
 export interface GeneratedScriptResponse {

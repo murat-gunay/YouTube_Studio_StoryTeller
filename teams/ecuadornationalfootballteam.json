@@ -1,0 +1,38 @@
+{
+  "team_name": "Ecuador National Football Team",
+  "head_coach": {
+    "name": "Sebastián Beccacece",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "A focus on high pressing, high physical intensity, and rapid vertical transitions. Defensively, Beccacece implements a highly organized and resilient framework that thrives under pressure, transitioning quickly to catch opponents out of position."
+  },
+  "key_players": [
+    {
+      "name": "Moisés Caicedo",
+      "position": "Defensive Midfield",
+      "market_value": "€110.00m",
+      "performance_stats": "Considered one of the world's best defensive midfielders, key to Chelsea's midfield and Ecuador's core. Celebrated for elite interceptions, work rate, and midfield control, helping Chelsea win the UEFA Conference League."
+    },
+    {
+      "name": "Willian Pacho",
+      "position": "Centre-Back",
+      "market_value": "€70.00m",
+      "performance_stats": "Plays for Paris Saint-Germain. Established as a world-class centre-back, demonstrating remarkable consistency, recovery speed, and defensive block saves at the highest level in Europe."
+    },
+    {
+      "name": "Piero Hincapié",
+      "position": "Centre-Back",
+      "market_value": "€50.00m",
+      "performance_stats": "Plays for Arsenal FC. Instrumental in Arsenal's Premier League title campaign, offering elite versatility as a left-footed centre-back or left-back, known for superb positioning and carrying the ball forward."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Nilson Angulo",
+      "absence_reason": "Muscle injury"
+    },
+    {
+      "player_name": "Gonzalo Valle",
+      "absence_reason": "Knee injury (bone edema) suffered during international play"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "team_name": "Ivory Coast",
+  "head_coach": {
+    "name": "Emerse Faé",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Prioritizes defensive solidity and discipline, setting up in a compact mid-block with selective pressing. Relies on the individual qualities of pacy wingers for rapid counterattacks in transition."
+  },
+  "key_players": [
+    {
+      "name": "Amad Diallo",
+      "position": "Right Winger",
+      "market_value": "€45m",
+      "performance_stats": "Logged 2 goals and 3 assists in 32 Premier League appearances (2,341 minutes) for Manchester United, creating 1.87 chances per 90 with a 7.19 FotMob rating. Scored the match-winning goal in a recent June 2026 friendly against France.",
+      "age": 23,
+      "goals": 2,
+      "assists": 3
+    },
+    {
+      "name": "Ousmane Diomande",
+      "position": "Centre-Back",
+      "market_value": "€42m",
+      "performance_stats": "Started 37 matches across all competitions for Sporting CP, maintaining a 91.7% pass completion rate, 7.25 average FotMob rating, and contributing to 17 clean sheets.",
+      "age": 22,
+      "goals": 0,
+      "assists": 1
+    },
+    {
+      "name": "Simon Adingra",
+      "position": "Left Winger",
+      "market_value": "€25m",
+      "performance_stats": "Recorded 3 goals and 2 assists in 14 Ligue 1 appearances (861 minutes) for AS Monaco, averaging 1.4 chances created per 90 and maintaining a 7.16 FotMob rating.",
+      "age": 24,
+      "goals": 3,
+      "assists": 2
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Clément Akpa",
+      "absence_reason": "Withdrawn from the World Cup squad due to an adductor injury suffered in club training with AJ Auxerre."
+    },
+    {
+      "player_name": "Evan Ndicka",
+      "absence_reason": "Suffered a second-degree hamstring lesion with AS Roma, leaving him highly doubtful for the start of the World Cup."
+    },
+    {
+      "player_name": "Odilon Kossounou",
+      "absence_reason": "Sidelined with a thigh injury."
+    }
+  ]
+}

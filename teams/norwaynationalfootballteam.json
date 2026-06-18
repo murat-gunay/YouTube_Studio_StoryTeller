@@ -1,0 +1,34 @@
+{
+  "team_name": "Norway National Football Team",
+  "head_coach": {
+    "name": "Ståle Solbakken",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Norway focuses on a high press, verticality, and rapid transitions. The tactical approach emphasizes quick vertical progression rather than long spells of sideways possession, establishing a compact defensive block (often shifting into a 4-4-2 or 4-5-1 out of possession) to force turnovers high up the pitch."
+  },
+  "key_players": [
+    {
+      "name": "Erling Haaland",
+      "position": "Centre-Forward",
+      "market_value": "€200.00m",
+      "performance_stats": "Scored 16 goals in 8 matches during the World Cup qualifying campaign, establishing himself as Norway's all-time top scorer."
+    },
+    {
+      "name": "Martin Ødegaard",
+      "position": "Attacking Midfield",
+      "market_value": "€65.00m",
+      "performance_stats": "The team's captain and primary playmaker, serving as a talismanic figure who led Norway to end their 26-year wait for a World Cup return."
+    },
+    {
+      "name": "Antonio Nusa",
+      "position": "Left Winger",
+      "market_value": "€32.00m",
+      "performance_stats": "A breakout star in the attack who scored a crucial goal against Italy in the final qualifying matches to secure World Cup spot."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Leo Østigård",
+      "absence_reason": "Sidelined due to a minor knock/muscular issue."
+    }
+  ]
+}

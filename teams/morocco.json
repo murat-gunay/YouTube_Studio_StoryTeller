@@ -1,0 +1,55 @@
+{
+  "team_name": "Morocco",
+  "head_coach": {
+    "name": "Mohamed Ouahbi",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "A highly flexible system built around a 4-2-3-1 shape that transforms into a fluid 2-3-5 in possession. It emphasizes an aggressive high press, compact defensive lines, quick counter-pressing, and explosive transitions. One fullback steps into the midfield to create an overload while creative players operate between the lines to break down low blocks."
+  },
+  "key_players": [
+    {
+      "name": "Achraf Hakimi",
+      "position": "Right-Back",
+      "market_value": "€80.00m",
+      "performance_stats": "PSG and national team captain. Registered 3 goals, 16 assists, and 19 clean sheets across all competitions in the 2025/26 season with PSG, winning Ligue 1, AFCON, and the Champions League. Renowned for world-class pace, high-volume key passes, crossing accuracy, and strong defensive contributions.",
+      "age": 27,
+      "goals": 3,
+      "assists": 16
+    },
+    {
+      "name": "Ismael Saibari",
+      "position": "Attacking Midfield",
+      "market_value": "€40.00m",
+      "performance_stats": "Eredivisie Player of the Season for 2025/26 with PSV before agreeing to a €50m+ transfer to Bayern Munich. Averaged a 7.20 Sofascore rating, 1.96 key passes, 1.78 successful dribbles, and 9.74 ball carries per game. Scored a magnificent opener for Morocco against Brazil at the 2026 World Cup.",
+      "age": 25,
+      "goals": 19,
+      "assists": 10
+    },
+    {
+      "name": "Brahim Díaz",
+      "position": "Right Winger",
+      "market_value": "€35.00m",
+      "performance_stats": "Made 42 appearances for Real Madrid in the 2025/26 season (17 starts) across La Liga and Champions League, registering 9 goal contributions (2 goals, 7 assists). Highly technical playmaker with exceptional acceleration, close control, and vision who won the 2025 AFCON Golden Boot.",
+      "age": 26,
+      "goals": 2,
+      "assists": 7
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Abde Ezzalzouli",
+      "absence_reason": "Ruled out of the 2026 World Cup squad after sustaining an MCL sprain (knee injury) during a pre-tournament friendly match against Norway on June 7, 2026."
+    },
+    {
+      "player_name": "Nayef Aguerd",
+      "absence_reason": "Withdrawn from the World Cup squad due to a groin injury requiring surgery in March, followed by a pubic bone fracture discovered in April."
+    },
+    {
+      "player_name": "Adam Masina",
+      "absence_reason": "Sidelined from the national team setup after sustaining an injury during the Africa Cup of Nations final in January 2026."
+    },
+    {
+      "player_name": "Ilias Akhomach",
+      "absence_reason": "Omitted from the final World Cup squad due to an ankle injury sustained in mid-March 2026, as the head coach prioritized perfect match fitness."
+    }
+  ]
+}

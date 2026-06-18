@@ -1,0 +1,51 @@
+{
+  "team_name": "United States",
+  "head_coach": {
+    "name": "Mauricio Pochettino",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "An aggressive, high-pressing, and vertically direct attacking style that emphasizes tactical flexibility. The system transitions fluidly from a 4-2-3-1 base into a 3-2-5 in possession or a compact 4-4-2 pressing structure off the ball. It relies on intense off-ball runs from midfielders, fast transitions after winning possession, and dynamic full-back movement to exploit wide channels."
+  },
+  "key_players": [
+    {
+      "name": "Christian Pulisic",
+      "position": "Winger",
+      "market_value": "€40m",
+      "performance_stats": "Played 34 games for AC Milan across all competitions in the 2025/2026 club season [2.1.6]. He averaged 1.4 shots per game, completed 79% of his passes, and maintained an average FotMob rating of 7.11 as a primary creative engine on the flank.",
+      "age": 27,
+      "goals": 10,
+      "assists": 4
+    },
+    {
+      "name": "Folarin Balogun",
+      "position": "Centre-Forward",
+      "market_value": "€40m",
+      "performance_stats": "Appeared in 29 matches in Ligue 1 for AS Monaco during the 2025/2026 season. He registered 60 shots, averaged 2.0 shots per game, and recorded a 7.03 average FotMob rating as a key attacking spearhead.",
+      "age": 24,
+      "goals": 13,
+      "assists": 4
+    },
+    {
+      "name": "Weston McKennie",
+      "position": "Central Midfielder",
+      "market_value": "€30m",
+      "performance_stats": "Maintained an 89% pass completion rate, a 7.22 average FotMob rating in Serie A, and played 48 matches across all competitions for Juventus, anchoring the midfield with elite work rate and defensive recoveries.",
+      "age": 27,
+      "goals": 9,
+      "assists": 6
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Johnny Cardoso",
+      "absence_reason": "Ankle surgery"
+    },
+    {
+      "player_name": "Patrick Agyemang",
+      "absence_reason": "Achilles tendon rupture"
+    },
+    {
+      "player_name": "Tanner Tessmann",
+      "absence_reason": "Muscle injury"
+    }
+  ]
+}

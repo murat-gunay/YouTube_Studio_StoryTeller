@@ -1,0 +1,47 @@
+{
+  "team_name": "Portugal",
+  "head_coach": {
+    "name": "Roberto Martínez",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Under Roberto Martínez, Portugal plays a possession-based, high-energy style that emphasizes rapid midfield passing, quick transitions, and tactical flexibility. They typically employ a compact defensive structure and utilize dynamic wingers to challenge opposition blocks while giving creative freedom to their playmakers."
+  },
+  "key_players": [
+    {
+      "name": "Vitinha",
+      "position": "Central Midfielder",
+      "market_value": "€140m",
+      "performance_stats": "Averages a 90% pass completion rate, orchestrates play with exceptional ball control and work rate, making 53 appearances for Paris Saint-Germain in the 2025/2026 season.",
+      "age": 26,
+      "goals": 7,
+      "assists": 7
+    },
+    {
+      "name": "Bruno Fernandes",
+      "position": "Attacking Midfielder",
+      "market_value": "€40m",
+      "performance_stats": "Elite playmaker with world-class chance creation metrics, completing a league-high 21 assists in the Premier League for Manchester United during the 2025/2026 season.",
+      "age": 31,
+      "goals": 9,
+      "assists": 21
+    },
+    {
+      "name": "Rafael Leão",
+      "position": "Left Winger",
+      "market_value": "€50m",
+      "performance_stats": "Dynamic winger with explosive acceleration and top-tier dribbling skills, averaging high completed dribble volumes and contributing 13 goal involvements in Serie A for AC Milan in 2025/2026.",
+      "age": 27,
+      "goals": 10,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "None",
+      "absence_reason": "Portugal enters the 2026 World Cup with a fully fit 26-man squad, reporting zero active clinical injuries or suspensions."
+    },
+    {
+      "player_name": "Diogo Jota",
+      "absence_reason": "Tragically passed away in a car accident on July 3, 2025. He is symbolically honored on the official team list as a memorial '+1' member."
+    }
+  ]
+}

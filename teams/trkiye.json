@@ -1,0 +1,55 @@
+{
+  "team_name": "Türkiye",
+  "head_coach": {
+    "name": "Vincenzo Montella",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Montella employs a possession-based, high-tempo, and technically fluid style. The team relies on winger-focused overloads, frequent positional rotations, and rapid attacking transitions. Under his guidance, Türkiye plays with high energy, often squeezing opponents with a compact 4-4-2 mid-block when defending and utilizing a strong counter-press immediately after losing possession."
+  },
+  "key_players": [
+    {
+      "name": "Arda Güler",
+      "position": "Attacking Midfield",
+      "market_value": "€90.00m",
+      "performance_stats": "Recorded 6 goals and 14 assists in 50 matches for Real Madrid. Features elite pass completion, high chance creation (12 chances created in World Cup Qualifiers), and exceptional crossing accuracy.",
+      "age": 21,
+      "goals": 6,
+      "assists": 14
+    },
+    {
+      "name": "Kenan Yıldız",
+      "position": "Left Winger",
+      "market_value": "€75.00m",
+      "performance_stats": "Recorded 11 goals and 9 assists for Juventus. Highly versatile forward noted for progressive ball-carries, high dribble success rates, and active contribution to high-press recovery.",
+      "age": 21,
+      "goals": 11,
+      "assists": 9
+    },
+    {
+      "name": "Can Uzun",
+      "position": "Attacking Midfield",
+      "market_value": "€45.00m",
+      "performance_stats": "Scored 8 goals and provided 4 assists in 21 Bundesliga appearances for Eintracht Frankfurt. Characterized by high shot conversion rates, intelligent off-the-ball runs, and strong spatial awareness.",
+      "age": 20,
+      "goals": 8,
+      "assists": 4
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ferdi Kadıoğlu",
+      "absence_reason": "Undisclosed injury (managing minor physical fitness issues ahead of World Cup Group D fixtures)"
+    },
+    {
+      "player_name": "Eren Elmalı",
+      "absence_reason": "Suspended officially by the Turkish Football Federation's sports court due to a historical betting investigation"
+    },
+    {
+      "player_name": "Metehan Baltacı",
+      "absence_reason": "Suspended officially by the Turkish Football Federation's sports court due to a betting investigation"
+    },
+    {
+      "player_name": "Kerem Aktürkoğlu",
+      "absence_reason": "Undisclosed injury (suffered a minor training injury, currently undergoing rehabilitation)"
+    }
+  ]
+}

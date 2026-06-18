@@ -1,0 +1,46 @@
+{
+  "team_name": "Netherlands National Football Team",
+  "head_coach": {
+    "name": "Ronald Koeman",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Modern interpretation of Total Football emphasizing high pressing, possession-based build-up from the back, numerical superiority in the midfield, and quick transitions with overlapping fullbacks."
+  },
+  "key_players": [
+    {
+      "name": "Frenkie de Jong",
+      "position": "Midfielder",
+      "market_value": "€60,000,000",
+      "performance_stats": "Technically elite playmaker who serves as the team's primary connector, dropping deep to break opposition press and drive vertical transitions."
+    },
+    {
+      "name": "Cody Gakpo",
+      "position": "Forward",
+      "market_value": "€55,000,000",
+      "performance_stats": "Highly versatile attacker playing on the left wing, known for cutting inside to create goalscoring chances and maintaining excellent form."
+    },
+    {
+      "name": "Virgil van Dijk",
+      "position": "Defender",
+      "market_value": "€30,000,000",
+      "performance_stats": "The team's defensive anchor and captain, dominating aerial duels and breaking opposition defensive lines with precise long-range passing."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Xavi Simons",
+      "absence_reason": "Cruciate ligament tear"
+    },
+    {
+      "player_name": "Jerdy Schouten",
+      "absence_reason": "Cruciate ligament tear"
+    },
+    {
+      "player_name": "Matthijs de Ligt",
+      "absence_reason": "Ruled out following major back surgery"
+    },
+    {
+      "player_name": "Jeremie Frimpong",
+      "absence_reason": "Excluded from the squad due to persistent fitness and injury concerns during the season"
+    }
+  ]
+}

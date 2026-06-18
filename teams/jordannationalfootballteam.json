@@ -1,0 +1,46 @@
+{
+  "team_name": "Jordan National Football Team",
+  "head_coach": {
+    "name": "Jamal Sellami",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "A highly disciplined, pragmatic approach utilizing an ultra-compact defensive shape that transforms into a 5-4-1 or 5-2-3 out of possession, heavily relying on rapid, direct, and devastating counter-attacks in transition."
+  },
+  "key_players": [
+    {
+      "name": "Mousa Al-Tamari",
+      "position": "Right Winger",
+      "market_value": "€10.00m",
+      "performance_stats": "Scored 7 goals and provided 11 assists in 36 games for French Ligue 1 side Stade Rennais FC, as well as scoring 7 goals during Jordan's World Cup qualification campaign."
+    },
+    {
+      "name": "Yazan Al-Arab",
+      "position": "Centre-Back",
+      "market_value": "€1.00m",
+      "performance_stats": "Experienced defensive leader playing for K League 1 club FC Seoul, serving as the central anchor of Jordan's stubborn backline."
+    },
+    {
+      "name": "Ali Olwan",
+      "position": "Centre-Forward",
+      "market_value": "€800k",
+      "performance_stats": "Playing for Al-Sailiya SC, he was the top scorer in the Arab Cup and is expected to shoulder Jordan's primary goalscoring duties in the final tournament."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Yazan Al-Naimat",
+      "absence_reason": "Ruled out of the World Cup squad due to a severe knee (anterior cruciate ligament) injury sustained at the Arab Cup."
+    },
+    {
+      "player_name": "Adham Al-Quraishi",
+      "absence_reason": "Misses the tournament after suffering an anterior cruciate ligament (ACL) tear at the Arab Cup."
+    },
+    {
+      "player_name": "Issam Smeeri",
+      "absence_reason": "Officially excluded from the final tournament list due to a ruptured Achilles tendon sustained during individual training."
+    },
+    {
+      "player_name": "Ibrahim Sabra",
+      "absence_reason": "Sidelined on the eve of the tournament after suffering a torn ankle ligament in his left foot during national team training."
+    }
+  ]
+}

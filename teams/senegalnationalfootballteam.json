@@ -1,0 +1,38 @@
+{
+  "team_name": "Senegal National Football Team",
+  "head_coach": {
+    "name": "Pape Thiaw",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "A proactive, offensive approach characterized by aggressive high pressing, swift transitions from defense to attack, and immediate ball recovery after possession loss, with recent tactical flexibility to adapt to a 3-4-3 system during matches."
+  },
+  "key_players": [
+    {
+      "name": "Nicolas Jackson",
+      "position": "Centre-Forward",
+      "market_value": "€60,000,000",
+      "performance_stats": "Serving as a premier attacking focal point, known for dynamic movement, elite link-up play, and clinical finishes in top-tier competition."
+    },
+    {
+      "name": "Pape Matar Sarr",
+      "position": "Central Midfielder",
+      "market_value": "€45,000,000",
+      "performance_stats": "A energetic, box-to-box midfield engine returning fully fit to provide essential physical presence and distribution."
+    },
+    {
+      "name": "Iliman Ndiaye",
+      "position": "Attacking Midfielder / Winger",
+      "market_value": "€30,000,000",
+      "performance_stats": "Widely regarded as the team's creative heartbeat, offering exceptional dribbling, versatility, and playmaking flare."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Kalidou Koulibaly",
+      "absence_reason": "Thigh injury sustained in mid-April, requiring specialized rehabilitation and a highly managed return to full fitness."
+    },
+    {
+      "player_name": "Assane Diao",
+      "absence_reason": "Hamstring injury in his right leg."
+    }
+  ]
+}

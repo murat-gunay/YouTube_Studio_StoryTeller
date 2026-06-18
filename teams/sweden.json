@@ -1,0 +1,51 @@
+{
+  "team_name": "Sweden",
+  "head_coach": {
+    "name": "Graham Potter",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Known for positional flexibility, structured build-up play, and defensive discipline. Potter employs a back-three system utilizing high-pushing wing-backs to overload the flanks and a fluid, hard-pressing attacking line."
+  },
+  "key_players": [
+    {
+      "name": "Alexander Isak",
+      "position": "Centre-Forward",
+      "market_value": "€85m",
+      "performance_stats": "Registered a 6.49 average rating over 14 league appearances. Sidelined for portions of the 2025/26 season due to a fibula fracture but remains Sweden's highest-valued elite striker.",
+      "age": 26,
+      "goals": 4,
+      "assists": 1
+    },
+    {
+      "name": "Viktor Gyökeres",
+      "position": "Centre-Forward",
+      "market_value": "€65m",
+      "performance_stats": "Arsenal's top scorer in his debut season, showcasing intense physical presence and relentless pressing. Averaged 3.2 shots per game with a 73% passing accuracy.",
+      "age": 28,
+      "goals": 19,
+      "assists": 2
+    },
+    {
+      "name": "Isak Hien",
+      "position": "Centre-Back",
+      "market_value": "€22m",
+      "performance_stats": "Averages a 6.81 rating in Serie A. A robust and dominant central defender, winning an average of 2.1 aerial duels and registering 2.5 clearances per game.",
+      "age": 27,
+      "goals": 1,
+      "assists": 0
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Dejan Kulusevski",
+      "absence_reason": "Knee injury (patella surgery and subsequent recovery complications); completely missed the 2025-26 season and was officially excluded from Sweden's 2026 World Cup squad."
+    },
+    {
+      "player_name": "Roony Bardghji",
+      "absence_reason": "Omitted from Sweden's 2026 World Cup squad by head coach Graham Potter despite playing regularly for Barcelona."
+    },
+    {
+      "player_name": "Gabriel Gudmundsson",
+      "absence_reason": "Hamstring injury sustained in late May 2026, forcing a brief period of recovery."
+    }
+  ]
+}

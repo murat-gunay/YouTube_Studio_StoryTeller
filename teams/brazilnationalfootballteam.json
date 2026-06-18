@@ -1,0 +1,55 @@
+{
+  "team_name": "Brazil National Football Team",
+  "head_coach": {
+    "name": "Carlo Ancelotti",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Flexible and offensive style emphasizing attacking freedom, relying on direct and vertical transitions with individual brilliance of wide players. Utilizes high-intensity coordinated pressing from the front line to exploit spaces while maintaining central defensive compactness."
+  },
+  "key_players": [
+    {
+      "name": "Vinicius Junior",
+      "position": "Left Winger",
+      "market_value": "€140m",
+      "performance_stats": "Averaging 2.20 key passes per 90 minutes, 83.07% pass completion rate, 46.00% shooting accuracy, and a 7.35 WhoScored rating in the 2025/26 La Liga season.",
+      "age": 25,
+      "goals": 16,
+      "assists": 5
+    },
+    {
+      "name": "Bruno Guimarães",
+      "position": "Central Midfield",
+      "market_value": "€70m",
+      "performance_stats": "Averaging over 2.6 tackles per game, a key engine driving progressive carries and build-up play, achieving a 7.14 WhoScored rating in the 2025/26 Premier League season.",
+      "age": 28,
+      "goals": 9,
+      "assists": 5
+    },
+    {
+      "name": "Raphinha",
+      "position": "Left Winger",
+      "market_value": "€70m",
+      "performance_stats": "Recorded an average FotMob rating of 7.77 over 1,388 minutes with exceptional attacking threat, high work rate, and prominent set-piece delivery in the 2025/26 La Liga season.",
+      "age": 29,
+      "goals": 13,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Rodrygo",
+      "absence_reason": "Ruptured ACL and lateral meniscus in his right knee sustained in March 2026, requiring surgery and ruling him out of the 2026 World Cup."
+    },
+    {
+      "player_name": "Eder Militao",
+      "absence_reason": "Sidelined following thigh surgery and muscle injury, ruling him out of the 2026 World Cup."
+    },
+    {
+      "player_name": "Neymar",
+      "absence_reason": "Undergoing rehabilitation for a Grade II calf muscle injury sustained in late May 2026, expected to miss the group stage of the 2026 World Cup."
+    },
+    {
+      "player_name": "Estevao",
+      "absence_reason": "Suffered a grade four hamstring injury in late April/May 2026, making him a major doubt and effectively ruling him out of the 2026 World Cup."
+    }
+  ]
+}

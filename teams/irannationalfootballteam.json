@@ -1,0 +1,47 @@
+{
+  "team_name": "Iran National Football Team",
+  "head_coach": {
+    "name": "Amir Ghalenoei",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Pragmatic defensive-minded structure built around defensive organization, direct attacking transitions, and quick counters, shifting to a 4-4-2 or a 4-5-1 hybrid setup."
+  },
+  "key_players": [
+    {
+      "name": "Mehdi Ghayedi",
+      "position": "Left Winger",
+      "market_value": "€4.50m",
+      "performance_stats": "Scored 4 goals and provided 6 assists in 20 matches for Al-Nasr SC in the 2025/26 UAE Pro League. Known for pacey dribbling, clinical crossing, and vertical transition threats.",
+      "age": 27,
+      "goals": 4,
+      "assists": 6
+    },
+    {
+      "name": "Amirhossein Hosseinzadeh",
+      "position": "Centre-Forward",
+      "market_value": "€2.20m",
+      "performance_stats": "Scored 17 goals in 28 matches for Tractor FC, leading the Persian Gulf Pro League as top scorer in 2024/25. Highly versatile forward with strong link-up play.",
+      "age": 25,
+      "goals": 17,
+      "assists": 5
+    },
+    {
+      "name": "Mehdi Taremi",
+      "position": "Centre-Forward",
+      "market_value": "€2.00m",
+      "performance_stats": "Scored 10 goals in 24 appearances for Olympiacos in the 2025/26 season. Hard-working striker and team captain who excels at making runs behind the defensive line.",
+      "age": 33,
+      "goals": 10,
+      "assists": 4
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ali Gholizadeh",
+      "absence_reason": "Torn anterior cruciate ligament (ACL) in his left knee sustained in May 2026, ruling him out of the 2026 FIFA World Cup."
+    },
+    {
+      "player_name": "Sardar Azmoun",
+      "absence_reason": "Omitted and excluded from the final 26-man World Cup squad following political controversy and alleged disloyalty linked to his social media posts."
+    }
+  ]
+}

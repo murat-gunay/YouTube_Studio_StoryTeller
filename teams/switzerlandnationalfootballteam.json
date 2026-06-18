@@ -2,37 +2,46 @@
   "team_name": "Switzerland National Football Team",
   "head_coach": {
     "name": "Murat Yakin",
-    "preferred_formation": "3-4-3",
-    "play_style_summary": "Flexible and possession-oriented approach focusing on building from the back, maintaining defensive organization, utilizing Granit Xhaka and Remo Freuler as a controlling midfield double-pivot, and using wing-backs to create attacking width."
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "A highly structured and tactically disciplined defensive unit prioritizing compact central coverage and possession-oriented play building from the back, transitioning into attack with vertical passing and pacey wingers."
   },
   "key_players": [
     {
+      "name": "Johan Manzambi",
+      "position": "Central Midfielder",
+      "market_value": "€50m",
+      "performance_stats": "Named the UEFA Europa League Young Player of the Season with SC Freiburg, showcasing excellent duel-winning abilities and tactical fluidity in the midfield.",
+      "age": 20,
+      "goals": 5,
+      "assists": 2
+    },
+    {
       "name": "Gregor Kobel",
       "position": "Goalkeeper",
-      "market_value": "€40.00m",
-      "performance_stats": "The most valuable player in the Swiss squad, starring for Borussia Dortmund and serving as a crucial, consistent shot-stopper during Switzerland's unbeaten World Cup qualifying matches."
+      "market_value": "€40m",
+      "performance_stats": "A premier Bundesliga shot-stopper for Borussia Dortmund and Switzerland's number one keeper, exhibiting outstanding reflex saves and aerial dominance.",
+      "age": 28,
+      "goals": 0,
+      "assists": 0
     },
     {
-      "name": "Ardon Jashari",
-      "position": "Midfielder",
-      "market_value": "€30.00m",
-      "performance_stats": "Joined Italian giants AC Milan following a spectacular tenure in Belgium with Club Brugge where he earned Player of the Year honors, solidifying his spot as one of Switzerland's brightest young midfield talents."
-    },
-    {
-      "name": "Manuel Akanji",
-      "position": "Defender",
-      "market_value": "€18.00m",
-      "performance_stats": "A world-class center-back who recently clinched the Italian Serie A title during his loan spell with Inter Milan, cementing his status as the foundational leader of the Swiss defense."
+      "name": "Dan Ndoye",
+      "position": "Right Winger",
+      "market_value": "€32m",
+      "performance_stats": "A highly athletic, pacey winger who completed a €40m transfer to Nottingham Forest, providing robust counter-attacking runs and direct threat in transitions.",
+      "age": 25,
+      "goals": 2,
+      "assists": 1
     }
   ],
   "injuries_and_absences": [
     {
-      "player_name": "Noah Okafor",
-      "absence_reason": "Sidelined during late May due to a persistent calf injury/strain suffered with Leeds United, though still named to the preliminary World Cup squad."
+      "player_name": "Breel Embolo",
+      "absence_reason": "Travel authorization review delaying his arrival to the national squad"
     },
     {
-      "player_name": "Luca Jaquez",
-      "absence_reason": "Sustained a worrying knee injury during the DFB Pokal final with VfB Stuttgart on May 23, 2026, putting his World Cup participation in major doubt."
+      "player_name": "Noah Okafor",
+      "absence_reason": "Calf injury which caused him to miss preparation friendly matches"
     }
   ]
 }

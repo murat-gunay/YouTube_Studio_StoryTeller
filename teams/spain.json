@@ -1,0 +1,59 @@
+{
+  "team_name": "Spain",
+  "head_coach": {
+    "name": "Luis de la Fuente",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Luis de la Fuente's tactics merge Spain's traditional possession and positional play (Juego de Posición) with increased verticality and directness. He utilizes short-passing triangles and tempo control to pull opponents out of position before quickly releasing explosive wingers into space. Defensively, Spain deploys a high line and intense, man-to-man high-pressing to choke opposition build-ups and win the ball back early."
+  },
+  "key_players": [
+    {
+      "name": "Lamine Yamal",
+      "position": "Right Winger",
+      "market_value": "€200m",
+      "performance_stats": "Crowned the LaLiga 2025/26 Player of the Season after leading Barcelona to a domestic treble. Across all competitions, he registered 225 completed dribbles (5.47 per 90), 413 touches in the opponent's box (10.05 per 90), and drew 100 fouls, making him Spain's most dangerous attacking outlet.",
+      "age": 18,
+      "goals": 24,
+      "assists": 17
+    },
+    {
+      "name": "Pedri",
+      "position": "Central Midfield",
+      "market_value": "€150m",
+      "performance_stats": "Upgraded to the world's most valuable midfielder in early 2026. He registered a 7.56 Sofascore rating in LaLiga 2025/26, serving as the core creative architect who dictates transitions, breaks lines, and creates key chances for both club and country.",
+      "age": 23,
+      "goals": 6,
+      "assists": 11
+    },
+    {
+      "name": "Pau Cubarsí",
+      "position": "Centre-Back",
+      "market_value": "€80m",
+      "performance_stats": "An associative and positional center-back who acts as a structural pillar for a high defensive line. He possesses elite body orientation and spatial scanning, having completed over 2,700 minutes in LaLiga 2025/26 while executing deep playmaking duties with high passing accuracy.",
+      "age": 19,
+      "goals": 1,
+      "assists": 1
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Fermín López",
+      "absence_reason": "Sidelined and officially ruled out of the World Cup squad due to surgery on a fractured fifth metatarsal in his right foot sustained in May 2026."
+    },
+    {
+      "player_name": "Dani Carvajal",
+      "absence_reason": "Excluded from Spain's World Cup squad by the head coach following a highly disrupted, injury-plagued domestic season with Real Madrid."
+    },
+    {
+      "player_name": "Lamine Yamal",
+      "absence_reason": "Sustained a hamstring tear in late April 2026 and groin issues; though he has returned to full training, he is under a cautious, gradual-minute return roadmap."
+    },
+    {
+      "player_name": "Nico Williams",
+      "absence_reason": "Hamstring injury suffered in May 2026; he has rejoined team training but is on an individualized rehabilitation program to prevent re-injury."
+    },
+    {
+      "player_name": "Víctor Muñoz",
+      "absence_reason": "Muscle injury sustained in May 2026; he has returned to practicing but is on restricted minutes as a medical precaution."
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "team_name": "Morocco National Football Team",
+  "head_coach": {
+    "name": "Mohamed Ouahbi",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Emphasizes a highly disciplined, high-pressing defensive structure combined with quick combination plays and creative, fluid attacking transitions designed to exploit technical qualities in advanced areas."
+  },
+  "key_players": [
+    {
+      "name": "Achraf Hakimi",
+      "position": "Right-Back",
+      "market_value": "€80.00m",
+      "performance_stats": "The team's captain and defensive anchor; vital for his physical dominance, elite transition speed, and world-class overlapping runs from the flank."
+    },
+    {
+      "name": "Ayyoub Bouaddi",
+      "position": "Central Midfielder",
+      "market_value": "€50.00m",
+      "performance_stats": "A highly rated young prodigy from Lille who chose to represent Morocco; renowned for his composed ball progression and maturity in structural midfield play."
+    },
+    {
+      "name": "Brahim Díaz",
+      "position": "Right Winger / Attacking Midfielder",
+      "market_value": "€35.00m",
+      "performance_stats": "Real Madrid playmaker who serves as the chief creative force between the lines, bringing exceptional dribbling, agility, and offensive output."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Chemsdine Talbi",
+      "absence_reason": "Suffered a muscle injury during a training session with Sunderland, creating major uncertainty for his World Cup availability."
+    },
+    {
+      "player_name": "Nayef Aguerd",
+      "absence_reason": "Recovering from groin surgery, though recently showing positive progress and nearing a return."
+    },
+    {
+      "player_name": "Sofyan Amrabat",
+      "absence_reason": "Sidelined following a surgical procedure earlier in the year."
+    },
+    {
+      "player_name": "Hamza Igamane",
+      "absence_reason": "Out of action due to a knee injury."
+    },
+    {
+      "player_name": "Ilias Akhomach",
+      "absence_reason": "Sidelined due to a muscle injury."
+    }
+  ]
+}

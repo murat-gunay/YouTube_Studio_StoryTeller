@@ -1,0 +1,55 @@
+{
+  "team_name": "Uruguay National Football Team",
+  "head_coach": {
+    "name": "Marcelo Bielsa",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Aggressive, high-intensity pressing and immediate counter-pressing after turnovers. He implements energetic, vertical chaos focused on rapid transitions, width via natural-footed wingers, and absolute physical sacrifice with high-intensity off-the-ball movements."
+  },
+  "key_players": [
+    {
+      "name": "Federico Valverde",
+      "position": "Central Midfield",
+      "market_value": "€113m",
+      "performance_stats": "In the 2025/2026 LaLiga season with Real Madrid, Valverde recorded 5 goals and 8 assists in 33 matches with an average rating of 7.6. He excelled in ball carrying, high-intensity pressing, and long-range shooting with a pass completion rate above 88%.",
+      "age": 27,
+      "goals": 5,
+      "assists": 8
+    },
+    {
+      "name": "Darwin Núñez",
+      "position": "Centre-Forward",
+      "market_value": "€25m",
+      "performance_stats": "In the 2025/2026 Saudi Pro League season with Al-Hilal, Núñez recorded 6 goals and 4 assists across 16 matches with an average rating of 7.38. He functions as a high-tempo pressing forward, creating high-intensity transitions and direct threats in the penalty area.",
+      "age": 26,
+      "goals": 6,
+      "assists": 4
+    },
+    {
+      "name": "Manuel Ugarte",
+      "position": "Defensive Midfield",
+      "market_value": "€42m",
+      "performance_stats": "A crucial defensive mid anchor at Manchester United, registering an average of 3.4 tackles and 1.8 interceptions per game, along with a 91% pass accuracy rate, serving as the primary ball-winner.",
+      "age": 25,
+      "goals": 0,
+      "assists": 0
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ronald Araújo",
+      "absence_reason": "Suffered a muscle strain and flu symptoms, forcing him to exit the national team camp on June 9, 2026, to return to Barcelona for treatment."
+    },
+    {
+      "player_name": "Giorgian de Arrascaeta",
+      "absence_reason": "Sustained a grade two tear in his right calf and is recovering from a fractured right collarbone."
+    },
+    {
+      "player_name": "Joaquín Piquerez",
+      "absence_reason": "Sidelined with a cruciate ligament tear suffered in late March 2026."
+    },
+    {
+      "player_name": "Rodrigo Bentancur",
+      "absence_reason": "Recovering from a serious hamstring injury sustained in January 2026."
+    }
+  ]
+}

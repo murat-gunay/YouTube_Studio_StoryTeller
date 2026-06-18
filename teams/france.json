@@ -1,0 +1,47 @@
+{
+  "team_name": "France",
+  "head_coach": {
+    "name": "Didier Deschamps",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "A highly organized, pragmatic, and defensively solid approach utilizing a strong double pivot in midfield. Focuses on structured defensive blocks combined with vertical, direct counter-attacks that exploit the world-class speed, technical ability, and creativity of the attacking wingers and forwards."
+  },
+  "key_players": [
+    {
+      "name": "Kylian Mbappé",
+      "position": "Centre-Forward",
+      "market_value": "€200m",
+      "performance_stats": "Averages 1.05 goals per game across all competitions in the 2025/26 season, registering 38 goals and 6 assists in 36 matches for Real Madrid. Retains a 91 overall EA FC 26 rating and recently matched Cristiano Ronaldo's record of 59 goals in a calendar year.",
+      "age": 27,
+      "goals": 38,
+      "assists": 6
+    },
+    {
+      "name": "Ousmane Dembélé",
+      "position": "Right Winger",
+      "market_value": "€100m",
+      "performance_stats": "Voted Transfermarkt's Ligue 1 Player of the Season for 2025/26 after recording 10 goals and 7 assists in 22 matches for PSG. Famously won the 2025 Ballon d'Or after contributing 35 goals and 14 assists in 53 appearances the previous year.",
+      "age": 29,
+      "goals": 10,
+      "assists": 7
+    },
+    {
+      "name": "Michael Olise",
+      "position": "Right Winger",
+      "market_value": "€150m",
+      "performance_stats": "Voted Bundesliga's Player of the Season for 2025/26 after contributing 15 goals and 19 assists in 32 matches for Bayern Munich, becoming the first player since 2019/20 to record 15+ goals and assists in a single Bundesliga campaign. He achieved an 8.09 average FotMob rating.",
+      "age": 24,
+      "goals": 15,
+      "assists": 19
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Hugo Ekitike",
+      "absence_reason": "Ruptured Achilles tendon sustained in April 2026 during a UEFA Champions League quarterfinal match against Paris Saint-Germain, ruling him out of the 2026 FIFA World Cup."
+    },
+    {
+      "player_name": "Eduardo Camavinga",
+      "absence_reason": "Excluded from the 26-man FIFA World Cup squad by manager Didier Deschamps following an injury-plagued and inconsistent club season with Real Madrid where he struggled for regular playing time."
+    }
+  ]
+}

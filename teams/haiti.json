@@ -1,0 +1,55 @@
+{
+  "team_name": "Haiti",
+  "head_coach": {
+    "name": "Sébastien Migné",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "Focuses on a highly compact defensive block that willingly concedes possession, restricting space for opponents and looking to transition rapidly to release quick and direct-running forwards in 1v1 situations."
+  },
+  "key_players": [
+    {
+      "name": "Wilson Isidor",
+      "position": "Centre-Forward",
+      "market_value": "€18.00m",
+      "performance_stats": "Recorded 81% shot attempts and 48% aerial duels won for Sunderland in the 2025/26 Premier League season. Has 2 goals in 5 international caps for Haiti.",
+      "age": 25,
+      "goals": 8,
+      "assists": 1
+    },
+    {
+      "name": "Josué Casimir",
+      "position": "Right Winger",
+      "market_value": "€3.00m",
+      "performance_stats": "Played 31 matches in Ligue 1 for AJ Auxerre in the 2025/26 season, registering a 78.9% pass completion rate and 1,521 minutes of play.",
+      "age": 24,
+      "goals": 1,
+      "assists": 0
+    },
+    {
+      "name": "Danley Jean Jacques",
+      "position": "Defensive Midfield",
+      "market_value": "€3.00m",
+      "performance_stats": "Boasts a 59% defensive contributions rating on FotMob. Has 29 senior caps and 6 international goals for Haiti, protecting the midfield and facilitating transitions.",
+      "age": 26,
+      "goals": 2,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Leverton Pierre",
+      "absence_reason": "Right Achilles tendon injury suffered just before the 2026 World Cup kick-off; ruled out of the tournament and replaced by Garven Metusala."
+    },
+    {
+      "player_name": "Stéphane Lambese",
+      "absence_reason": "Officially excluded from the final 26-man FIFA World Cup squad."
+    },
+    {
+      "player_name": "Francois Dulysse",
+      "absence_reason": "Officially excluded from the final 26-man FIFA World Cup squad."
+    },
+    {
+      "player_name": "Christopher Attys",
+      "absence_reason": "Officially excluded from the final 26-man FIFA World Cup squad."
+    }
+  ]
+}

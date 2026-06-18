@@ -1,0 +1,42 @@
+{
+  "team_name": "Brazil",
+  "head_coach": {
+    "name": "Carlo Ancelotti",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "A highly fluid tactical system transitioning between 4-3-3 and 4-2-3-1. It emphasizes structured positional play, utilizing high pressing, dynamic wing play, and rapid defensive transitions."
+  },
+  "key_players": [
+    {
+      "name": "Vinicius Junior",
+      "position": "Left Winger",
+      "market_value": "€150.00m",
+      "performance_stats": "Remains the most valuable asset in the Seleção squad, acting as a premier dribbler and direct attacking threat for Real Madrid and Brazil."
+    },
+    {
+      "name": "Raphinha",
+      "position": "Right Winger",
+      "market_value": "€80.00m",
+      "performance_stats": "In sensational form for both FC Barcelona and the national team, establishing himself as one of the squad's primary creative engines and goal scorers."
+    },
+    {
+      "name": "Gabriel Magalhaes",
+      "position": "Centre-Back",
+      "market_value": "€70.00m",
+      "performance_stats": "Serves as a vital defensive leader after helping guide Arsenal to the UEFA Champions League final, offering physical dominance and stability at the back."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Eder Militao",
+      "absence_reason": "Ruled out of the 2026 World Cup after undergoing surgery on a torn biceps femoris tendon in his left leg."
+    },
+    {
+      "player_name": "Rodrygo",
+      "absence_reason": "Excluded from the squad after sustaining a severe ACL and meniscus injury in his right knee in early May."
+    },
+    {
+      "player_name": "Neymar",
+      "absence_reason": "Though named in the official squad, his initial availability is in doubt after suffering a moderate muscle edema in his right calf."
+    }
+  ]
+}

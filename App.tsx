@@ -10,10 +10,531 @@ import { SceneCard } from './components/SceneCard';
 import { AnimatedSceneCard } from './components/AnimatedSceneCard';
 import { LiveAssistant } from './components/LiveAssistant';
 import { KenBurnsPlayer } from './components/KenBurnsPlayer';
-import { transcribeAudio, generateStoryScript, generateAnimatedStoryScript, generateFootballScript, generateImage, generateVideo, generateTTS, generateThumbnail, generateCharacterReference, generateTitle, generateVideoPrompt, localizeScript, generateFootballThumbnailSuggestions, localizeThumbnailMetadata, localizeMetadata } from './services/geminiService';
+import { transcribeAudio, generateStoryScript, generateAnimatedStoryScript, generateFootballScript, generateImage, generateVideo, generateTTS, generateThumbnail, generateCharacterReference, generateKitReferenceImage, generateTitle, generateVideoPrompt, localizeScript, generateFootballThumbnailSuggestions, localizeThumbnailMetadata, localizeMetadata, generateMatchVisualPrompts, generateLocalizedFootballScript, runMatchSimulationEngine, getTeamProfileHelper, translateTeamData, getStatsLabels, getCanonicalStatKey } from './services/geminiService';
 import { renderFullVideo } from './services/videoRenderService';
 import { AssetStorage } from './services/assetStorage';
 import { burnThumbnailText } from './services/thumbnailUtils';
+import { OverlayStyle } from './types';
+
+const determineOverlayStyle = (text: string, index: number): OverlayStyle => {
+  if (!text) return 'comic-box';
+  const clean = text.toLowerCase();
+  
+  if (clean.includes('|') && clean.includes(':')) {
+    return 'stats-board';
+  }
+  
+  if (clean.includes('goal') || clean.includes('gol') || clean.includes('goool') || clean.includes('red card') || clean.includes('kırmızı kart') || clean.includes('sarı kart') || clean.includes('yellow card') || clean.includes('penalty') || clean.includes('penaltı')) {
+    return 'goal-banner';
+  }
+  
+  if (index === 0) {
+    if (clean.includes('versus') || clean.includes('vs') || clean.includes('score') || clean.includes('skor') || clean.includes('min') || clean.includes('dk') || clean.includes('lineup') || clean.includes('kadro')) {
+      return 'scoreboard';
+    }
+    return 'comic-box';
+  }
+  
+  if (index === 1) {
+    return 'comic-box';
+  }
+  
+  if (index === 2) {
+    if (clean.includes('%') || clean.includes('possession') || clean.includes('şut') || clean.includes('shot') || clean.includes('xg') || clean.includes('tact') || clean.includes('anal') || clean.includes('pas') || clean.includes('pass') || clean.includes('stat') || clean.includes('insig') || clean.includes('veriler')) {
+      return 'tactical-card';
+    }
+    return 'comic-box';
+  }
+  
+  return 'comic-box';
+};
+
+const translateFootballTerm = (term: string, lang: string): string => {
+  if (!term || term === 'N/A') return 'N/A';
+  const lowerLang = lang.toLowerCase();
+  
+  // Extract text inside parentheses
+  const parenIndex = term.indexOf('(');
+  let baseText = term;
+  let parenSuffix = '';
+  if (parenIndex !== -1) {
+    baseText = term.substring(0, parenIndex).trim();
+    parenSuffix = ' ' + term.substring(parenIndex).trim();
+  }
+
+  const cleanTerm = baseText.toLowerCase().trim();
+
+  const dictionary: Record<string, Record<string, string>> = {
+    turkish: {
+      'goalkeeper': 'Kaleci',
+      'gk': 'Kaleci',
+      'centre-back': 'Stoper',
+      'center-back': 'Stoper',
+      'cb': 'Stoper',
+      'defender': 'Defans',
+      'right-back': 'Sağ Bek',
+      'rb': 'Sağ Bek',
+      'left-back': 'Sol Bek',
+      'lb': 'Sol Bek',
+      'defensive midfield': 'Ön Libero',
+      'defensive midfielder': 'Ön Libero',
+      'dm': 'Ön Libero',
+      'central midfield': 'Merkez Orta Saha',
+      'central midfielder': 'Merkez Orta Saha',
+      'cm': 'Merkez Orta Saha',
+      'midfielder': 'Orta Saha',
+      'attacking midfield': 'Ofansif Orta Saha',
+      'attacking midfielder': 'Ofansif Orta Saha',
+      'am': 'Ofansif Orta Saha',
+      'right winger': 'Sağ Kanat',
+      'rw': 'Sağ Kanat',
+      'left winger': 'Sol Kanat',
+      'lw': 'Sol Kanat',
+      'centre-forward': 'Santrfor',
+      'striker': 'Santrfor',
+      'cf': 'Santrfor',
+      'tiki-taka': 'Tiki-taka',
+      'gegenpressing': 'Gegenpressing',
+      'pressing': 'Pres',
+      'high press': 'Yüksek Pres',
+      'counter-attacking': 'Kontratak',
+      'counterattack': 'Kontratak',
+      'counter attack': 'Kontratak',
+      'possession based': 'Topa Sahip Olma',
+      'possession-based': 'Topa Sahip Olma',
+      'possession': 'Topla Oynama',
+      'defensive': 'Savunma Ağırlıklı',
+      'park the bus': 'Otobüsü Çekme',
+      'low block': 'Alçak Blok',
+      'attacking': 'Hücum',
+      'high-tempo attacking': 'Hızlı Hücum',
+      'winners': 'Şampiyon',
+      'winner': 'Şampiyon',
+      'runner-up': 'İkinci',
+      'runners-up': 'İkinci',
+      'semi-finals': 'Yarı Final',
+      'semi-final': 'Yarı Final',
+      'semifinals': 'Yarı Final',
+      'semifinal': 'Yarı Final',
+      'quarter-finals': 'Çeyrek Final',
+      'quarter-final': 'Çeyrek Final',
+      'quarterfinals': 'Çeyrek Final',
+      'quarterfinal': 'Çeyrek Final',
+      'round of 16': 'Son 16',
+      'group stage': 'Grup Aşaması',
+      'none': 'Yok',
+      'appearances': 'Katılım',
+      'apps': 'Katılım',
+      'titles': 'Şampiyonluk'
+    },
+    spanish: {
+      'goalkeeper': 'Portero',
+      'gk': 'Portero',
+      'centre-back': 'Defensa Central',
+      'center-back': 'Defensa Central',
+      'cb': 'Defensa Central',
+      'defender': 'Defensa',
+      'right-back': 'Lateral Derecho',
+      'rb': 'Lateral Derecho',
+      'left-back': 'Lateral Izquierdo',
+      'lb': 'Lateral Izquierdo',
+      'defensive midfield': 'Pivote',
+      'defensive midfielder': 'Pivote',
+      'dm': 'Pivote',
+      'central midfield': 'Mediocentro',
+      'central midfielder': 'Mediocentro',
+      'cm': 'Mediocentro',
+      'midfielder': 'Centrocampista',
+      'attacking midfield': 'Mediapunta',
+      'attacking midfielder': 'Mediapunta',
+      'am': 'Mediapunta',
+      'right winger': 'Extremo Derecho',
+      'rw': 'Extremo Derecho',
+      'left winger': 'Extremo Izquierdo',
+      'lw': 'Extremo Izquierdo',
+      'centre-forward': 'Delantero Centro',
+      'striker': 'Delantero Centro',
+      'cf': 'Delantero Centro',
+      'tiki-taka': 'Tiki-taka',
+      'gegenpressing': 'Gegenpressing',
+      'pressing': 'Presión',
+      'high press': 'Presión Alta',
+      'counter-attacking': 'Contraataque',
+      'counterattack': 'Contraataque',
+      'counter attack': 'Contraataque',
+      'possession based': 'Juego de Posesión',
+      'possession-based': 'Juego de Posesión',
+      'possession': 'Posesión',
+      'defensive': 'Defensivo',
+      'park the bus': 'Autobús',
+      'low block': 'Bloque Bajo',
+      'attacking': 'Ofensivo',
+      'high-tempo attacking': 'Ataque Rápido',
+      'winners': 'Campeón',
+      'winner': 'Campeón',
+      'runner-up': 'Subcampeón',
+      'runners-up': 'Subcampeón',
+      'semi-finals': 'Semifinales',
+      'semi-final': 'Semifinales',
+      'semifinals': 'Semifinales',
+      'semifinal': 'Semifinales',
+      'quarter-finals': 'Cuartos de Final',
+      'quarter-final': 'Cuartos de Final',
+      'quarterfinals': 'Cuartos de Final',
+      'quarterfinal': 'Cuartos de Final',
+      'round of 16': 'Octavos de Final',
+      'group stage': 'Fase de Grupos',
+      'none': 'Ninguno',
+      'appearances': 'Partic. en Mundiales',
+      'apps': 'Partic. en Mundiales',
+      'titles': 'Títulos'
+    },
+    portuguese: {
+      'goalkeeper': 'Goleiro',
+      'gk': 'Goleiro',
+      'centre-back': 'Zagueiro',
+      'center-back': 'Zagueiro',
+      'cb': 'Zagueiro',
+      'defender': 'Defensor',
+      'right-back': 'Lateral Direito',
+      'rb': 'Lateral Direito',
+      'left-back': 'Lateral Esquerdo',
+      'lb': 'Lateral Esquerdo',
+      'defensive midfield': 'Volante',
+      'defensive midfielder': 'Volante',
+      'dm': 'Volante',
+      'central midfield': 'Meia Central',
+      'central midfielder': 'Meia Central',
+      'cm': 'Meia Central',
+      'midfielder': 'Meio-campista',
+      'attacking midfield': 'Meia-atacante',
+      'attacking midfielder': 'Meia-atacante',
+      'am': 'Meia-atacante',
+      'right winger': 'Ponta Direita',
+      'rw': 'Ponta Direita',
+      'left winger': 'Ponta Esquerda',
+      'lw': 'Ponta Esquerda',
+      'centre-forward': 'Centroavante',
+      'striker': 'Centroavante',
+      'cf': 'Centroavante',
+      'tiki-taka': 'Tiki-taka',
+      'gegenpressing': 'Gegenpressing',
+      'pressing': 'Marcação sob Pressão',
+      'high press': 'Pressão Alta',
+      'counter-attacking': 'Contra-ataque',
+      'counterattack': 'Contra-ataque',
+      'counter attack': 'Contra-ataque',
+      'possession based': 'Posse de Bola',
+      'possession-based': 'Posse de Bola',
+      'possession': 'Posse de bola',
+      'defensive': 'Defensivo',
+      'park the bus': 'Retranca',
+      'low block': 'Bloco Baixo',
+      'attacking': 'Ofensivo',
+      'high-tempo attacking': 'Ataque em Ritmo Acelerado',
+      'winners': 'Campeão',
+      'winner': 'Campeão',
+      'runner-up': 'Vice-campeão',
+      'runners-up': 'Vice-campeão',
+      'semi-finals': 'Semifinais',
+      'semi-final': 'Semifinais',
+      'semifinals': 'Semifinais',
+      'semifinal': 'Semifinais',
+      'quarter-finals': 'Quartas de Final',
+      'quarter-final': 'Quartas de Final',
+      'quarterfinals': 'Quartas de Final',
+      'quarterfinal': 'Quartas de Final',
+      'round of 16': 'Oitavas de Final',
+      'group stage': 'Fase de Grupos',
+      'none': 'Nenhum',
+      'appearances': 'Partic. em Copas',
+      'apps': 'Partic. em Copas',
+      'titles': 'Títulos'
+    },
+    french: {
+      'goalkeeper': 'Gardien',
+      'gk': 'Gardien',
+      'centre-back': 'Défenseur Central',
+      'center-back': 'Défenseur Central',
+      'cb': 'Défenseur Central',
+      'defender': 'Défenseur',
+      'right-back': 'Arrière Droit',
+      'rb': 'Arrière Droit',
+      'left-back': 'Arrière Gauche',
+      'lb': 'Arrière Gauche',
+      'defensive midfield': 'Milieu Défensif',
+      'defensive midfielder': 'Milieu Défensif',
+      'dm': 'Milieu Défensif',
+      'central midfield': 'Milieu Central',
+      'central midfielder': 'Milieu Central',
+      'cm': 'Milieu Central',
+      'midfielder': 'Milieu de Terrain',
+      'attacking midfield': 'Milieu Offensif',
+      'attacking midfielder': 'Milieu Offensif',
+      'am': 'Milieu Offensif',
+      'right winger': 'Ailier Droit',
+      'rw': 'Ailier Droit',
+      'left winger': 'Ailier Gauche',
+      'lw': 'Ailier Gauche',
+      'centre-forward': 'Avant-centre',
+      'striker': 'Buteur',
+      'cf': 'Avant-centre',
+      'tiki-taka': 'Tiki-taka',
+      'gegenpressing': 'Gegenpressing',
+      'pressing': 'Pressing',
+      'high press': 'Pressing Haut',
+      'counter-attacking': 'Contre-attaque',
+      'counterattack': 'Contre-attaque',
+      'counter attack': 'Contre-attaque',
+      'possession based': 'Jeu de Possession',
+      'possession-based': 'Jeu de Possession',
+      'possession': 'Possession',
+      'defensive': 'Défensif',
+      'park the bus': 'Garer le Bus',
+      'low block': 'Bloco Baixo',
+      'attacking': 'Offensif',
+      'high-tempo attacking': 'Attaque à Haute Intensité',
+      'winners': 'Vainqueur',
+      'winner': 'Vainqueur',
+      'runner-up': 'Finaliste',
+      'runners-up': 'Finaliste',
+      'semi-finals': 'Demi-finales',
+      'semi-final': 'Demi-finales',
+      'semifinals': 'Demi-finales',
+      'semifinal': 'Demi-finales',
+      'quarter-finals': 'Quarts de finale',
+      'quarter-final': 'Quarts de finale',
+      'quarterfinals': 'Quarts de finale',
+      'quarterfinal': 'Quarts de finale',
+      'round of 16': 'Huitièmes de finale',
+      'group stage': 'Phase de Groupes',
+      'none': 'Aucun',
+      'appearances': 'Participations',
+      'apps': 'Participations',
+      'titles': 'Titres'
+    },
+    german: {
+      'goalkeeper': 'Torwart',
+      'gk': 'Torwart',
+      'centre-back': 'Innenverteidiger',
+      'center-back': 'Innenverteidiger',
+      'cb': 'Innenverteidiger',
+      'defender': 'Abwehrspieler',
+      'right-back': 'Rechter Verteidiger',
+      'rb': 'Rechter Verteidiger',
+      'left-back': 'Linker Verteidiger',
+      'lb': 'Linker Verteidiger',
+      'defensive midfield': 'Defensives Mittelfeld',
+      'defensive midfielder': 'Defensiver Mittelfeldspieler',
+      'dm': 'Defensives Mittelfeld',
+      'central midfield': 'Zentrales Mittelfeld',
+      'central midfielder': 'Zentraler Mittelfeldspieler',
+      'cm': 'Zentrales Mittelfeld',
+      'midfielder': 'Mittelfeldspieler',
+      'attacking midfield': 'Offensives Mittelfeld',
+      'attacking midfielder': 'Offensiver Mittelfeldspieler',
+      'am': 'Offensives Mittelfeld',
+      'right winger': 'Rechter Flügelspieler',
+      'rw': 'Rechter Flügelspieler',
+      'left winger': 'Linker Flügelspieler',
+      'lw': 'Linker Flügelspieler',
+      'centre-forward': 'Mittelstürmer',
+      'striker': 'Stürmer',
+      'cf': 'Mittelstürmer',
+      'tiki-taka': 'Tiki-Taka',
+      'gegenpressing': 'Gegenpressing',
+      'pressing': 'Pressing',
+      'high press': 'Hohes Pressing',
+      'counter-attacking': 'Konterspiel',
+      'counterattack': 'Konter',
+      'counter attack': 'Konter',
+      'possession based': 'Ballbesitzfußball',
+      'possession-based': 'Ballbesitzfußball',
+      'possession': 'Ballbesitz',
+      'defensive': 'Defensiv',
+      'park the bus': 'Bus Parken',
+      'low block': 'Tiefes Abwehrblock',
+      'attacking': 'Offensiv',
+      'high-tempo attacking': 'Schnelles Angriffsspiel',
+      'winners': 'Sieger',
+      'winner': 'Sieger',
+      'runner-up': 'Zweiter',
+      'runners-up': 'Zweiter',
+      'semi-finals': 'Halbfinale',
+      'semi-final': 'Halbfinale',
+      'semifinals': 'Halbfinale',
+      'semifinal': 'Halbfinale',
+      'quarter-finals': 'Viertelfinale',
+      'quarter-final': 'Viertelfinale',
+      'quarterfinals': 'Viertelfinale',
+      'quarterfinal': 'Viertelfinale',
+      'round of 16': 'Achtelfinale',
+      'group stage': 'Gruppenphase',
+      'none': 'Keine',
+      'appearances': 'Teilnahmen',
+      'apps': 'Teilnahmen',
+      'titles': 'Titel'
+    }
+  };
+
+  const langKey = Object.keys(dictionary).find(k => lowerLang.includes(k) || k === lowerLang);
+  if (langKey && dictionary[langKey]) {
+    if (dictionary[langKey][cleanTerm]) {
+      return dictionary[langKey][cleanTerm] + parenSuffix;
+    }
+    for (const [eng, loc] of Object.entries(dictionary[langKey])) {
+      if (cleanTerm.includes(eng)) {
+        return cleanTerm.replace(eng, loc) + parenSuffix;
+      }
+    }
+  }
+
+  return baseText.replace(/\b\w/g, c => c.toUpperCase()) + parenSuffix;
+};
+
+const normalizeMarketValue = (val: string): string => {
+  if (!val || val === 'N/A') return 'N/A';
+  let clean = val.trim();
+  // Remove any leading quote, backtick, apostrophe, space
+  clean = clean.replace(/^[‘'’`" ]+/, '');
+  // Ensure it starts with a valid currency symbol, defaulting to Euro (€) if none is present
+  if (!/^[€$£]/.test(clean)) {
+    clean = '€' + clean;
+  }
+  return clean;
+};
+
+const localizeFootballStatsString = (text: string, lang: Language): string => {
+  if (!text) return '';
+  if (!text.includes('|') || !text.includes(':')) return text; // Not a stats-board formatted string
+  
+  const parts = text.split('|');
+  const targetLabels = getStatsLabels(lang);
+  
+  const localizedParts = parts.map(part => {
+    const colonIndex = part.indexOf(':');
+    if (colonIndex === -1) return part;
+    
+    const label = part.substring(0, colonIndex).trim();
+    const valuesStr = part.substring(colonIndex + 1).trim();
+    
+    // Find canonical key
+    const canonicalKey = getCanonicalStatKey(label);
+    const localizedLabel = canonicalKey && targetLabels[canonicalKey as keyof typeof targetLabels]
+      ? targetLabels[canonicalKey as keyof typeof targetLabels]
+      : label;
+      
+    // Find separator
+    let dashIndex = valuesStr.indexOf(' - ');
+    let dividerLength = 3;
+    if (dashIndex === -1) {
+      dashIndex = valuesStr.indexOf('-');
+      dividerLength = 1;
+    }
+    
+    if (dashIndex === -1) {
+      // No dash, maybe single value or custom text, translate it directly
+      return `${localizedLabel}: ${translateFootballTerm(valuesStr, lang)}`;
+    }
+    
+    const valA = valuesStr.substring(0, dashIndex).trim();
+    const valB = valuesStr.substring(dashIndex + dividerLength).trim();
+    
+    // For comparison cards (position, style, performance), translate values
+    let valATrans = valA;
+    let valBTrans = valB;
+    if (canonicalKey === 'position' || canonicalKey === 'style' || canonicalKey === 'performance' || canonicalKey === 'bestFinish' || canonicalKey === 'worldCupAppearances' || canonicalKey === 'worldCupTitles') {
+      valATrans = translateFootballTerm(valA, lang);
+      valBTrans = translateFootballTerm(valB, lang);
+    }
+    
+    return `${localizedLabel}: ${valATrans} - ${valBTrans}`;
+  });
+  
+  return localizedParts.join(' | ');
+};
+
+// --- API Coordination & Concurrency Queue Classes ---
+class StaggeredApiOrchestrator {
+  private lastCallTime = 0;
+  private queue: (() => Promise<any>)[] = [];
+  private running = false;
+  private delayMs = 3000;
+
+  constructor(delayMs = 3000) {
+    this.delayMs = delayMs;
+  }
+
+  public enqueue<T>(apiCall: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          const res = await apiCall();
+          resolve(res);
+        } catch (err) {
+          reject(err);
+        }
+      });
+      this.start();
+    });
+  }
+
+  private async start() {
+    if (this.running) return;
+    this.running = true;
+    while (this.queue.length > 0) {
+      const task = this.queue.shift();
+      if (task) {
+        const now = Date.now();
+        const elapsed = now - this.lastCallTime;
+        if (elapsed < this.delayMs) {
+          await new Promise(resolve => setTimeout(resolve, this.delayMs - elapsed));
+        }
+        this.lastCallTime = Date.now();
+        task();
+      }
+    }
+    this.running = false;
+  }
+}
+
+class RenderConcurrencyQueue {
+  private runningCount = 0;
+  private maxConcurrency = 2;
+  private waitingQueue: (() => void)[] = [];
+
+  constructor(maxConcurrency = 2) {
+    this.maxConcurrency = maxConcurrency;
+  }
+
+  public setMaxConcurrency(val: number) {
+    this.maxConcurrency = val;
+  }
+
+  public async acquire(): Promise<() => void> {
+    if (this.runningCount < this.maxConcurrency) {
+      this.runningCount++;
+      return () => this.release();
+    }
+    return new Promise<() => void>((resolve) => {
+      this.waitingQueue.push(() => {
+        this.runningCount++;
+        resolve(() => this.release());
+      });
+    });
+  }
+
+  private release() {
+    this.runningCount--;
+    if (this.waitingQueue.length > 0) {
+      const next = this.waitingQueue.shift();
+      next?.();
+    }
+  }
+}
+
+const apiOrchestrator = new StaggeredApiOrchestrator(3000);
+const renderQueue = new RenderConcurrencyQueue(2);
 
 const blobToDataUrl = (blob: Blob): Promise<string> => {
   return new Promise((resolve) => {
@@ -30,6 +551,10 @@ const App: React.FC = () => {
 
   // --- App State ---
   const [step, setStep] = useState<AppStep>(AppStep.INPUT);
+  const [renderConcurrency, setRenderConcurrency] = useState<number>(() => {
+    const saved = localStorage.getItem('yt_studio_render_concurrency');
+    return saved ? Number(saved) : 2;
+  });
   const [inputs, setInputs] = useState<UserInput>({
     title: '',
     instructions: '',
@@ -41,6 +566,9 @@ const App: React.FC = () => {
     useSearchGrounding: true,
     targetLanguage: Language.English,
     appMode: AppMode.Static,
+    speaker1Voice: VoiceOption.Enceladus,
+    speaker2Voice: VoiceOption.Kore,
+    imageGenerator: 'xAI',
   });
 
   // --- Fixture File States ---
@@ -96,6 +624,158 @@ const App: React.FC = () => {
     return localStorage.getItem('yt_studio_last_scheduled_trigger') || '';
   });
 
+  const [schedulerStatus, setSchedulerStatus] = useState<{
+    nextTriggerStr: string;
+    countdownStr: string;
+    warningStr: string;
+  }>({ nextTriggerStr: '', countdownStr: '', warningStr: '' });
+
+  // --- Selected Languages and Successfully Uploaded Videos Log ---
+  interface UploadedVideo {
+    id: string;
+    title: string;
+    lang: Language;
+    youtubeUrl: string;
+    uploadedAt: string;
+    matchInfo?: string;
+  }
+
+  interface LangPipelineStepState {
+    subStep: 'idle' | 'script' | 'assets' | 'thumbnail' | 'render' | 'publish' | 'backup';
+    statusMessage: string;
+    errorLog: string[];
+    retries: number;
+  }
+
+  const [dashboardSelectedLanguage, setDashboardSelectedLanguage] = useState<Language>(Language.English);
+
+  const [langPipelineSteps, setLangPipelineSteps] = useState<Record<Language, LangPipelineStepState>>({
+    [Language.English]: { subStep: 'idle', statusMessage: 'Idle.', errorLog: [], retries: 0 },
+    [Language.Turkish]: { subStep: 'idle', statusMessage: 'Idle.', errorLog: [], retries: 0 },
+    [Language.Spanish]: { subStep: 'idle', statusMessage: 'Idle.', errorLog: [], retries: 0 },
+    [Language.Portuguese]: { subStep: 'idle', statusMessage: 'Idle.', errorLog: [], retries: 0 },
+    [Language.French]: { subStep: 'idle', statusMessage: 'Idle.', errorLog: [], retries: 0 },
+    [Language.German]: { subStep: 'idle', statusMessage: 'Idle.', errorLog: [], retries: 0 }
+  } as Record<Language, LangPipelineStepState>);
+
+  const [selectedAutoLanguages, setSelectedAutoLanguages] = useState<Language[]>(() => {
+    const saved = localStorage.getItem('yt_studio_selected_auto_languages');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // fallback
+      }
+    }
+    return [Language.English, Language.Turkish, Language.Spanish, Language.Portuguese, Language.French, Language.German];
+  });
+
+  const [uploadedVideos, setUploadedVideos] = useState<UploadedVideo[]>(() => {
+    const saved = localStorage.getItem('yt_studio_uploaded_videos');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // fallback
+      }
+    }
+    return [];
+  });
+
+  const getNextScheduledDate = (): { date: Date; timeStr: string } | null => {
+    if (!schedulerEnabled) return null;
+    const now = new Date();
+    const activeTimes = Array.from({ length: schedulerFrequency }).map((_, idx) => schedulerTimes[idx] || '09:00');
+    
+    let nextDate: Date | null = null;
+    let nextTimeStr = '';
+
+    activeTimes.forEach(t => {
+      const [hStr, mStr] = t.split(':');
+      const h = parseInt(hStr, 10);
+      const m = parseInt(mStr, 10);
+      if (isNaN(h) || isNaN(m)) return;
+
+      // Candidate 1: today at h:m
+      const candidate1 = new Date(now);
+      candidate1.setHours(h, m, 0, 0);
+
+      // Candidate 2: tomorrow at h:m
+      const candidate2 = new Date(now);
+      candidate2.setDate(candidate2.getDate() + 1);
+      candidate2.setHours(h, m, 0, 0);
+
+      // Use candidate 1 if it's in the future (at least 1 second in the future), else candidate 2
+      const chosen = candidate1.getTime() > now.getTime() + 1000 ? candidate1 : candidate2;
+
+      if (!nextDate || chosen.getTime() < nextDate.getTime()) {
+        nextDate = chosen;
+        nextTimeStr = t;
+      }
+    });
+
+    return nextDate ? { date: nextDate, timeStr: nextTimeStr } : null;
+  };
+
+  useEffect(() => {
+    if (!schedulerEnabled) {
+      setSchedulerStatus({ nextTriggerStr: '', countdownStr: '', warningStr: '' });
+      return;
+    }
+
+    const updateStatus = () => {
+      let warningStr = '';
+      if (selectedFixtureName === 'manual') {
+        warningStr = "Competition / Tournament dropdown is set to 'manual'. Please select a fixture file for automatic triggers to work.";
+      } else if (selectedAutoLanguages.length === 0) {
+        warningStr = "No languages are selected for automatic publishing. Please include at least one language channel.";
+      } else if (autoPublishState.isRunning) {
+        warningStr = "Full Auto Publish engine is already running. The next scheduled trigger will be bypassed if the current match is still publishing.";
+      }
+
+      const nextInfo = getNextScheduledDate();
+      if (!nextInfo) {
+        setSchedulerStatus({ nextTriggerStr: '', countdownStr: '', warningStr });
+        return;
+      }
+
+      const diffMs = nextInfo.date.getTime() - Date.now();
+      if (diffMs <= 0) {
+        setSchedulerStatus({
+          nextTriggerStr: nextInfo.timeStr,
+          countdownStr: 'Triggering now...',
+          warningStr
+        });
+        return;
+      }
+
+      const diffSecs = Math.floor(diffMs / 1000);
+      const hours = Math.floor(diffSecs / 3600);
+      const minutes = Math.floor((diffSecs % 3600) / 60);
+      const seconds = diffSecs % 60;
+
+      let countdownStr = '';
+      if (hours > 0) {
+        countdownStr += `${hours}h ${minutes}m ${seconds}s`;
+      } else if (minutes > 0) {
+        countdownStr += `${minutes}m ${seconds}s`;
+      } else {
+        countdownStr += `${seconds}s`;
+      }
+
+      setSchedulerStatus({
+        nextTriggerStr: nextInfo.timeStr,
+        countdownStr,
+        warningStr
+      });
+    };
+
+    updateStatus();
+    const interval = setInterval(updateStatus, 1000);
+    return () => clearInterval(interval);
+  }, [schedulerEnabled, schedulerFrequency, schedulerTimes, selectedFixtureName, autoPublishState.isRunning, selectedAutoLanguages]);
+
+
   useEffect(() => {
     localStorage.setItem('yt_studio_fixture_files', JSON.stringify(fixtureFiles));
   }, [fixtureFiles]);
@@ -124,34 +804,54 @@ const App: React.FC = () => {
     localStorage.setItem('yt_studio_last_scheduled_trigger', lastScheduledTrigger);
   }, [lastScheduledTrigger]);
 
-  // Load fixtures from server
   useEffect(() => {
-    const loadFixtures = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/api/fixtures');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && Array.isArray(data.fixtures)) {
-            setFixtureFiles(prev => {
-              const merged = [...prev];
-              data.fixtures.forEach((sf: FixtureFile) => {
-                const idx = merged.findIndex(f => f.name === sf.name);
-                if (idx > -1) {
-                  merged[idx] = sf;
-                } else {
-                  merged.push(sf);
-                }
-              });
-              return merged;
+    localStorage.setItem('yt_studio_render_concurrency', String(renderConcurrency));
+  }, [renderConcurrency]);
+
+  useEffect(() => {
+    localStorage.setItem('yt_studio_selected_auto_languages', JSON.stringify(selectedAutoLanguages));
+  }, [selectedAutoLanguages]);
+
+  useEffect(() => {
+    localStorage.setItem('yt_studio_uploaded_videos', JSON.stringify(uploadedVideos));
+  }, [uploadedVideos]);
+
+  // Load fixtures from server
+  const loadFixtures = useCallback(async () => {
+    try {
+      // Use cache-busting query parameter to prevent browser caching of API responses
+      const response = await fetch(`http://localhost:3001/api/fixtures?t=${Date.now()}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && Array.isArray(data.fixtures)) {
+          setFixtureFiles(prev => {
+            const merged = [...prev];
+            data.fixtures.forEach((sf: FixtureFile) => {
+              const idx = merged.findIndex(f => f.name === sf.name);
+              if (idx > -1) {
+                merged[idx] = sf;
+              } else {
+                merged.push(sf);
+              }
             });
-          }
+            return merged;
+          });
         }
-      } catch (err) {
-        console.error("⚠️ Failed to load fixtures from backend server:", err);
       }
-    };
-    loadFixtures();
+    } catch (err) {
+      console.error("⚠️ Failed to load fixtures from backend server:", err);
+    }
   }, []);
+
+  useEffect(() => {
+    loadFixtures();
+
+    // Auto-reload fixtures when browser tab or window gains focus
+    window.addEventListener('focus', loadFixtures);
+    return () => {
+      window.removeEventListener('focus', loadFixtures);
+    };
+  }, [loadFixtures]);
 
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [recorderKey, setRecorderKey] = useState(0);
@@ -162,7 +862,15 @@ const App: React.FC = () => {
   const [transcription, setTranscription] = useState<string>("");
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [kitAUrl, setKitAUrl] = useState<string>("");
+  const [kitBUrl, setKitBUrl] = useState<string>("");
+  const [isGeneratingKitA, setIsGeneratingKitA] = useState<boolean>(false);
+  const [isGeneratingKitB, setIsGeneratingKitB] = useState<boolean>(false);
   const [storyContext, setStoryContext] = useState<string>("");
+  const [historyData, setHistoryData] = useState<any>(null);
+  const [teamAProfile, setTeamAProfile] = useState<any>(null);
+  const [teamBProfile, setTeamBProfile] = useState<any>(null);
+  const [scoreDecision, setScoreDecision] = useState<any>(null);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -172,10 +880,12 @@ const App: React.FC = () => {
   const [isGeneratingAllAudio, setIsGeneratingAllAudio] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [soloRunningLanguage, setSoloRunningLanguage] = useState<Language | null>(null);
 
   // Thumbnail
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
+  const [thumbnailTopLeftText, setThumbnailTopLeftText] = useState("");
   const [thumbnailTitleText, setThumbnailTitleText] = useState("");
   const [thumbnailSubtitleText, setThumbnailSubtitleText] = useState("");
   const [thumbnailTopRightText, setThumbnailTopRightText] = useState("");
@@ -184,6 +894,7 @@ const App: React.FC = () => {
 
   interface LocalizedThumbnail {
     url: string | null;
+    topLeftText: string;
     titleText: string;
     subtitleText: string;
     topRightText: string;
@@ -210,6 +921,7 @@ const App: React.FC = () => {
   // YouTube API State
   const [isYoutubeConnected, setIsYoutubeConnected] = useState(false);
   const [youtubeChannel, setYoutubeChannel] = useState<{ title: string; avatar: string; customUrl: string } | null>(null);
+  const [youtubeConnections, setYoutubeConnections] = useState<Record<string, { isConnected: boolean; channel?: { title: string; avatar: string; customUrl: string } | null }>>({});
   const [youtubeTitle, setYoutubeTitle] = useState("");
   const [youtubeDescription, setYoutubeDescription] = useState("");
   const [youtubeTags, setYoutubeTags] = useState("story, AI");
@@ -218,6 +930,8 @@ const App: React.FC = () => {
   const [publishSuccessUrl, setPublishSuccessUrl] = useState<string | null>(null);
   const [serverVideoFilename, setServerVideoFilename] = useState<string | null>(null);
   const [autoPublishToYoutube, setAutoPublishToYoutube] = useState(false);
+  const [sharedImagesMode, setSharedImagesMode] = useState(true);
+  const sharedImageCacheRef = useRef<Record<number, Promise<string>>>({});
 
   // Localization State
   const [currentEditorLanguage, setCurrentEditorLanguage] = useState<Language>(Language.English);
@@ -244,26 +958,237 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const localizedScenes = React.useMemo(() => {
-    return scenes.map(s => {
-      if (currentEditorLanguage === Language.English) return s;
-      const loc = s.localizations?.[currentEditorLanguage];
-      if (loc) {
+    return scenes.map((s, idx) => {
+      let currentOverlays = s.overlays || [];
+      let currentVoiceover = s.voiceoverScript;
+      let currentImageOverlay = s.imageOverlayText;
+      let currentTtsUrl = s.ttsAudioUrl;
+      let currentIsGeneratingTts = s.isGeneratingTTS || false;
+      let currentImageUrl = s.imageUrl;
+      let currentMatchMinute = s.matchMinute;
+
+      if (currentEditorLanguage !== Language.English) {
+        const loc = s.localizations?.[currentEditorLanguage];
+        if (loc) {
+          if (loc.voiceoverScript) currentVoiceover = loc.voiceoverScript;
+          if (loc.overlays) currentOverlays = loc.overlays;
+          if (loc.imageOverlayText) currentImageOverlay = loc.imageOverlayText;
+          if (loc.ttsAudioUrl !== undefined) currentTtsUrl = loc.ttsAudioUrl;
+          if (loc.isGeneratingTTS !== undefined) currentIsGeneratingTts = loc.isGeneratingTTS;
+          if (loc.imageUrl) currentImageUrl = loc.imageUrl;
+          if (loc.matchMinute !== undefined) currentMatchMinute = loc.matchMinute;
+        }
+      }
+
+      const paddedOverlays = (currentOverlays || []).map(o => {
+        let text = o.text || '';
+        if (o.style === 'stats-board' || (text.includes('|') && text.includes(':'))) {
+          text = localizeFootballStatsString(text, currentEditorLanguage);
+        }
         return {
-          ...s,
-          voiceoverScript: loc.voiceoverScript || s.voiceoverScript,
-          overlays: loc.overlays || s.overlays,
-          imageOverlayText: loc.imageOverlayText || s.imageOverlayText,
-          ttsAudioUrl: loc.ttsAudioUrl !== undefined ? loc.ttsAudioUrl : undefined,
-          isGeneratingTTS: loc.isGeneratingTTS || false
+          text,
+          style: o.style || 'comic-box',
+          startSecond: typeof o.startSecond === 'number' ? o.startSecond : 0,
+          duration: typeof o.duration === 'number' ? o.duration : 5
+        };
+      });
+      while (paddedOverlays.length < 3) {
+        paddedOverlays.push({
+          text: '',
+          style: 'comic-box' as const,
+          startSecond: 0,
+          duration: 5
+        });
+      }
+
+      if (idx === 0 && historyData) {
+        const labels = getStatsLabels(currentEditorLanguage);
+        const teamAName = s.teamA || footballInput.teamA || "Team A";
+        const teamBName = s.teamB || footballInput.teamB || "Team B";
+        const wcA = historyData.teamA?.worldCupTitles || "0";
+        const wcB = historyData.teamB?.worldCupTitles || "0";
+        const bestA = historyData.teamA?.bestFinish || "N/A";
+        const bestB = historyData.teamB?.bestFinish || "N/A";
+        const rankA = historyData.teamA?.fifaRanking || "N/A";
+        const rankB = historyData.teamB?.fifaRanking || "N/A";
+        const appsA = historyData.teamA?.worldCupAppearances || "N/A";
+        const appsB = historyData.teamB?.worldCupAppearances || "N/A";
+        const h2h = historyData.h2hRecord || "N/A";
+        
+        const statsText = `${labels.compare}: ${teamAName} - ${teamBName} | ${labels.worldCupTitles}: ${wcA} - ${wcB} | ${labels.bestFinish}: ${bestA} - ${bestB} | ${labels.fifaRanking}: ${rankA} - ${rankB} | ${labels.worldCupAppearances}: ${appsA} - ${appsB} | ${labels.h2hRecord}: ${h2h}`;
+        paddedOverlays[1] = {
+          text: statsText,
+          style: 'stats-board',
+          startSecond: 0.5,
+          duration: 14.0
+        };
+      } else if (idx === 1 && teamAProfile && teamBProfile) {
+        const labels = getStatsLabels(currentEditorLanguage);
+        const coachA = teamAProfile.head_coach?.name || "Coach A";
+        const coachB = teamBProfile.head_coach?.name || "Coach B";
+        const formA = teamAProfile.head_coach?.preferred_formation || "N/A";
+        const formB = teamBProfile.head_coach?.preferred_formation || "N/A";
+        const styleA = teamAProfile.head_coach?.play_style_summary || "N/A";
+        const styleB = teamBProfile.head_coach?.play_style_summary || "N/A";
+        const statsText = `${labels.compare}: ${coachA} - ${coachB} | ${labels.formation}: ${formA} - ${formB} | ${labels.style}: ${styleA} - ${styleB}`;
+        paddedOverlays[1] = {
+          text: statsText,
+          style: 'stats-board',
+          startSecond: 0.5,
+          duration: 14.0
+        };
+      } else if (idx === 2 && teamAProfile && teamBProfile) {
+        const labels = getStatsLabels(currentEditorLanguage);
+        const playerA = teamAProfile.key_players?.[0]?.name || "Player A";
+        const playerB = teamBProfile.key_players?.[0]?.name || "Player B";
+        const posA = teamAProfile.key_players?.[0]?.position || "Forward";
+        const posB = teamBProfile.key_players?.[0]?.position || "Forward";
+        const ageA = teamAProfile.key_players?.[0]?.age || "N/A";
+        const ageB = teamBProfile.key_players?.[0]?.age || "N/A";
+        const goalsA = typeof teamAProfile.key_players?.[0]?.goals === 'number' ? teamAProfile.key_players[0].goals : "0";
+        const goalsB = typeof teamBProfile.key_players?.[0]?.goals === 'number' ? teamBProfile.key_players[0].goals : "0";
+        const assistsA = typeof teamAProfile.key_players?.[0]?.assists === 'number' ? teamAProfile.key_players[0].assists : "0";
+        const assistsB = typeof teamBProfile.key_players?.[0]?.assists === 'number' ? teamBProfile.key_players[0].assists : "0";
+        const valA = normalizeMarketValue(teamAProfile.key_players?.[0]?.market_value || "N/A");
+        const valB = normalizeMarketValue(teamBProfile.key_players?.[0]?.market_value || "N/A");
+        const perfA = teamAProfile.key_players?.[0]?.performance_stats || "N/A";
+        const perfB = teamBProfile.key_players?.[0]?.performance_stats || "N/A";
+        const statsText = `${labels.compare}: ${playerA} - ${playerB} | ${labels.position}: ${posA} - ${posB} | ${labels.age}: ${ageA} - ${ageB} | ${labels.goals}: ${goalsA} - ${goalsB} | ${labels.assists}: ${assistsA} - ${assistsB} | ${labels.marketValue}: ${valA} - ${valB} | ${labels.performance}: ${perfA} - ${perfB}`;
+        paddedOverlays[1] = {
+          text: statsText,
+          style: 'stats-board',
+          startSecond: 0.5,
+          duration: 14.0
+        };
+      } else if (idx === scenes.length - 2 && scoreDecision && scoreDecision.teamStats) {
+        const labels = getStatsLabels(currentEditorLanguage);
+        const stats = scoreDecision.teamStats;
+        const statsText = `${labels.score}: ${scoreDecision.finalScore} | ${labels.possession}: ${stats.teamA.possessionPercent}% - ${stats.teamB.possessionPercent}% | ${labels.shots}: ${stats.teamA.totalShots} - ${stats.teamB.totalShots} | ${labels.onTarget}: ${stats.teamA.shotsOnTarget} - ${stats.teamB.shotsOnTarget} | ${labels.xg}: ${stats.teamA.expectedGoalsXg} - ${stats.teamB.expectedGoalsXg} | ${labels.corners}: ${stats.teamA.cornerKicks} - ${stats.teamB.cornerKicks} | ${labels.fouls}: ${stats.teamA.foulsCommitted} - ${stats.teamB.foulsCommitted}`;
+        paddedOverlays[1] = {
+          text: statsText,
+          style: 'stats-board',
+          startSecond: 0.5,
+          duration: 14.0
         };
       }
-      return s;
+
+      return {
+        ...s,
+        voiceoverScript: currentVoiceover,
+        overlays: paddedOverlays.slice(0, 3),
+        imageOverlayText: currentImageOverlay,
+        ttsAudioUrl: currentTtsUrl,
+        isGeneratingTTS: currentIsGeneratingTts,
+        imageUrl: currentImageUrl,
+        matchMinute: currentMatchMinute,
+        language: currentEditorLanguage,
+        teamA: (s as any).teamA || (inputs.appMode === AppMode.Football ? footballInput.teamA : undefined),
+        teamB: (s as any).teamB || (inputs.appMode === AppMode.Football ? footballInput.teamB : undefined)
+      };
     });
-  }, [scenes, currentEditorLanguage]);
+  }, [scenes, currentEditorLanguage, footballInput, inputs.appMode, historyData, teamAProfile, teamBProfile, scoreDecision]);
+
+  // Fetch team profiles and sim results for manual mode / editor view
+  useEffect(() => {
+    let active = true;
+    const loadProfileData = async () => {
+      const teamA = footballInput.teamA;
+      const teamB = footballInput.teamB;
+      const comp = footballInput.competition;
+      
+      if (!teamA || !teamB) {
+        if (active) {
+          setTeamAProfile(null);
+          setTeamBProfile(null);
+          setScoreDecision(null);
+          setKitAUrl("");
+          setKitBUrl("");
+        }
+        return;
+      }
+
+      const matchKey = getMatchKey({ teamA, teamB, tournament: comp });
+      const currentLang = currentEditorLanguage || Language.English;
+
+      // 1. Fetch sim_result.json to set historyData and scoreDecision if missing/cacheable
+      try {
+        const simRes = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=sim_result.json`).then(r => r.json());
+        if (simRes.exists && simRes.data && active) {
+          if (simRes.data.historyData) setHistoryData(simRes.data.historyData);
+          if (simRes.data.scoreDecision) setScoreDecision(simRes.data.scoreDecision);
+        }
+      } catch (e) {
+        console.warn("Error pre-fetching sim_result.json for editor:", e);
+      }
+
+      // 2. Fetch Team A Profile
+      let profileA = null;
+      try {
+        const fileA = `team_a_profile_${currentLang}.json`;
+        const resA = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=${fileA}`).then(r => r.json());
+        if (resA.exists && resA.data && Object.keys(resA.data).length > 0) {
+          profileA = resA.data;
+        } else {
+          // Fallback to raw cached profile from server
+          const cleanName = teamA.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+          const fallbackRes = await fetch(`http://localhost:3001/api/teams/${cleanName}`);
+          if (fallbackRes.ok) {
+            profileA = await fallbackRes.json();
+          }
+        }
+      } catch (e) {
+        console.warn("Error fetching team A profile for editor:", e);
+      }
+
+      // 3. Fetch Team B Profile
+      let profileB = null;
+      try {
+        const fileB = `team_b_profile_${currentLang}.json`;
+        const resB = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=${fileB}`).then(r => r.json());
+        if (resB.exists && resB.data && Object.keys(resB.data).length > 0) {
+          profileB = resB.data;
+        } else {
+          // Fallback to raw cached profile from server
+          const cleanName = teamB.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+          const fallbackRes = await fetch(`http://localhost:3001/api/teams/${cleanName}`);
+          if (fallbackRes.ok) {
+            profileB = await fallbackRes.json();
+          }
+        }
+      } catch (e) {
+        console.warn("Error fetching team B profile for editor:", e);
+      }
+
+      // 4. Fetch Kits
+      try {
+        const [checkA, checkB] = await Promise.all([
+          fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=kit_A.png`).then(r => r.json()),
+          fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=kit_B.png`).then(r => r.json())
+        ]);
+        if (active) {
+          setKitAUrl(checkA.exists && checkA.url ? checkA.url : "");
+          setKitBUrl(checkB.exists && checkB.url ? checkB.url : "");
+        }
+      } catch (e) {
+        console.warn("Error pre-fetching kit files:", e);
+      }
+
+      if (active) {
+        setTeamAProfile(profileA);
+        setTeamBProfile(profileB);
+      }
+    };
+
+    loadProfileData();
+    return () => {
+      active = false;
+    };
+  }, [footballInput.teamA, footballInput.teamB, footballInput.competition, currentEditorLanguage]);
 
   // Blocking Check
   const hasCharacters = characters.length > 0;
-  const isReadyForSceneGeneration = characters.every(c => !!c.referenceImageUrl);
+  const hasKits = inputs.appMode === AppMode.Football ? (!!kitAUrl && !!kitBUrl) : true;
+  const isReadyForSceneGeneration = characters.every(c => !!c.referenceImageUrl) && hasKits;
 
   // --- Auth Effect ---
   useEffect(() => {
@@ -382,6 +1307,7 @@ const App: React.FC = () => {
       return alert("⚽ Please enter both Team A and Team B names.");
 
     await executeWithAuthHandler(async () => {
+      sharedImageCacheRef.current = {};
       setStep(AppStep.PROCESSING_SCRIPT);
       setIsProcessing(true);
 
@@ -465,24 +1391,25 @@ const App: React.FC = () => {
         setScenes(result.scenes);
         setCharacters(result.characters);
         setStoryContext(result.storyContext);
+        setHistoryData(result.historyData || null);
         setYoutubeTitle(finalTitle);
         const initialDesc = inputs.appMode === AppMode.Football
           ? (() => {
-              let baseTournament = footballInput.competition.trim() || 'FIFA-2026 World Cup';
-              let groupText = 'Group Stage Matches';
-              if (baseTournament.includes(',')) {
-                const parts = baseTournament.split(',');
-                baseTournament = parts[0].trim();
-                const secondPart = parts[1].trim();
-                if (secondPart.toLowerCase().startsWith('group-') || secondPart.toLowerCase().startsWith('group ')) {
-                  const groupLetter = secondPart.replace(/group[- ]/i, '').trim();
-                  groupText = `Group Stage Matches, Group ${groupLetter}`;
-                } else {
-                  groupText = secondPart;
-                }
+            let baseTournament = footballInput.competition.trim() || 'FIFA-2026 World Cup';
+            let groupText = 'Group Stage Matches';
+            if (baseTournament.includes(',')) {
+              const parts = baseTournament.split(',');
+              baseTournament = parts[0].trim();
+              const secondPart = parts[1].trim();
+              if (secondPart.toLowerCase().startsWith('group-') || secondPart.toLowerCase().startsWith('group ')) {
+                const groupLetter = secondPart.replace(/group[- ]/i, '').trim();
+                groupText = `Group Stage Matches, Group ${groupLetter}`;
+              } else {
+                groupText = secondPart;
               }
-              return `🎬 AI Cinematic Story: ${footballInput.teamA} vs ${footballInput.teamB} | ${baseTournament}, ${groupText}\nTactical simulation analysis of ${footballInput.teamA} vs ${footballInput.teamB} in ${baseTournament}, ${groupText}.\nGenerated with AI Creator Studio.\nWe don’t guess; we calculate. Football Simulator is a digital laboratory that leverages advanced data models and cutting-edge algorithms to generate the world’s most accurate and realistic football match simulations.\nWe simulate every single fixture 10,000 times in our proprietary data engine. Current team form, player heat maps, xG (expected goals) metrics, injuries, and off-pitch breaking news are directly fed into our algorithm. The result? Not just a random score prediction, but an in-depth, cinematic football documentary that reveals the flow of the game, tactical breaking points, and the most probable scenarios.`;
-            })()
+            }
+            return `🎬 AI Cinematic Story: ${footballInput.teamA} vs ${footballInput.teamB} | ${baseTournament}, ${groupText}\nTactical simulation analysis of ${footballInput.teamA} vs ${footballInput.teamB} in ${baseTournament}, ${groupText}.\nWe don’t guess; we calculate. Football Simulator is a digital laboratory that leverages advanced data models and cutting-edge algorithms to generate the world’s most accurate and realistic football match simulations.\nWe simulate every single fixture 10,000 times in our proprietary data engine. Current team form, player heat maps, xG (expected goals) metrics, injuries, and off-pitch breaking news are directly fed into our algorithm. The result? Not just a random score prediction, but an in-depth, cinematic football documentary that reveals the flow of the game, tactical breaking points, and the most probable scenarios.`;
+          })()
           : `🎬 AI Cinematic Story: ${finalTitle}\n\n${result.storyContext}\n\nGenerated with AI Creator Studio.`;
         setYoutubeDescription(initialDesc);
 
@@ -517,6 +1444,7 @@ const App: React.FC = () => {
             setThumbnailLocalizations({
               [inputs.targetLanguage]: {
                 url: null,
+                topLeftText: suggestions.topLeftText,
                 titleText: suggestions.titleText,
                 subtitleText: suggestions.subtitleText,
                 topRightText: suggestions.topRightText,
@@ -524,8 +1452,9 @@ const App: React.FC = () => {
                 style: inputs.artStyle
               }
             });
-            
+
             // Also sync the default single-language states
+            setThumbnailTopLeftText(suggestions.topLeftText);
             setThumbnailTitleText(suggestions.titleText);
             setThumbnailSubtitleText(suggestions.subtitleText);
             setThumbnailTopRightText(suggestions.topRightText);
@@ -589,6 +1518,80 @@ const App: React.FC = () => {
     }
   };
 
+  const handleGenerateKit = async (teamKey: 'A' | 'B') => {
+    const teamName = teamKey === 'A' ? footballInput.teamA : footballInput.teamB;
+    const profile = teamKey === 'A' ? teamAProfile : teamBProfile;
+    if (!teamName) return;
+
+    const setGenerating = teamKey === 'A' ? setIsGeneratingKitA : setIsGeneratingKitB;
+    const setUrl = teamKey === 'A' ? setKitAUrl : setKitBUrl;
+
+    setGenerating(true);
+    await executeWithAuthHandler(async () => {
+      try {
+        const matchKey = getMatchKey({
+          teamA: footballInput.teamA,
+          teamB: footballInput.teamB,
+          tournament: footballInput.competition
+        });
+        
+        const kitColors = profile?.kit_colors?.home || {
+          primary_color: teamKey === 'A' ? 'red' : 'blue',
+          secondary_color: 'white',
+          pattern: 'solid'
+        };
+
+        const url = await generateKitReferenceImage(
+          teamName,
+          'home',
+          kitColors,
+          inputs.artStyle,
+          inputs.imageGenerator
+        );
+
+        const saveRes = await fetch('http://localhost:3001/api/auto-assets/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ matchKey, fileName: `kit_${teamKey}.png`, content: url })
+        }).then(r => r.json());
+
+        setUrl(saveRes.url || url);
+      } finally {
+        setGenerating(false);
+      }
+    });
+  };
+
+  const handleUploadKit = async (teamKey: 'A' | 'B', file: File) => {
+    if (!file) return;
+    const setGenerating = teamKey === 'A' ? setIsGeneratingKitA : setIsGeneratingKitB;
+    const setUrl = teamKey === 'A' ? setKitAUrl : setKitBUrl;
+
+    setGenerating(true);
+    try {
+      const matchKey = getMatchKey({
+        teamA: footballInput.teamA,
+        teamB: footballInput.teamB,
+        tournament: footballInput.competition
+      });
+
+      const storedUrl = await AssetStorage.saveAsset(`kit_${teamKey}_${Date.now()}`, file);
+
+      const saveRes = await fetch('http://localhost:3001/api/auto-assets/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matchKey, fileName: `kit_${teamKey}.png`, content: storedUrl })
+      }).then(r => r.json());
+
+      setUrl(saveRes.url || storedUrl);
+    } catch (e) {
+      console.error("Kit upload failed", e);
+      alert("Failed to upload kit reference image.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const handleGenerateCharacterRef = async (charId: string) => {
     const char = characters.find(c => c.id === charId);
     if (!char) return;
@@ -596,7 +1599,13 @@ const App: React.FC = () => {
     updateCharacter(charId, { isGenerating: true });
     await executeWithAuthHandler(async () => {
       try {
-        const url = await generateCharacterReference(char, inputs.artStyle, storyContext);
+        let kitUrl = "";
+        if (inputs.appMode === AppMode.Football) {
+          const teamKey = char.id.includes(`_${footballInput.teamA.replace(/\s+/g, '_')}`) ? 'A' : 'B';
+          kitUrl = teamKey === 'A' ? kitAUrl : kitBUrl;
+        }
+
+        const url = await generateCharacterReference(char, inputs.artStyle, storyContext, inputs.imageGenerator, kitUrl);
         updateCharacter(charId, { referenceImageUrl: url, isGenerating: false });
       } catch (e) {
         updateCharacter(charId, { isGenerating: false });
@@ -625,8 +1634,58 @@ const App: React.FC = () => {
     await executeWithAuthHandler(async () => {
       try {
         const scene = scenes.find(s => s.id === id);
-        const imageUrl = await generateImage(prompt, inputs.artStyle, inputs.aspectRatio, storyContext, characters, scene?.imageOverlayText);
-        updateScene(id, { imageUrl, isGeneratingImage: false });
+        let imageUrl = "";
+        let imgPromise = sharedImageCacheRef.current[id];
+
+        if (sharedImagesMode && imgPromise) {
+          imageUrl = await imgPromise;
+          console.info(`🎯 [App:Image] Reusing cached image for Scene ${id + 1}: ${imageUrl}`);
+        } else {
+          const currentLoc = scene?.localizations?.[currentEditorLanguage];
+          const sceneInvolvedIds = currentLoc?.involvedCharacterIds || scene?.involvedCharacterIds || [];
+          const cleanPrompt = sharedImagesMode
+            ? `${prompt} Do not generate any text, words, labels, numbers, letters, names, scoreboards, banners, UI elements, or strings directly on the image itself. Render a clean background visual only.`
+            : prompt;
+
+          const generationPromise = (async () => {
+            const kitReferenceUrls: string[] = [];
+            if (inputs.appMode === AppMode.Football) {
+              if (kitAUrl) kitReferenceUrls.push(kitAUrl);
+              if (kitBUrl) kitReferenceUrls.push(kitBUrl);
+            }
+
+            return await generateImage(
+              cleanPrompt,
+              scene?.selectedArtStyle || inputs.artStyle,
+              inputs.aspectRatio,
+              storyContext,
+              characters,
+              undefined, // Bypassed overlay text rendering on the image itself
+              sceneInvolvedIds,
+              scene?.voiceoverScript,
+              scene?.id,
+              inputs.imageGenerator,
+              kitReferenceUrls
+            );
+          })();
+
+          if (sharedImagesMode) {
+            sharedImageCacheRef.current[id] = generationPromise;
+          }
+          imageUrl = await generationPromise;
+        }
+
+        updateScene(id, { 
+          imageUrl, 
+          isGeneratingImage: false,
+          localizations: {
+            ...scene?.localizations,
+            [currentEditorLanguage]: {
+              ...(scene?.localizations?.[currentEditorLanguage] || { voiceoverScript: '', overlays: [] }),
+              imageUrl
+            }
+          }
+        });
       } catch (e) {
         updateScene(id, { isGeneratingImage: false });
         throw e;
@@ -646,30 +1705,35 @@ const App: React.FC = () => {
     const isTitleEmpty = !currentLoc?.titleText?.trim();
     const isSubtitleEmpty = !currentLoc?.subtitleText?.trim();
     const isTopRightEmpty = !currentLoc?.topRightText?.trim();
+    const isTopLeftEmpty = !currentLoc?.topLeftText?.trim();
 
-    if (isTitleEmpty || isSubtitleEmpty || isTopRightEmpty) {
+    if (isTitleEmpty || isSubtitleEmpty || isTopRightEmpty || isTopLeftEmpty) {
       const defaultTitle = `${footballInput.teamA.trim() || 'Team A'} vs ${footballInput.teamB.trim() || 'Team B'}`;
       const defaultSubtitle = footballInput.competition.trim() || 'FIFA-2026 World Cup, Group-A';
       const defaultTopRight = "10K Times Simulated with AI";
+      const defaultTopLeft = "WINNER PREDICTED!";
 
       const englishThumb = activeThumbnailLocalizations[Language.English] || {
         url: null,
+        topLeftText: thumbnailTopLeftText || "",
         titleText: thumbnailTitleText || "",
         subtitleText: thumbnailSubtitleText || "",
         topRightText: thumbnailTopRightText || "",
         prompt: thumbnailPrompt || "",
         style: thumbnailStyle || inputs.artStyle || ""
       };
-      
+
       const activeBaseUrl = englishThumb.url || activeThumbnailUrl || (Object.values(activeThumbnailLocalizations) as any[]).find(t => t?.url)?.url || null;
 
       const baseTitleToTranslate = englishThumb.titleText.trim() || defaultTitle;
       const baseSubtitleToTranslate = englishThumb.subtitleText.trim() || defaultSubtitle;
       const baseTopRightToTranslate = englishThumb.topRightText.trim() || defaultTopRight;
+      const baseTopLeftToTranslate = englishThumb.topLeftText.trim() || defaultTopLeft;
 
       if (targetLanguage === Language.English) {
         const prevLoc = activeThumbnailLocalizations[Language.English] || {
           url: activeBaseUrl,
+          topLeftText: "",
           titleText: "",
           subtitleText: "",
           topRightText: "",
@@ -679,6 +1743,7 @@ const App: React.FC = () => {
         const updatedLoc = {
           ...prevLoc,
           url: activeBaseUrl,
+          topLeftText: isTopLeftEmpty ? baseTopLeftToTranslate : prevLoc.topLeftText,
           titleText: isTitleEmpty ? baseTitleToTranslate : prevLoc.titleText,
           subtitleText: isSubtitleEmpty ? baseSubtitleToTranslate : prevLoc.subtitleText,
           topRightText: isTopRightEmpty ? baseTopRightToTranslate : prevLoc.topRightText
@@ -688,11 +1753,12 @@ const App: React.FC = () => {
           [Language.English]: updatedLoc
         };
         setThumbnailLocalizations(nextMap);
-        
+
+        if (isTopLeftEmpty) setThumbnailTopLeftText(baseTopLeftToTranslate);
         if (isTitleEmpty) setThumbnailTitleText(baseTitleToTranslate);
         if (isSubtitleEmpty) setThumbnailSubtitleText(baseSubtitleToTranslate);
         if (isTopRightEmpty) setThumbnailTopRightText(baseTopRightToTranslate);
-        
+
         return nextMap;
       } else {
         setIsLocalizing(true);
@@ -701,11 +1767,13 @@ const App: React.FC = () => {
             baseTitleToTranslate,
             baseSubtitleToTranslate,
             baseTopRightToTranslate,
+            baseTopLeftToTranslate,
             targetLanguage
           );
 
           const prevLoc = activeThumbnailLocalizations[targetLanguage] || {
             url: activeBaseUrl,
+            topLeftText: "",
             titleText: "",
             subtitleText: "",
             topRightText: "",
@@ -715,6 +1783,7 @@ const App: React.FC = () => {
           const updatedLoc = {
             ...prevLoc,
             url: activeBaseUrl,
+            topLeftText: isTopLeftEmpty ? localizedMeta.topLeftText : prevLoc.topLeftText,
             titleText: isTitleEmpty ? localizedMeta.titleText : prevLoc.titleText,
             subtitleText: isSubtitleEmpty ? localizedMeta.subtitleText : prevLoc.subtitleText,
             topRightText: isTopRightEmpty ? localizedMeta.topRightText : prevLoc.topRightText
@@ -832,26 +1901,61 @@ const App: React.FC = () => {
     label: string,
     stepName: 'script' | 'assets' | 'thumbnail' | 'render' | 'publish' | 'backup',
     fn: () => Promise<T>,
+    targetLangs?: Language | Language[],
     maxRetries = 3
   ): Promise<T> => {
     let ret = 0;
     while (true) {
       try {
         console.info(`🔄 [AutoMode] Starting step: "${label}" (attempt ${ret + 1}/${maxRetries + 1})`);
+        const statusMsg = `${label} (Attempt ${ret + 1}/${maxRetries + 1})...`;
         setAutoPublishState(prev => ({
           ...prev,
           currentSubStep: stepName,
-          statusMessage: `${label} (Attempt ${ret + 1}/${maxRetries + 1})...`,
+          statusMessage: statusMsg,
           retries: ret
         }));
+
+        if (targetLangs) {
+          const langs = Array.isArray(targetLangs) ? targetLangs : [targetLangs];
+          setLangPipelineSteps(prev => {
+            const next = { ...prev };
+            langs.forEach(lang => {
+              next[lang] = {
+                ...next[lang],
+                subStep: stepName,
+                statusMessage: statusMsg,
+                retries: ret
+              };
+            });
+            return next;
+          });
+        }
+
         return await fn();
       } catch (err: any) {
         console.error(`❌ [AutoMode] Step "${label}" failed:`, err);
         ret++;
+        const errMsg = `Error at "${label}" (Attempt ${ret}): ${err.message || String(err)}`;
         setAutoPublishState(prev => ({
           ...prev,
-          errorLog: [...prev.errorLog, `Error at "${label}" (Attempt ${ret}): ${err.message || String(err)}`]
+          errorLog: [...prev.errorLog, errMsg]
         }));
+
+        if (targetLangs) {
+          const langs = Array.isArray(targetLangs) ? targetLangs : [targetLangs];
+          setLangPipelineSteps(prev => {
+            const next = { ...prev };
+            langs.forEach(lang => {
+              next[lang] = {
+                ...next[lang],
+                errorLog: [...(next[lang]?.errorLog || []), errMsg]
+              };
+            });
+            return next;
+          });
+        }
+
         if (ret > maxRetries) {
           throw err;
         }
@@ -860,6 +1964,21 @@ const App: React.FC = () => {
         await new Promise(r => setTimeout(r, delayMs));
       }
     }
+  };
+
+  const getMatchKey = (match: { teamA: string; teamB: string; tournament: string }) => {
+    return `${match.teamA}_vs_${match.teamB}_${match.tournament}`.replace(/[^a-z0-9_-]/gi, '_');
+  };
+
+  const startSoloAutoMode = async (lang: Language) => {
+    isStopRequestedRef.current = false;
+    setSoloRunningLanguage(lang);
+    setAutoPublishState(prev => ({
+      ...prev,
+      isRunning: true,
+      isPaused: false,
+      errorLog: []
+    }));
   };
 
   const startFullAutoMode = async () => {
@@ -882,8 +2001,28 @@ const App: React.FC = () => {
     }));
   };
 
-  const handleResetEngineState = () => {
+  const handleResetEngineState = async () => {
     if (window.confirm("Are you sure you want to reset the Auto Mode pipeline state and clear all generated assets for this match? This will allow you to start from scratch.")) {
+      // Clear backend directory cache if match is pending
+      const fixture = fixtureFiles.find(f => f.name === selectedFixtureName);
+      if (fixture) {
+        const matches = parseFixtureMatches(fixture.content);
+        const pendingMatch = matches.find(m => !m.isCompleted);
+        if (pendingMatch) {
+          const matchKey = getMatchKey(pendingMatch);
+          try {
+            await fetch('http://localhost:3001/api/auto-assets/reset', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchKey })
+            });
+            console.info(`🗑️ [AutoMode] Asset directory reset successfully for key: ${matchKey}`);
+          } catch (err) {
+            console.error("⚠️ [AutoMode] Failed to reset backend asset directory:", err);
+          }
+        }
+      }
+
       // 1. Reset auto publish engine status
       setAutoPublishState({
         isRunning: false,
@@ -897,10 +2036,13 @@ const App: React.FC = () => {
       });
 
       // 2. Clear generated assets
+      sharedImageCacheRef.current = {};
       setScenes([]);
       setCharacters([]);
       setStoryContext("");
+      setHistoryData(null);
       setThumbnailUrl(null);
+      setThumbnailTopLeftText("");
       setThumbnailLocalizations({});
       setBurnedThumbnailUrls({} as any);
       setYoutubeMetadataLocalizations({} as any);
@@ -921,6 +2063,41 @@ const App: React.FC = () => {
 
   const runPipelineLoop = async () => {
     console.info("🚀 [AutoMode] Entering pipeline loop...");
+    const pipelineDurationMinutes = inputs.durationMinutes === DEFAULT_DURATION ? 6 : (inputs.durationMinutes || 6);
+
+    // Calculate active languages early and validate
+    const activeLanguages = soloRunningLanguage 
+      ? [soloRunningLanguage]
+      : [Language.English, Language.Turkish, Language.Spanish, Language.Portuguese, Language.French, Language.German]
+          .filter(lang => selectedAutoLanguages.includes(lang));
+
+    if (activeLanguages.length === 0) {
+      const errMsg = "No languages selected for video creation. Please select at least one language in the connection grid.";
+      setAutoPublishState(prev => ({
+        ...prev,
+        isRunning: false,
+        statusMessage: `Failed: ${errMsg}`
+      }));
+      alert(`⚠️ ${errMsg}`);
+      isPipelineRunningRef.current = false;
+      return;
+    }
+
+    // Reset language pipeline states
+    setLangPipelineSteps(prev => {
+      const next = { ...prev };
+      [Language.English, Language.Turkish, Language.Spanish, Language.Portuguese, Language.French, Language.German].forEach(lang => {
+        const isActive = activeLanguages.includes(lang);
+        next[lang] = {
+          subStep: 'idle',
+          statusMessage: isActive ? 'Initializing...' : 'Excluded from auto publish.',
+          errorLog: [],
+          retries: 0
+        };
+      });
+      return next;
+    });
+
     try {
       const fixture = fixtureFiles.find(f => f.name === selectedFixtureName);
       if (!fixture) {
@@ -941,8 +2118,9 @@ const App: React.FC = () => {
         return;
       }
 
-      console.info(`⚽ [AutoMode] Next pending match: ${pendingMatch.teamA} vs ${pendingMatch.teamB}`);
-      
+      const matchKey = getMatchKey(pendingMatch);
+      console.info(`⚽ [AutoMode] Next pending match: ${pendingMatch.teamA} vs ${pendingMatch.teamB} (Match Key: ${matchKey})`);
+
       setAutoPublishState(prev => ({
         ...prev,
         currentLineIndex: pendingMatch.lineIndex
@@ -969,643 +2147,1182 @@ const App: React.FC = () => {
       setInputs(prev => ({
         ...prev,
         appMode: AppMode.Football,
-        durationMinutes: 8,
+        durationMinutes: prev.durationMinutes === DEFAULT_DURATION ? 6 : (prev.durationMinutes || 6),
         imageIntervalMinutes: 0.5,
         targetLanguage: Language.English,
         voice: activeVoice
       }));
 
-      // Initialize local non-stale active variables using current state as a fallback (useful for resumes)
-      let activeScenes = [...scenes];
-      let activeCharacters = [...characters];
-      let activeStoryContext = storyContext;
-      let activeThumbnailUrl = thumbnailUrl;
-      let activeThumbnailLocalizations = { ...thumbnailLocalizations };
-      let activeBurnedThumbnailUrls = { ...burnedThumbnailUrls };
-      let activeYoutubeMetadataLocalizations = { ...youtubeMetadataLocalizations };
-      let activeYoutubeTitle = youtubeTitle;
-      let activeYoutubeDescription = youtubeDescription;
+      // --- PHASE 1: GOSSIP, PROFILES, & SIMULATION SCORE ---
+      let simResult;
+      const simResultCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=sim_result.json`).then(r => r.json());
+      if (simResultCheck.exists && simResultCheck.data) {
+        console.info(`🎯 [AutoMode] Found existing simulation reasoning locally for ${matchKey}. Resuming...`);
+        simResult = simResultCheck.data;
 
-      const languages = [Language.English, Language.Turkish, Language.Spanish, Language.Portuguese];
-      let startLangIndex = autoPublishState.currentLangIndex;
-
-      for (let langIdx = startLangIndex; langIdx < languages.length; langIdx++) {
-        if (isStopRequestedRef.current) {
-          console.info("⏸️ [AutoMode] Pause requested. Breaking language loop.");
-          setAutoPublishState(prev => ({ ...prev, isPaused: true, isRunning: false }));
-          isPipelineRunningRef.current = false;
-          return;
+        // Self-healing: If teamAData or teamBData is empty/missing, re-fetch it using getTeamProfileHelper
+        let healed = false;
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+        if (!simResult.teamAData || Object.keys(simResult.teamAData).length === 0) {
+          console.info(`🔧 [AutoMode] Self-healing: teamAData is empty in cached sim_result.json. Re-fetching for ${pendingMatch.teamA}...`);
+          simResult.teamAData = await getTeamProfileHelper(pendingMatch.teamA, ai);
+          healed = true;
+        }
+        if (!simResult.teamBData || Object.keys(simResult.teamBData).length === 0) {
+          console.info(`🔧 [AutoMode] Self-healing: teamBData is empty in cached sim_result.json. Re-fetching for ${pendingMatch.teamB}...`);
+          simResult.teamBData = await getTeamProfileHelper(pendingMatch.teamB, ai);
+          healed = true;
         }
 
-        const currentLang = languages[langIdx];
-        setAutoPublishState(prev => ({
-          ...prev,
-          currentLangIndex: langIdx,
-          statusMessage: `Starting process for ${currentLang}...`
-        }));
-
-        setCurrentEditorLanguage(currentLang);
-        console.info(`🌐 [AutoMode] Processing language: ${currentLang}`);
-
-        if (currentLang === Language.English) {
-          const hasEnglishScenes = activeScenes.length > 0 && 
-            activeScenes.every(s => s.imageUrl && s.ttsAudioUrl) && 
-            (footballInput.teamA.toLowerCase() === pendingMatch.teamA.toLowerCase()) &&
-            (footballInput.teamB.toLowerCase() === pendingMatch.teamB.toLowerCase());
-
-          if (hasEnglishScenes) {
-            console.info("⚡ [AutoMode] Detected existing English assets matching this match. Skipping English asset generation.");
-            setAutoPublishState(prev => ({
-              ...prev,
-              statusMessage: "Skipping English asset generation (restored from backup)."
-            }));
-            activeThumbnailUrl = thumbnailUrl || thumbnailLocalizations[Language.English]?.url;
-          } else {
-            const storyScenes = Math.floor(8 / Math.max(0.1, 0.5)); // Using default 8 / 0.5
-            const totalSceneCount = storyScenes + 1;
-            
-            const scriptResult = await executeStepWithRetry(
-              `Generate Script in English`,
-              'script',
-              async () => {
-                return await generateFootballScript(
-                  pendingMatch.teamA,
-                  pendingMatch.teamB,
-                  pendingMatch.tournament,
-                  `Stadium: ${pendingMatch.stadium}, Date: ${pendingMatch.date}`,
-                  totalSceneCount,
-                  8, // duration
-                  inputs.useSearchGrounding,
-                  activeVoice,
-                  Language.English
-                );
-              }
-            );
-
-            activeScenes = scriptResult.scenes;
-            activeCharacters = scriptResult.characters;
-            activeStoryContext = scriptResult.storyContext;
-
-            setScenes(activeScenes);
-            setCharacters(activeCharacters);
-            setStoryContext(activeStoryContext);
-            
-            let baseTournament = pendingMatch.tournament.trim() || 'FIFA-2026 World Cup';
-            let groupText = 'Group Stage Matches';
-            if (baseTournament.includes(',')) {
-              const parts = baseTournament.split(',');
-              baseTournament = parts[0].trim();
-              const secondPart = parts[1].trim();
-              if (secondPart.toLowerCase().startsWith('group-') || secondPart.toLowerCase().startsWith('group ')) {
-                const groupLetter = secondPart.replace(/group[- ]/i, '').trim();
-                groupText = `Group Stage Matches, Group ${groupLetter}`;
-              } else {
-                groupText = secondPart;
-              }
-            }
-
-            const finalTitle = `${pendingMatch.teamA} vs ${pendingMatch.teamB} | ${baseTournament}, AI-Simulated 10K Times`;
-            activeYoutubeTitle = finalTitle;
-            setYoutubeTitle(finalTitle);
-            setInputs(prev => ({ ...prev, title: finalTitle }));
-
-            const initialDesc = `🎬 AI Cinematic Story: ${pendingMatch.teamA} vs ${pendingMatch.teamB} | ${baseTournament}, ${groupText}\nTactical simulation analysis of ${pendingMatch.teamA} vs ${pendingMatch.teamB} in ${baseTournament}, ${groupText}.\nGenerated with AI Creator Studio.\nWe don’t guess; we calculate. Football Simulator is a digital laboratory that leverages advanced data models and cutting-edge algorithms to generate the world’s most accurate and realistic football match simulations.\nWe simulate every single fixture 10,000 times in our proprietary data engine. Current team form, player heat maps, xG (expected goals) metrics, injuries, and off-pitch breaking news are directly fed into our algorithm. The result? Not just a random score prediction, but an in-depth, cinematic football documentary that reveals the flow of the game, tactical breaking points, and the most probable scenarios.`;
-            activeYoutubeDescription = initialDesc;
-            setYoutubeDescription(initialDesc);
-
-            const initialTags = `AI, football, soccer, football simulator, world cup, fifa, fifa 2026, ${pendingMatch.teamA.toLowerCase()} football team, ${pendingMatch.teamB.toLowerCase()} football team`;
-
-            activeYoutubeMetadataLocalizations = {
-              ...activeYoutubeMetadataLocalizations,
-              [Language.English]: {
-                title: finalTitle,
-                description: initialDesc,
-                tags: initialTags
-              }
-            };
-            setYoutubeMetadataLocalizations(activeYoutubeMetadataLocalizations);
-            setThumbnailStyle(inputs.artStyle);
-
-            const suggestions = await executeStepWithRetry(
-              `Generate High-CTR Thumbnail suggestions`,
-              'thumbnail',
-              async () => {
-                return await generateFootballThumbnailSuggestions(
-                  pendingMatch.teamA,
-                  pendingMatch.teamB,
-                  pendingMatch.tournament,
-                  `Stadium: ${pendingMatch.stadium}, Date: ${pendingMatch.date}`,
-                  activeCharacters,
-                  Language.English
-                );
-              }
-            );
-
-            const initialThumb = {
-              url: null,
-              titleText: suggestions.titleText,
-              subtitleText: suggestions.subtitleText,
-              topRightText: suggestions.topRightText,
-              prompt: suggestions.customVisualPrompt,
-              style: inputs.artStyle
-            };
-            activeThumbnailLocalizations = {
-              ...activeThumbnailLocalizations,
-              [Language.English]: initialThumb
-            };
-            setThumbnailLocalizations(activeThumbnailLocalizations);
-            setThumbnailTitleText(suggestions.titleText);
-            setThumbnailSubtitleText(suggestions.subtitleText);
-            setThumbnailTopRightText(suggestions.topRightText);
-            setThumbnailPrompt(suggestions.customVisualPrompt);
-
-            // Image generation sequence (Sequential loop with 5s delay)
-            const charsToGen = activeCharacters.filter(c => !c.referenceImageUrl);
-            for (let i = 0; i < charsToGen.length; i++) {
-              if (isStopRequestedRef.current) throw new Error("Pause requested.");
-              const char = charsToGen[i];
-              const charUrl = await executeStepWithRetry(
-                `Generate Character Ref: ${char.name}`,
-                'assets',
-                async () => {
-                  return await generateCharacterReference(char, inputs.artStyle, activeStoryContext);
-                }
-              );
-              activeCharacters = activeCharacters.map(c => c.id === char.id ? { ...c, referenceImageUrl: charUrl } : c);
-              setCharacters(activeCharacters);
-              if (i < charsToGen.length - 1 || activeScenes.length > 0) {
-                await new Promise(r => setTimeout(r, 5000));
-              }
-            }
-
-            const scenesToGen = activeScenes.filter(s => !s.imageUrl);
-            for (let j = 0; j < scenesToGen.length; j++) {
-              if (isStopRequestedRef.current) throw new Error("Pause requested.");
-              const scene = scenesToGen[j];
-              const sceneImgUrl = await executeStepWithRetry(
-                `Generate Scene Image ${scene.id + 1}/${activeScenes.length}`,
-                'assets',
-                async () => {
-                  return await generateImage(
-                    scene.visualPrompt,
-                    inputs.artStyle,
-                    inputs.aspectRatio,
-                    activeStoryContext,
-                    activeCharacters,
-                    scene.imageOverlayText
-                  );
-                }
-              );
-              activeScenes = activeScenes.map(s => s.id === scene.id ? { ...s, imageUrl: sceneImgUrl } : s);
-              setScenes(activeScenes);
-              if (j < scenesToGen.length - 1) {
-                await new Promise(r => setTimeout(r, 5000));
-              }
-            }
-
-            // Audio generation sequence (Sequential loop with 5s delay)
-            for (let k = 0; k < activeScenes.length; k++) {
-              if (isStopRequestedRef.current) throw new Error("Pause requested.");
-              const scene = activeScenes[k];
-              if (scene.ttsAudioUrl) {
-                console.info(`⚡ [AutoMode] English TTS audio already exists for scene ${scene.id + 1}. Skipping generation.`);
-                continue;
-              }
-              const audioUrl = await executeStepWithRetry(
-                `Generate Voiceover Audio ${scene.id + 1}/${activeScenes.length}`,
-                'assets',
-                async () => {
-                  return await generateTTS(scene.voiceoverScript, scene.selectedVoice || activeVoice, scene.selectedTone);
-                }
-              );
-              activeScenes = activeScenes.map(s => s.id === scene.id ? { ...s, ttsAudioUrl: audioUrl } : s);
-              setScenes(activeScenes);
-              if (k < activeScenes.length - 1) {
-                await new Promise(r => setTimeout(r, 5000));
-              }
-            }
-
-            const cleanBaseImageUrl = await executeStepWithRetry(
-              `Generate Base Thumbnail Image`,
-              'thumbnail',
-              async () => {
-                return await generateThumbnail(
-                  activeYoutubeTitle,
-                  inputs.artStyle,
-                  activeStoryContext,
-                  activeCharacters,
-                  suggestions.titleText,
-                  suggestions.subtitleText,
-                  suggestions.customVisualPrompt
-                );
-              }
-            );
-
-            activeThumbnailUrl = cleanBaseImageUrl;
-            setThumbnailUrl(cleanBaseImageUrl);
-            activeThumbnailLocalizations = {
-              ...activeThumbnailLocalizations,
-              [Language.English]: {
-                ...activeThumbnailLocalizations[Language.English]!,
-                url: cleanBaseImageUrl
-              }
-            };
-            setThumbnailLocalizations(activeThumbnailLocalizations);
-
-            const burnedUrl = await burnThumbnailText(
-              cleanBaseImageUrl,
-              suggestions.titleText,
-              suggestions.subtitleText,
-              suggestions.topRightText
-            );
-            activeBurnedThumbnailUrls = {
-              ...activeBurnedThumbnailUrls,
-              [Language.English]: burnedUrl
-            };
-            setBurnedThumbnailUrls(activeBurnedThumbnailUrls);
-          }
- 
-          console.info("💤 [AutoMode] Sleeping 5 seconds before starting render...");
-          await new Promise(r => setTimeout(r, 5000));
- 
-          setRenderResolution('1440p');
-          const renderResult = await executeStepWithRetry(
-            `Render English Video (1440p)`,
-            'render',
-            async () => {
-              return await renderFullVideo(
-                activeScenes,
-                inputs.aspectRatio,
-                '1440p',
-                setRenderProgress,
-                false
-              );
-            }
-          );
-          setRenderedVideoUrl(renderResult.filename ? `http://localhost:3001/static/${renderResult.filename}` : null);
-          setServerVideoFilename(renderResult.filename);
- 
-          // ZIP Export BEFORE Youtube publish
-          await executeStepWithRetry(
-            `Export ZIP Backup`,
-            'backup',
-            async () => {
-              await handleExportProject(
-                activeScenes,
-                activeCharacters,
-                activeStoryContext,
-                activeThumbnailUrl,
-                activeThumbnailLocalizations,
-                activeYoutubeMetadataLocalizations,
-                activeBurnedThumbnailUrls,
-                renderResult.filename ? `http://localhost:3001/static/${renderResult.filename}` : null,
-                { ...inputs, title: activeYoutubeTitle }
-              );
-              return true;
-            }
-          );
- 
-          console.info("💤 [AutoMode] Sleeping 5 seconds before starting YouTube publish...");
-          await new Promise(r => setTimeout(r, 5000));
- 
-          await executeStepWithRetry(
-            `Publish English Video to YouTube`,
-            'publish',
-            async () => {
-              await executeYoutubePublish(
-                renderResult.filename,
-                activeYoutubeTitle,
-                activeYoutubeDescription,
-                activeBurnedThumbnailUrls,
-                activeThumbnailLocalizations,
-                activeThumbnailUrl,
-                activeYoutubeMetadataLocalizations,
-                Language.English
-              );
-              return true;
-            }
-          );
-
-        } else {
-          // --- TARGET LANGUAGE LOCALIZATION ---
-
-          const hasScriptLocalized = activeScenes.every(s => s.localizations?.[currentLang]?.voiceoverScript);
-          if (hasScriptLocalized) {
-            console.info(`⚡ [AutoMode] Script is already localized to ${currentLang}. Skipping localization step.`);
-          } else {
-            await executeStepWithRetry(
-              `Localize Script & Metadata to ${currentLang}`,
-              'script',
-              async () => {
-                const updatedThumbnailLocs = await checkAndPrefillThumbnailOverlays(currentLang, activeThumbnailLocalizations, activeThumbnailUrl);
-                if (updatedThumbnailLocs) {
-                  activeThumbnailLocalizations = updatedThumbnailLocs;
-                }
-                
-                const locResults = await localizeScript(activeScenes, currentLang);
-                activeScenes = activeScenes.map(s => {
-                  const loc = locResults[s.id];
-                  if (loc) {
-                    return {
-                      ...s,
-                      localizations: {
-                        ...s.localizations,
-                        [currentLang]: loc
-                      }
-                    };
-                  }
-                  return s;
-                });
-                setScenes(activeScenes);
-
-                const englishMeta = activeYoutubeMetadataLocalizations[Language.English] || {
-                  title: activeYoutubeTitle || inputs.title || "",
-                  description: activeYoutubeDescription || "",
-                  tags: inputs.appMode === AppMode.Football
-                    ? `AI, football, soccer, football simulator, world cup, fifa, fifa 2026, ${pendingMatch.teamA.toLowerCase()} football team, ${pendingMatch.teamB.toLowerCase()} football team`
-                    : (youtubeTags || "story, AI")
-                };
-                
-                const localizedMeta = await localizeMetadata(englishMeta, currentLang);
-                activeYoutubeMetadataLocalizations = {
-                  ...activeYoutubeMetadataLocalizations,
-                  [currentLang]: localizedMeta
-                };
-                setYoutubeMetadataLocalizations(activeYoutubeMetadataLocalizations);
-
-                return true;
-              }
-            );
-          }
-
-          await new Promise(r => setTimeout(r, 2000));
-
-          const targetLangActiveScenes = activeScenes.map(s => {
-            const loc = s.localizations?.[currentLang];
-            return {
-              ...s,
-              voiceoverScript: loc?.voiceoverScript || s.voiceoverScript,
-              ttsAudioUrl: loc?.ttsAudioUrl
-            };
+        if (healed) {
+          // Save the healed sim_result back to the server
+          await fetch('http://localhost:3001/api/auto-assets/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matchKey, fileName: 'sim_result.json', content: simResult })
           });
+          console.info(`🔧 [AutoMode] Saved healed sim_result.json to server.`);
+        }
+      } else {
+        simResult = await executeStepWithRetry(
+          `Run Football Simulation Reasoning`,
+          'script',
+          async () => {
+            const result = await runMatchSimulationEngine(
+              pendingMatch.teamA,
+              pendingMatch.teamB,
+              pendingMatch.tournament,
+              `Stadium: ${pendingMatch.stadium}, Date: ${pendingMatch.date}`
+            );
+            // Save to server local assets
+            await fetch('http://localhost:3001/api/auto-assets/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchKey, fileName: 'sim_result.json', content: result })
+            });
+            return result;
+          },
+          activeLanguages
+        );
+      }
 
-          for (let k = 0; k < targetLangActiveScenes.length; k++) {
-            if (isStopRequestedRef.current) throw new Error("Pause requested.");
-            const scene = targetLangActiveScenes[k];
-            
-            if (scene.ttsAudioUrl) {
-              console.info(`⚡ [AutoMode] ${currentLang} TTS audio already exists for scene ${scene.id + 1}. Skipping generation.`);
-              continue;
+      const { gossipSummary, teamAData, teamBData, scoreDecision, historyData } = simResult;
+      setHistoryData(historyData || null);
+      const combinedExtraContext = gossipSummary 
+        ? `--- GOSSIP, NEWS, & RUMORS (GROUNDED SEARCH) ---\n${gossipSummary}\n\n--- USER CONTEXT ---\nStadium: ${pendingMatch.stadium}, Date: ${pendingMatch.date}`
+        : `Stadium: ${pendingMatch.stadium}, Date: ${pendingMatch.date}`;
+
+      // --- PHASE 2: COMMON MATCH VISUAL STORYBOARD ---
+      const totalSceneCount = Math.floor(pipelineDurationMinutes / 0.5) + 1;
+      const durationPerSceneSeconds = (pipelineDurationMinutes * 60) / totalSceneCount;
+
+      let visualScenes;
+      const visualScenesCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=visual_scenes.json`).then(r => r.json());
+      if (visualScenesCheck.exists && visualScenesCheck.data) {
+        console.info(`🎯 [AutoMode] Found existing visual storyboard locally for ${matchKey}. Resuming...`);
+        visualScenes = visualScenesCheck.data;
+      } else {
+        visualScenes = await executeStepWithRetry(
+          `Generate Common Visual Storyboard`,
+          'script',
+          async () => {
+            const result = await generateMatchVisualPrompts(
+              pendingMatch.teamA,
+              pendingMatch.teamB,
+              pendingMatch.tournament,
+              combinedExtraContext,
+              scoreDecision,
+              totalSceneCount,
+              teamAData,
+              teamBData
+            );
+            // Save to server local assets
+            await fetch('http://localhost:3001/api/auto-assets/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchKey, fileName: 'visual_scenes.json', content: result })
+            });
+            return result;
+          },
+          activeLanguages
+        );
+      }
+
+      // Reset global simulator UI states
+      sharedImageCacheRef.current = {};
+      setScenes([]);
+      setCharacters([]);
+      setStoryContext(`Tactical simulation analysis of ${pendingMatch.teamA} vs ${pendingMatch.teamB} in ${pendingMatch.tournament || 'friendly'}.`);
+      setHistoryData(null);
+
+      // --- PHASE 2.5: EXTRACT PLAYER REGISTRY & GENERATE CHARACTER REFERENCES ---
+      const autoCharacters: Character[] = [];
+      const addTeamCharacters = (data: any, teamLabel: string) => {
+        if (!data) return;
+        if (data.head_coach && data.head_coach.name) {
+          autoCharacters.push({
+            id: `char_coach_${teamLabel.replace(/\s+/g, '_')}`,
+            name: data.head_coach.name,
+            description: `${data.head_coach.name}, Head Coach of ${teamLabel}. Preferred formation: ${data.head_coach.preferred_formation || 'Unknown'}. Play style: ${data.head_coach.play_style_summary || 'Unknown'}`
+          });
+        }
+        if (Array.isArray(data.key_players)) {
+          data.key_players.forEach((p: any, idx: number) => {
+            if (p.name) {
+              autoCharacters.push({
+                id: `char_player_${teamLabel.replace(/\s+/g, '_')}_${idx}`,
+                name: p.name,
+                description: `${p.name}, key player for ${teamLabel}. Position: ${p.position || 'Unknown'}. Market value: ${p.market_value || 'Unknown'}. Form/Stats: ${p.performance_stats || 'Unknown'}`
+              });
             }
+          });
+        }
+      };
 
-            const audioUrl = await executeStepWithRetry(
-              `Generate ${currentLang} Voiceover Audio ${scene.id + 1}/${targetLangActiveScenes.length}`,
+      addTeamCharacters(teamAData, pendingMatch.teamA);
+      addTeamCharacters(teamBData, pendingMatch.teamB);
+
+      // Save to state so they are visible in the UI
+      setCharacters(autoCharacters);
+
+      const storyContextText = `Tactical simulation analysis of ${pendingMatch.teamA} vs ${pendingMatch.teamB} in ${pendingMatch.tournament || 'friendly'}.`;
+
+      // --- PHASE 2.6: GENERATE TEAM KIT REFERENCE IMAGES (ONE PER TEAM) ---
+      const kitReferenceUrls: Record<string, string> = {};
+      const teamsToProcess = [
+        { key: 'A', name: pendingMatch.teamA, data: teamAData },
+        { key: 'B', name: pendingMatch.teamB, data: teamBData }
+      ];
+
+      for (const t of teamsToProcess) {
+        const kitFilename = `kit_${t.key}.png`;
+        const kitCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=${kitFilename}`).then(r => r.json());
+        if (kitCheck.exists && kitCheck.url) {
+          console.info(`🎯 [AutoMode] Found cached kit reference locally for ${t.name}: ${kitCheck.url}`);
+          kitReferenceUrls[t.key] = kitCheck.url;
+          if (t.key === 'A') setKitAUrl(kitCheck.url);
+          else setKitBUrl(kitCheck.url);
+        } else {
+          if (t.data?.kit_colors?.home) {
+            const kitUrl = await executeStepWithRetry(
+              `Generate Kit Reference Image for ${t.name}`,
               'assets',
               async () => {
-                return await generateTTS(scene.voiceoverScript, scene.selectedVoice || activeVoice, scene.selectedTone);
-              }
-            );
-
-            activeScenes = activeScenes.map(s => {
-              if (s.id !== scene.id) return s;
-              const prevLoc = s.localizations?.[currentLang] || { voiceoverScript: s.voiceoverScript, overlays: s.overlays };
-              return {
-                ...s,
-                localizations: {
-                  ...s.localizations,
-                  [currentLang]: {
-                    ...prevLoc,
-                    ttsAudioUrl: audioUrl
-                  }
-                }
-              };
-            });
-            setScenes(activeScenes);
-
-            if (k < targetLangActiveScenes.length - 1) {
-              await new Promise(r => setTimeout(r, 5000));
-            }
-          }
-
-          let cleanBaseImageUrl = activeThumbnailUrl || activeThumbnailLocalizations[Language.English]?.url;
-          if (!cleanBaseImageUrl) {
-            console.info("⚡ [AutoMode] Base thumbnail image is missing during localization. Generating it first...");
-            let titleText = thumbnailTitleText || "";
-            let subtitleText = thumbnailSubtitleText || "";
-            let topRightText = thumbnailTopRightText || "";
-            let prompt = thumbnailPrompt || "";
-
-            if (!titleText && !subtitleText) {
-              const suggestions = await executeStepWithRetry(
-                `Generate High-CTR Thumbnail suggestions`,
-                'thumbnail',
-                async () => {
-                  return await generateFootballThumbnailSuggestions(
-                    pendingMatch.teamA,
-                    pendingMatch.teamB,
-                    pendingMatch.tournament,
-                    `Stadium: ${pendingMatch.stadium}, Date: ${pendingMatch.date}`,
-                    activeCharacters,
-                    Language.English
-                  );
-                }
-              );
-              titleText = suggestions.titleText;
-              subtitleText = suggestions.subtitleText;
-              topRightText = suggestions.topRightText;
-              prompt = suggestions.customVisualPrompt;
-
-              activeThumbnailLocalizations = {
-                ...activeThumbnailLocalizations,
-                [Language.English]: {
-                  url: null,
-                  titleText,
-                  subtitleText,
-                  topRightText,
-                  prompt,
-                  style: inputs.artStyle
-                }
-              };
-              setThumbnailLocalizations(activeThumbnailLocalizations);
-              setThumbnailTitleText(titleText);
-              setThumbnailSubtitleText(subtitleText);
-              setThumbnailTopRightText(topRightText);
-              setThumbnailPrompt(prompt);
-            }
-
-            const generatedBaseUrl = await executeStepWithRetry(
-              `Generate Base Thumbnail Image`,
-              'thumbnail',
-              async () => {
-                return await generateThumbnail(
-                  activeYoutubeTitle || `${pendingMatch.teamA} vs ${pendingMatch.teamB}`,
+                const url = await apiOrchestrator.enqueue(() => generateKitReferenceImage(
+                  t.name,
+                  'home',
+                  t.data.kit_colors.home,
                   inputs.artStyle,
-                  activeStoryContext,
-                  activeCharacters,
-                  titleText,
-                  subtitleText,
-                  prompt
-                );
+                  inputs.imageGenerator
+                ));
+                const saveRes = await fetch('http://localhost:3001/api/auto-assets/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ matchKey, fileName: kitFilename, content: url })
+                }).then(r => r.json());
+                return saveRes.url || url;
               }
             );
-
-            activeThumbnailUrl = generatedBaseUrl;
-            setThumbnailUrl(generatedBaseUrl);
-            activeThumbnailLocalizations = {
-              ...activeThumbnailLocalizations,
-              [Language.English]: {
-                ...(activeThumbnailLocalizations[Language.English] || {
-                  titleText,
-                  subtitleText,
-                  topRightText,
-                  prompt,
-                  style: inputs.artStyle
-                }),
-                url: generatedBaseUrl
-              }
-            };
-            setThumbnailLocalizations(activeThumbnailLocalizations);
-            cleanBaseImageUrl = generatedBaseUrl;
+            kitReferenceUrls[t.key] = kitUrl;
+            if (t.key === 'A') setKitAUrl(kitUrl);
+            else setKitBUrl(kitUrl);
           }
-
-          const localizedThumbLoc = activeThumbnailLocalizations[currentLang] || {
-            titleText: `${pendingMatch.teamA} vs ${pendingMatch.teamB}`,
-            subtitleText: pendingMatch.tournament || 'FIFA-2026 World Cup, Group-A',
-            topRightText: currentLang === Language.Turkish ? "10B Kez AI ile Simüle Edildi" : "10K Times Simulated with AI",
-            prompt: thumbnailPrompt || ""
-          };
-
-          let cleanLocalizedThumbUrl = activeThumbnailLocalizations[currentLang]?.url;
-          if (!cleanLocalizedThumbUrl) {
-            cleanLocalizedThumbUrl = await executeStepWithRetry(
-              `Generate Localized Thumbnail for ${currentLang}`,
-              'thumbnail',
-              async () => {
-                return await generateThumbnail(
-                  activeYoutubeMetadataLocalizations[currentLang]?.title || `${pendingMatch.teamA} vs ${pendingMatch.teamB}`,
-                  inputs.artStyle,
-                  activeStoryContext,
-                  activeCharacters,
-                  localizedThumbLoc.titleText,
-                  localizedThumbLoc.subtitleText,
-                  localizedThumbLoc.prompt
-                );
-              }
-            );
-
-            activeThumbnailLocalizations = {
-              ...activeThumbnailLocalizations,
-              [currentLang]: {
-                ...(activeThumbnailLocalizations[currentLang] || {
-                  titleText: localizedThumbLoc.titleText,
-                  subtitleText: localizedThumbLoc.subtitleText,
-                  topRightText: localizedThumbLoc.topRightText,
-                  prompt: localizedThumbLoc.prompt,
-                  style: inputs.artStyle
-                }),
-                url: cleanLocalizedThumbUrl
-              }
-            };
-            setThumbnailLocalizations(activeThumbnailLocalizations);
-          }
-
-          let burnedUrl = activeBurnedThumbnailUrls[currentLang];
-          if (!burnedUrl) {
-            burnedUrl = await burnThumbnailText(
-              cleanLocalizedThumbUrl,
-              localizedThumbLoc.titleText,
-              localizedThumbLoc.subtitleText,
-              localizedThumbLoc.topRightText
-            );
-            activeBurnedThumbnailUrls = {
-              ...activeBurnedThumbnailUrls,
-              [currentLang]: burnedUrl
-            };
-            setBurnedThumbnailUrls(activeBurnedThumbnailUrls);
-          }
-
-          console.info("💤 [AutoMode] Sleeping 5 seconds before starting render...");
-          await new Promise(r => setTimeout(r, 5000));
- 
-          setRenderResolution('1440p');
-          
-          const finalLocalizedScenes = activeScenes.map(s => {
-            const loc = s.localizations?.[currentLang];
-            return {
-              ...s,
-              voiceoverScript: loc?.voiceoverScript || s.voiceoverScript,
-              overlays: loc?.overlays || s.overlays,
-              imageOverlayText: loc?.imageOverlayText || s.imageOverlayText,
-              ttsAudioUrl: loc?.ttsAudioUrl || s.ttsAudioUrl
-            };
-          });
-  
-          const renderResult = await executeStepWithRetry(
-            `Render ${currentLang} Video (1440p)`,
-            'render',
-            async () => {
-              return await renderFullVideo(
-                finalLocalizedScenes,
-                inputs.aspectRatio,
-                '1440p',
-                setRenderProgress,
-                false
-              );
-            }
-          );
-          setRenderedVideoUrl(renderResult.filename ? `http://localhost:3001/static/${renderResult.filename}` : null);
-          setServerVideoFilename(renderResult.filename);
-  
-          console.info("💤 [AutoMode] Sleeping 5 seconds before starting YouTube publish...");
-          await new Promise(r => setTimeout(r, 5000));
- 
-          await executeStepWithRetry(
-            `Publish ${currentLang} Video to YouTube`,
-            'publish',
-            async () => {
-              await executeYoutubePublish(
-                renderResult.filename,
-                activeYoutubeMetadataLocalizations[currentLang]?.title,
-                activeYoutubeMetadataLocalizations[currentLang]?.description,
-                activeBurnedThumbnailUrls,
-                activeThumbnailLocalizations,
-                activeThumbnailUrl,
-                activeYoutubeMetadataLocalizations,
-                currentLang
-              );
-              return true;
-            }
-          );
         }
       }
 
-      console.info("🎉 [AutoMode] Match successfully published in English, Turkish, Spanish, and Portuguese!");
+      if (autoCharacters.length > 0) {
+        console.info(`⚽ [AutoMode] Generating character references for ${autoCharacters.length} registry entries...`);
+        const charRefPromises = autoCharacters.map(async (char, cIdx) => {
+          const charFile = `char_${char.id}.png`;
+          const charCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&fileName=${charFile}`).then(r => r.json());
+          if (charCheck.exists && charCheck.url) {
+            console.info(`🎯 [AutoMode] Found character reference locally: ${char.name}`);
+            char.referenceImageUrl = charCheck.url;
+            setCharacters(prev => prev.map(c => c.id === char.id ? { ...c, referenceImageUrl: charCheck.url } : c));
+            return charCheck.url;
+          }
 
-      const updatedFiles = fixtureFiles.map(f => {
-        if (f.name !== selectedFixtureName) return f;
-        const fileLines = f.content.split(/\r?\n/);
-        fileLines[pendingMatch.lineIndex] = `${pendingMatch.originalLine} | Done`;
-        return {
-          ...f,
-          content: fileLines.join('\n')
-        };
-      });
+          return await executeStepWithRetry(
+            `Generate Character Reference for ${char.name}`,
+            'assets',
+            async () => {
+              // Stagger call to avoid hitting rate limits
+              await new Promise(r => setTimeout(r, cIdx * 3000));
+              const teamKey = char.id.includes(`_${pendingMatch.teamA.replace(/\s+/g, '_')}`) ? 'A' : 'B';
+              const kitUrl = kitReferenceUrls[teamKey] || "";
+              const url = await apiOrchestrator.enqueue(() => generateCharacterReference(char, inputs.artStyle, storyContextText, inputs.imageGenerator, kitUrl));
+              
+              // Save to server local assets
+              const saveRes = await fetch('http://localhost:3001/api/auto-assets/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchKey, fileName: charFile, content: url })
+              }).then(r => r.json());
 
-      setFixtureFiles(updatedFiles);
+              const savedUrl = saveRes.url || url;
+              char.referenceImageUrl = savedUrl;
+              setCharacters(prev => prev.map(c => c.id === char.id ? { ...c, referenceImageUrl: savedUrl } : c));
+              return savedUrl;
+            },
+            activeLanguages
+          );
+        });
+        await Promise.all(charRefPromises);
+      }
 
-      // Save the updated fixture file to the backend filesystem
-      const updatedFixture = updatedFiles.find(f => f.name === selectedFixtureName);
-      if (updatedFixture) {
-        try {
-          await fetch('http://localhost:3001/api/fixtures/save', {
+      const movementAnimations = [
+        'animate-kb-zoom-in', 'animate-kb-zoom-out',
+        'animate-kb-pan-right', 'animate-kb-pan-left',
+        'animate-kb-diag-right-up', 'animate-kb-zoom-pan-right'
+      ];
+
+      const formatTime = (totalMinutes: number) => {
+        const totalSeconds = Math.round(totalMinutes * 60);
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      };
+
+      // --- PHASE 3: PARALLEL LOCALIZED LANGUAGE PIPELINES ---
+      if (activeLanguages.length === 0) {
+        throw new Error("No languages selected for video creation. Please select at least one language in the connection grid.");
+      }
+      
+      const pipelinePromises = activeLanguages.map(async (currentLang, langIdx) => {
+        // Staggered delay for starting Gemini script generation API call (7s interval between script calls)
+        console.info(`🌐 [AutoMode] Scheduling localized pipeline for ${currentLang} (staggered delay: ${langIdx * 7}s)...`);
+        await new Promise(r => setTimeout(r, langIdx * 7000));
+        
+        if (isStopRequestedRef.current) {
+          console.info(`⏸️ [AutoMode] Pipeline run cancelled before starting ${currentLang}.`);
+          return;
+        }
+
+        // Translate team profiles for this target language using Gemini
+        const [localizedTeamAData, localizedTeamBData] = await Promise.all([
+          executeStepWithRetry(
+            `Translate Team A Profile (${currentLang})`,
+            'script',
+            async () => {
+              const fileName = `team_a_profile_${currentLang}.json`;
+              const check = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=${fileName}`).then(r => r.json());
+              if (check.exists && check.data && Object.keys(check.data).length > 0) {
+                return check.data;
+              }
+              const result = teamAData ? await translateTeamData(teamAData, currentLang) : null;
+              if (result && Object.keys(result).length > 0) {
+                await fetch('http://localhost:3001/api/auto-assets/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ matchKey, language: currentLang, fileName, content: result })
+                });
+              }
+              return result;
+            }
+          ),
+          executeStepWithRetry(
+            `Translate Team B Profile (${currentLang})`,
+            'script',
+            async () => {
+              const fileName = `team_b_profile_${currentLang}.json`;
+              const check = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=${fileName}`).then(r => r.json());
+              if (check.exists && check.data && Object.keys(check.data).length > 0) {
+                return check.data;
+              }
+              const result = teamBData ? await translateTeamData(teamBData, currentLang) : null;
+              if (result && Object.keys(result).length > 0) {
+                await fetch('http://localhost:3001/api/auto-assets/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ matchKey, language: currentLang, fileName, content: result })
+                });
+              }
+              return result;
+            }
+          )
+        ]);
+
+        // 1. Localized Script Generation Call
+        let scriptResult;
+        const scriptCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=script_result.json`).then(r => r.json());
+        if (scriptCheck.exists && scriptCheck.data) {
+          console.info(`🎯 [AutoMode] Found existing script locally for ${currentLang}. Resuming...`);
+          scriptResult = scriptCheck.data;
+        } else {
+          scriptResult = await executeStepWithRetry(
+            `Generate Localized Script (${currentLang})`,
+            'script',
+            async () => {
+              const result = await generateLocalizedFootballScript(
+                currentLang,
+                pendingMatch.teamA,
+                pendingMatch.teamB,
+                pendingMatch.tournament,
+                combinedExtraContext,
+                scoreDecision,
+                visualScenes,
+                totalSceneCount,
+                pipelineDurationMinutes,
+                activeVoice,
+                autoCharacters,
+                historyData,
+                teamAData,
+                teamBData
+              );
+              // Save to server local assets
+              await fetch('http://localhost:3001/api/auto-assets/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchKey, language: currentLang, fileName: 'script_result.json', content: result })
+              });
+              return result;
+            }
+          );
+        }
+
+        // Integrate scenes into functional updates to prevent clobbering other languages in React state
+        setScenes(prev => {
+          const baseList = prev.length > 0 ? prev : scriptResult.scenes.map((s, idx) => {
+            return {
+              id: s.id,
+              timeRange: `${formatTime((idx * durationPerSceneSeconds)/60)} - ${formatTime(((idx+1)*durationPerSceneSeconds)/60)}`,
+              voiceoverScript: '',
+              overlays: [],
+              visualPrompt: visualScenes[idx]?.visual_description || '',
+              animationStyles: [movementAnimations[idx % movementAnimations.length]],
+              isGeneratingImage: false,
+              isGeneratingImageEnd: false,
+              isGeneratingVideo: false,
+              isGeneratingVideoPrompt: false,
+              isGeneratingTTS: false,
+              selectedTone: idx === totalSceneCount - 1 ? TTSTone.Warm : TTSTone.Enthusiastic,
+              selectedVoice: activeVoice,
+              selectedArtStyle: (visualScenes[idx]?.art_style as any) || inputs.artStyle,
+              selectedMusicId: s.background_audio_id || 'music_thrilling',
+              selectedSfxId: s.sfx_audio_id || 'ambience_crowd',
+              videoOptions: {
+                duration: 6 as 4 | 6 | 8,
+                resolution: '1080p' as '720p' | '1080p' | '1440p',
+                generateAudio: true,
+                aspectRatio: '16:9' as '16:9' | '9:16',
+                numVideos: 1 as 1 | 2,
+                placement: 'end' as 'start' | 'end'
+              },
+              hasShortVideo: false,
+              teamA: pendingMatch.teamA,
+              teamB: pendingMatch.teamB
+            };
+          });
+
+          return baseList.map((s, idx) => {
+            const matchScene = scriptResult.scenes[idx];
+            if (!matchScene) return s;
+            return {
+              ...s,
+              id: idx,
+              localizations: {
+                ...s.localizations,
+                [currentLang]: {
+                  voiceoverScript: matchScene.voiceover,
+                  overlays: (() => {
+                    const list = (matchScene.overlays || []).map((o, oIdx) => {
+                      let text = o.text || '';
+                      const style = determineOverlayStyle(text, oIdx);
+                      if (style === 'stats-board' || (text.includes('|') && text.includes(':'))) {
+                        text = localizeFootballStatsString(text, currentLang);
+                      }
+                      return {
+                        text,
+                        style,
+                        startSecond: typeof o.startSecond === 'number' ? o.startSecond : 0,
+                        duration: typeof o.duration === 'number' ? o.duration : 5
+                      };
+                    });
+                    while (list.length < 3) {
+                      list.push({
+                        text: '',
+                        style: 'comic-box' as const,
+                        startSecond: 0,
+                        duration: 5
+                      });
+                    }
+                    if (idx === 0 && historyData) {
+                      const labels = getStatsLabels(currentLang);
+                      const wcA = historyData.teamA?.worldCupTitles || "0";
+                      const wcB = historyData.teamB?.worldCupTitles || "0";
+                      const bestA = historyData.teamA?.bestFinish || "N/A";
+                      const bestB = historyData.teamB?.bestFinish || "N/A";
+                      const rankA = historyData.teamA?.fifaRanking || "N/A";
+                      const rankB = historyData.teamB?.fifaRanking || "N/A";
+                      const appsA = historyData.teamA?.worldCupAppearances || "N/A";
+                      const appsB = historyData.teamB?.worldCupAppearances || "N/A";
+                      const h2h = historyData.h2hRecord || "N/A";
+                      
+                      const statsText = `${labels.compare}: ${pendingMatch.teamA} - ${pendingMatch.teamB} | ${labels.worldCupTitles}: ${wcA} - ${wcB} | ${labels.bestFinish}: ${bestA} - ${bestB} | ${labels.fifaRanking}: ${rankA} - ${rankB} | ${labels.worldCupAppearances}: ${appsA} - ${appsB} | ${labels.h2hRecord}: ${h2h}`;
+                      list[1] = {
+                        text: statsText,
+                        style: 'stats-board',
+                        startSecond: 0.5,
+                        duration: 14.0
+                      };
+                    } else if (idx === 1 && localizedTeamAData && localizedTeamBData) {
+                      const labels = getStatsLabels(currentLang);
+                      const coachA = localizedTeamAData.head_coach?.name || "Coach A";
+                      const coachB = localizedTeamBData.head_coach?.name || "Coach B";
+                      const formA = localizedTeamAData.head_coach?.preferred_formation || "N/A";
+                      const formB = localizedTeamBData.head_coach?.preferred_formation || "N/A";
+                      const styleA = localizedTeamAData.head_coach?.play_style_summary || "N/A";
+                      const styleB = localizedTeamBData.head_coach?.play_style_summary || "N/A";
+                      const statsText = `${labels.compare}: ${coachA} - ${coachB} | ${labels.formation}: ${formA} - ${formB} | ${labels.style}: ${styleA} - ${styleB}`;
+                      list[1] = {
+                        text: statsText,
+                        style: 'stats-board',
+                        startSecond: 0.5,
+                        duration: 14.0
+                      };
+                    } else if (idx === 2 && localizedTeamAData && localizedTeamBData) {
+                      const labels = getStatsLabels(currentLang);
+                      const playerA = localizedTeamAData.key_players?.[0]?.name || "Player A";
+                      const playerB = localizedTeamBData.key_players?.[0]?.name || "Player B";
+                      const posA = localizedTeamAData.key_players?.[0]?.position || "Forward";
+                      const posB = localizedTeamBData.key_players?.[0]?.position || "Forward";
+                      const ageA = localizedTeamAData.key_players?.[0]?.age || "N/A";
+                      const ageB = localizedTeamBData.key_players?.[0]?.age || "N/A";
+                      const goalsA = typeof localizedTeamAData.key_players?.[0]?.goals === 'number' ? localizedTeamAData.key_players[0].goals : "0";
+                      const goalsB = typeof localizedTeamBData.key_players?.[0]?.goals === 'number' ? localizedTeamBData.key_players[0].goals : "0";
+                      const assistsA = typeof localizedTeamAData.key_players?.[0]?.assists === 'number' ? localizedTeamAData.key_players[0].assists : "0";
+                      const assistsB = typeof localizedTeamBData.key_players?.[0]?.assists === 'number' ? localizedTeamBData.key_players[0].assists : "0";
+                      const valA = normalizeMarketValue(localizedTeamAData.key_players?.[0]?.market_value || "N/A");
+                      const valB = normalizeMarketValue(localizedTeamBData.key_players?.[0]?.market_value || "N/A");
+                      const perfA = localizedTeamAData.key_players?.[0]?.performance_stats || "N/A";
+                      const perfB = localizedTeamBData.key_players?.[0]?.performance_stats || "N/A";
+                      const statsText = `${labels.compare}: ${playerA} - ${playerB} | ${labels.position}: ${posA} - ${posB} | ${labels.age}: ${ageA} - ${ageB} | ${labels.goals}: ${goalsA} - ${goalsB} | ${labels.assists}: ${assistsA} - ${assistsB} | ${labels.marketValue}: ${valA} - ${valB} | ${labels.performance}: ${perfA} - ${perfB}`;
+                      list[1] = {
+                        text: statsText,
+                        style: 'stats-board',
+                        startSecond: 0.5,
+                        duration: 14.0
+                      };
+                    } else if (idx === totalSceneCount - 2 && scoreDecision && scoreDecision.teamStats) {
+                      const labels = getStatsLabels(currentLang);
+                      const stats = scoreDecision.teamStats;
+                      const statsText = `${labels.score}: ${scoreDecision.finalScore} | ${labels.possession}: ${stats.teamA.possessionPercent}% - ${stats.teamB.possessionPercent}% | ${labels.shots}: ${stats.teamA.totalShots} - ${stats.teamB.totalShots} | ${labels.onTarget}: ${stats.teamA.shotsOnTarget} - ${stats.teamB.shotsOnTarget} | ${labels.xg}: ${stats.teamA.expectedGoalsXg} - ${stats.teamB.expectedGoalsXg} | ${labels.corners}: ${stats.teamA.cornerKicks} - ${stats.teamB.cornerKicks} | ${labels.fouls}: ${stats.teamA.foulsCommitted} - ${stats.teamB.foulsCommitted}`;
+                      list[1] = {
+                        text: statsText,
+                        style: 'stats-board',
+                        startSecond: 0.5,
+                        duration: 14.0
+                      };
+                    }
+                    return list.slice(0, 3);
+                  })(),
+                  visualPrompt: matchScene.visual_description,
+                  isGeneratingTTS: false,
+                  isGeneratingImage: false,
+                  involvedCharacterIds: matchScene.involved_character_ids || []
+                }
+              }
+            };
+          });
+        });
+
+        // Set localized thumbnail overlays
+        const thumbMeta = scriptResult.thumbnail;
+        setThumbnailLocalizations(prev => ({
+          ...prev,
+          [currentLang]: {
+            url: null,
+            topLeftText: thumbMeta.topLeftText || "",
+            titleText: thumbMeta.titleText,
+            subtitleText: thumbMeta.subtitleText,
+            topRightText: thumbMeta.topRightText,
+            prompt: thumbMeta.customVisualPrompt,
+            style: inputs.artStyle
+          }
+        }));
+
+        // YouTube metadata titles/descriptions
+        let baseTournament = pendingMatch.tournament.trim() || 'FIFA-2026 World Cup';
+        let groupText = 'Group Stage Matches';
+        if (baseTournament.includes(',')) {
+          const parts = baseTournament.split(',');
+          baseTournament = parts[0].trim();
+          const secondPart = parts[1].trim();
+          if (secondPart.toLowerCase().startsWith('group-') || secondPart.toLowerCase().startsWith('group ')) {
+            const groupLetter = secondPart.replace(/group[- ]/i, '').trim();
+            groupText = `Group Stage Matches, Group ${groupLetter}`;
+          } else {
+            groupText = secondPart;
+          }
+        }
+
+        // Check if YouTube metadata localization already exists
+        let localizedMeta;
+        const metaCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=youtube_metadata.json`).then(r => r.json());
+        if (metaCheck.exists && metaCheck.data) {
+          localizedMeta = metaCheck.data;
+        } else {
+          const localizedTitle = `${thumbMeta.titleText} | ${baseTournament}, AI-Simulated 10K Times`;
+          const englishMeta = {
+            title: localizedTitle,
+            description: `🎬 AI Cinematic Story: ${pendingMatch.teamA} vs ${pendingMatch.teamB} | ${baseTournament}, ${groupText}\nTactical simulation analysis of ${pendingMatch.teamA} vs ${pendingMatch.teamB} in ${baseTournament}, ${groupText}.\nGenerated with AI Creator Studio.\nWe don’t guess; we calculate. Football Simulator is a digital laboratory that leverages advanced data models and cutting-edge algorithms to generate the world’s most accurate and realistic football match simulations.\nWe simulate every single fixture 10,000 times in our proprietary data engine. Current team form, player heat maps, xG (expected goals) metrics, injuries, and off-pitch breaking news are directly fed into our algorithm. The result? Not just a random score prediction, but an in-depth, cinematic football documentary that reveals the flow of the game, tactical breaking points, and the most probable scenarios.`,
+            tags: `AI, football, soccer, football simulator, world cup, fifa, fifa 2026, ${pendingMatch.teamA.toLowerCase()} football team, ${pendingMatch.teamB.toLowerCase()} football team`
+          };
+          localizedMeta = await localizeMetadata(englishMeta, currentLang);
+          await fetch('http://localhost:3001/api/auto-assets/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: updatedFixture.name, content: updatedFixture.content })
+            body: JSON.stringify({ matchKey, language: currentLang, fileName: 'youtube_metadata.json', content: localizedMeta })
           });
-          console.info(`💾 [AutoMode] Updated fixture file saved to backend filesystem: ${updatedFixture.name}`);
-        } catch (saveErr) {
-          console.error("⚠️ [AutoMode] Failed to save updated fixture to backend filesystem:", saveErr);
         }
+        
+        setYoutubeMetadataLocalizations(prev => ({
+          ...prev,
+          [currentLang]: localizedMeta
+        }));
+
+        // Check existing assets on server
+        const existingAssets: Record<string, string> = {};
+        for (let idx = 0; idx < totalSceneCount; idx++) {
+          const imgFile = `scene_${idx}_image.png`;
+          const audioFile = `scene_${idx}_voiceover.wav`;
+          
+          const [imgCheck, audioCheck] = await Promise.all([
+            fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=${imgFile}`).then(r => r.json()),
+            fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=${audioFile}`).then(r => r.json())
+          ]);
+          
+          let finalImgUrl = "";
+          if (imgCheck.exists && imgCheck.url) {
+            finalImgUrl = imgCheck.url;
+          } else if (sharedImagesMode) {
+            // Check fallback languages to see if the image was pregenerated elsewhere
+            const fallbackLangs = [
+              Language.English,
+              Language.Turkish,
+              Language.Spanish,
+              Language.Portuguese,
+              Language.French,
+              Language.German,
+              Language.Chinese,
+              Language.Japanese,
+              Language.Hindi,
+              Language.Arabic
+            ].filter(l => l !== currentLang);
+
+            for (const fallbackLang of fallbackLangs) {
+              try {
+                const fallbackCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${fallbackLang}&fileName=${imgFile}`).then(r => r.json());
+                if (fallbackCheck.exists && fallbackCheck.url) {
+                  finalImgUrl = fallbackCheck.url;
+                  console.info(`🎯 [AutoMode] Found pre-generated image for Scene ${idx + 1} in fallback language (${fallbackLang}): ${fallbackCheck.url}`);
+                  break;
+                }
+              } catch (e) {
+                console.warn(`Failed to check existing image for fallback language ${fallbackLang}:`, e);
+              }
+            }
+          }
+
+          if (finalImgUrl) {
+            existingAssets[imgFile] = finalImgUrl;
+          }
+          if (audioCheck.exists && audioCheck.url) {
+            existingAssets[audioFile] = audioCheck.url;
+          }
+        }
+        
+        const thumbCleanCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=thumbnail_clean.png`).then(r => r.json());
+        const thumbBurnedCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=thumbnail_burned.png`).then(r => r.json());
+        
+        if (thumbCleanCheck.exists && thumbCleanCheck.url) {
+          existingAssets['thumbnail_clean.png'] = thumbCleanCheck.url;
+        }
+        if (thumbBurnedCheck.exists && thumbBurnedCheck.url) {
+          existingAssets['thumbnail_burned.png'] = thumbBurnedCheck.url;
+        }
+
+        // 2. Localized Parallel Asset Generation (Spaces every API call by 3s via orchestrator)
+        console.info(`🌐 [AutoMode] Launching asset generation tasks in parallel for ${currentLang}...`);
+        const assetPromises: Promise<any>[] = [];
+
+        // Scene Image and Audio TTS generation concurrently per scene
+        for (let idx = 0; idx < totalSceneCount; idx++) {
+          const targetScene = scriptResult.scenes[idx];
+          const scenePrompt = targetScene?.visual_description || visualScenes[idx]?.visual_description;
+          const sceneArtStyle = visualScenes[idx]?.art_style || inputs.artStyle;
+
+          // Image generation task (enqueued to staggered orchestrator)
+          const imgTask = executeStepWithRetry(
+            `Generate Scene ${idx + 1} Image (${currentLang})`,
+            'assets',
+            async () => {
+              const targetFilename = `scene_${idx}_image.png`;
+              if (existingAssets[targetFilename]) {
+                console.info(`🎯 [AutoMode:Image] Using existing image asset: ${targetFilename}`);
+                const url = existingAssets[targetFilename];
+                if (sharedImagesMode && !sharedImageCacheRef.current[idx]) {
+                  sharedImageCacheRef.current[idx] = Promise.resolve(url);
+                }
+                setScenes(prev => prev.map(s => {
+                  if (s.id !== idx) return s;
+                  const prevLoc = s.localizations?.[currentLang] || { voiceoverScript: '', overlays: [] };
+                  return {
+                    ...s,
+                    localizations: {
+                      ...s.localizations,
+                      [currentLang]: {
+                        ...prevLoc,
+                        imageUrl: url
+                      }
+                    }
+                  };
+                }));
+                return url;
+              }
+
+              let url = "";
+              const imgPromise = sharedImageCacheRef.current[idx];
+              if (sharedImagesMode && imgPromise) {
+                console.info(`🎯 [AutoMode:Image] Awaiting cached image Promise for Scene ${idx + 1} (${currentLang})...`);
+                url = await imgPromise;
+              } else {
+                const cleanPrompt = sharedImagesMode
+                  ? `${scenePrompt} Do not generate any text, words, labels, numbers, letters, names, scoreboards, banners, UI elements, or strings directly on the image itself. Render a clean background visual only.`
+                  : scenePrompt;
+
+                const generationPromise = (async () => {
+                  const kitsInScene: string[] = [];
+                  if (kitReferenceUrls['A']) kitsInScene.push(kitReferenceUrls['A']);
+                  if (kitReferenceUrls['B']) kitsInScene.push(kitReferenceUrls['B']);
+
+                  const dataUrl = await apiOrchestrator.enqueue(() => generateImage(
+                    cleanPrompt,
+                    sceneArtStyle,
+                    inputs.aspectRatio,
+                    `Tactical simulation analysis of ${pendingMatch.teamA} vs ${pendingMatch.teamB} in ${pendingMatch.tournament || 'friendly'}.`,
+                    autoCharacters, // Use auto-generated characters with reference images
+                    undefined, // Bypassed overlay text rendering on the image itself
+                    targetScene?.involved_character_ids || [],
+                    targetScene?.voiceover,
+                    idx,
+                    inputs.imageGenerator,
+                    kitsInScene
+                  ));
+                  
+                  // Save to server local assets
+                  const saveRes = await fetch('http://localhost:3001/api/auto-assets/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ matchKey, language: currentLang, fileName: targetFilename, content: dataUrl })
+                  }).then(r => r.json());
+                  
+                  return saveRes.url || dataUrl;
+                })();
+
+                if (sharedImagesMode) {
+                  sharedImageCacheRef.current[idx] = generationPromise;
+                }
+                url = await generationPromise;
+              }
+              
+              setScenes(prev => prev.map(s => {
+                if (s.id !== idx) return s;
+                const prevLoc = s.localizations?.[currentLang] || { voiceoverScript: '', overlays: [] };
+                return {
+                  ...s,
+                  localizations: {
+                    ...s.localizations,
+                    [currentLang]: {
+                      ...prevLoc,
+                      imageUrl: url
+                    }
+                  }
+                };
+              }));
+              return url;
+            },
+            currentLang
+          );
+          assetPromises.push(imgTask);
+
+          // Voiceover TTS task (enqueued to staggered orchestrator)
+          const ttsTask = executeStepWithRetry(
+            `Generate Scene ${idx + 1} Voiceover Audio (${currentLang})`,
+            'assets',
+            async () => {
+              const targetFilename = `scene_${idx}_voiceover.wav`;
+              if (existingAssets[targetFilename]) {
+                console.info(`🎯 [AutoMode:TTS] Using existing TTS audio asset: ${targetFilename}`);
+                const url = existingAssets[targetFilename];
+                setScenes(prev => prev.map(s => {
+                  if (s.id !== idx) return s;
+                  const prevLoc = s.localizations?.[currentLang] || { voiceoverScript: '', overlays: [] };
+                  return {
+                    ...s,
+                    localizations: {
+                      ...s.localizations,
+                      [currentLang]: {
+                        ...prevLoc,
+                        voiceoverScript: targetScene?.voiceover || prevLoc.voiceoverScript || "",
+                        ttsAudioUrl: url
+                      }
+                    }
+                  };
+                }));
+                return url;
+              }
+
+              const res = await apiOrchestrator.enqueue(() => generateTTS(
+                targetScene?.voiceover || "",
+                activeVoice,
+                idx === totalSceneCount - 1 ? TTSTone.Warm : TTSTone.Enthusiastic,
+                inputs.speaker1Voice,
+                inputs.speaker2Voice,
+                currentLang
+              ));
+
+              // Save to server local assets
+              const saveRes = await fetch('http://localhost:3001/api/auto-assets/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchKey, language: currentLang, fileName: targetFilename, content: res.audioUrl })
+              }).then(r => r.json());
+              
+              const savedUrl = saveRes.url || res.audioUrl;
+
+              setScenes(prev => prev.map(s => {
+                if (s.id !== idx) return s;
+                const prevLoc = s.localizations?.[currentLang] || { voiceoverScript: '', overlays: [] };
+                return {
+                  ...s,
+                  localizations: {
+                    ...s.localizations,
+                    [currentLang]: {
+                      ...prevLoc,
+                      voiceoverScript: res.correctedText || prevLoc.voiceoverScript || targetScene?.voiceover || "",
+                      ttsAudioUrl: savedUrl
+                    }
+                  }
+                };
+              }));
+              return savedUrl;
+            },
+            currentLang
+          );
+          assetPromises.push(ttsTask);
+        }
+
+        // Localized Thumbnail task (enqueued to staggered orchestrator)
+        const thumbTask = executeStepWithRetry(
+          `Generate Thumbnail Image (${currentLang})`,
+          'thumbnail',
+          async () => {
+            if (existingAssets['thumbnail_clean.png'] && existingAssets['thumbnail_burned.png']) {
+              console.info(`🎯 [AutoMode:Thumbnail] Using existing clean & burned thumbnail assets.`);
+              const cleanUrl = existingAssets['thumbnail_clean.png'];
+              const burnedUrl = existingAssets['thumbnail_burned.png'];
+              
+              setThumbnailLocalizations(prev => ({
+                ...prev,
+                [currentLang]: {
+                  ...prev[currentLang]!,
+                  url: cleanUrl
+                }
+              }));
+
+              setBurnedThumbnailUrls(prev => ({
+                ...prev,
+                [currentLang]: burnedUrl
+              }));
+
+              return { cleanUrl, burnedUrl };
+            }
+
+            const cleanUrl = await apiOrchestrator.enqueue(() => generateThumbnail(
+              localizedMeta.title,
+              inputs.artStyle,
+              `Tactical simulation analysis of ${pendingMatch.teamA} vs ${pendingMatch.teamB} in ${pendingMatch.tournament || 'friendly'}.`,
+              autoCharacters,
+              thumbMeta.titleText,
+              thumbMeta.subtitleText,
+              thumbMeta.customVisualPrompt,
+              inputs.imageGenerator
+            ));
+
+            const burnedUrl = await burnThumbnailText(
+              cleanUrl,
+              thumbMeta.titleText,
+              thumbMeta.subtitleText,
+              thumbMeta.topRightText,
+              thumbMeta.topLeftText,
+              pendingMatch.teamA,
+              pendingMatch.teamB
+            );
+
+            // Save clean to server local assets
+            const saveClean = await fetch('http://localhost:3001/api/auto-assets/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchKey, language: currentLang, fileName: 'thumbnail_clean.png', content: cleanUrl })
+            }).then(r => r.json());
+            
+            // Save burned to server local assets
+            const saveBurned = await fetch('http://localhost:3001/api/auto-assets/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchKey, language: currentLang, fileName: 'thumbnail_burned.png', content: burnedUrl })
+            }).then(r => r.json());
+
+            const cleanSavedUrl = saveClean.url || cleanUrl;
+            const burnedSavedUrl = saveBurned.url || burnedUrl;
+
+            setThumbnailLocalizations(prev => ({
+              ...prev,
+              [currentLang]: {
+                ...prev[currentLang]!,
+                url: cleanSavedUrl
+              }
+            }));
+
+            setBurnedThumbnailUrls(prev => ({
+              ...prev,
+              [currentLang]: burnedSavedUrl
+            }));
+
+            return { cleanUrl: cleanSavedUrl, burnedUrl: burnedSavedUrl };
+          },
+          currentLang
+        );
+        assetPromises.push(thumbTask);
+
+        // Wait for all assets (all images + all TTS audios + thumbnail) to finish generating
+        const resolvedAssets = await Promise.all(assetPromises);
+        const resolvedThumbnail = resolvedAssets[resolvedAssets.length - 1];
+
+        // 3. Concurrency-Controlled Video Rendering
+        let renderFilename: string | null = null;
+
+        // Check if video is already rendered locally
+        const videoCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=rendered_video.mp4`).then(r => r.json());
+        if (videoCheck.exists && videoCheck.url) {
+          console.info(`🎯 [AutoMode] Video already rendered locally for ${currentLang}. Skipping rendering step.`);
+          renderFilename = `auto_assets/${matchKey}/${currentLang}/rendered_video.mp4`;
+          
+          if (currentLang === Language.English) {
+            setRenderedVideoUrl(videoCheck.url);
+            setServerVideoFilename(renderFilename);
+          }
+
+          setLangPipelineSteps(prev => ({
+            ...prev,
+            [currentLang]: {
+              ...prev[currentLang],
+              statusMessage: `Video rendering complete (reused local).`
+            }
+          }));
+        } else {
+          console.info(`🎥 [AutoMode] Localized assets completed for ${currentLang}. Queuing for rendering...`);
+          renderQueue.setMaxConcurrency(renderConcurrency);
+          const releaseRender = await renderQueue.acquire();
+          try {
+            if (isStopRequestedRef.current) throw new Error("Pause requested before rendering starts.");
+
+            const renderStatusMsg = `Rendering ${currentLang} video (concurrency locked)...`;
+            setAutoPublishState(prev => ({
+              ...prev,
+              statusMessage: renderStatusMsg
+            }));
+
+            setLangPipelineSteps(prev => ({
+              ...prev,
+              [currentLang]: {
+                ...prev[currentLang],
+                subStep: 'render',
+                statusMessage: renderStatusMsg
+              }
+            }));
+
+            // Rebuild final scenes array for this language using the resolved URLs
+            const finalScenes = scriptResult.scenes.map((s, idx) => {
+              return {
+                id: idx,
+                imageUrl: resolvedAssets[2 * idx],
+                ttsAudioUrl: resolvedAssets[2 * idx + 1],
+                voiceoverScript: s.voiceover,
+                overlays: (() => {
+                  const list = (s.overlays || []).map((o, oIdx) => {
+                    let text = o.text || '';
+                    const style = determineOverlayStyle(text, oIdx);
+                    if (style === 'stats-board' || (text.includes('|') && text.includes(':'))) {
+                      text = localizeFootballStatsString(text, currentLang);
+                    }
+                    return {
+                      text,
+                      style,
+                      startSecond: typeof o.startSecond === 'number' ? o.startSecond : 0,
+                      duration: typeof o.duration === 'number' ? o.duration : 5
+                    };
+                  });
+                  while (list.length < 3) {
+                    list.push({
+                      text: '',
+                      style: 'comic-box' as const,
+                      startSecond: 0,
+                      duration: 5
+                    });
+                  }
+                   if (idx === 0 && historyData) {
+                     const labels = getStatsLabels(currentLang);
+                     const wcA = historyData.teamA?.worldCupTitles || "0";
+                     const wcB = historyData.teamB?.worldCupTitles || "0";
+                     const bestA = historyData.teamA?.bestFinish || "N/A";
+                     const bestB = historyData.teamB?.bestFinish || "N/A";
+                     const rankA = historyData.teamA?.fifaRanking || "N/A";
+                     const rankB = historyData.teamB?.fifaRanking || "N/A";
+                     const appsA = historyData.teamA?.worldCupAppearances || "N/A";
+                     const appsB = historyData.teamB?.worldCupAppearances || "N/A";
+                     const h2h = historyData.h2hRecord || "N/A";
+                     
+                     const statsText = `${labels.compare}: ${pendingMatch.teamA} - ${pendingMatch.teamB} | ${labels.worldCupTitles}: ${wcA} - ${wcB} | ${labels.bestFinish}: ${bestA} - ${bestB} | ${labels.fifaRanking}: ${rankA} - ${rankB} | ${labels.worldCupAppearances}: ${appsA} - ${appsB} | ${labels.h2hRecord}: ${h2h}`;
+                     list[1] = {
+                       text: statsText,
+                       style: 'stats-board',
+                       startSecond: 0.5,
+                       duration: 14.0
+                     };
+                   } else if (idx === 1 && localizedTeamAData && localizedTeamBData) {
+                    const labels = getStatsLabels(currentLang);
+                    const coachA = localizedTeamAData.head_coach?.name || "Coach A";
+                    const coachB = localizedTeamBData.head_coach?.name || "Coach B";
+                    const formA = localizedTeamAData.head_coach?.preferred_formation || "N/A";
+                    const formB = localizedTeamBData.head_coach?.preferred_formation || "N/A";
+                    const styleA = localizedTeamAData.head_coach?.play_style_summary || "N/A";
+                    const styleB = localizedTeamBData.head_coach?.play_style_summary || "N/A";
+                    const statsText = `${labels.compare}: ${coachA} - ${coachB} | ${labels.formation}: ${formA} - ${formB} | ${labels.style}: ${styleA} - ${styleB}`;
+                    list[1] = {
+                      text: statsText,
+                      style: 'stats-board',
+                      startSecond: 0.5,
+                      duration: 14.0
+                    };
+                  } else if (idx === 2 && localizedTeamAData && localizedTeamBData) {
+                    const labels = getStatsLabels(currentLang);
+                    const playerA = localizedTeamAData.key_players?.[0]?.name || "Player A";
+                    const playerB = localizedTeamBData.key_players?.[0]?.name || "Player B";
+                    const posA = localizedTeamAData.key_players?.[0]?.position || "Forward";
+                    const posB = localizedTeamBData.key_players?.[0]?.position || "Forward";
+                    const ageA = localizedTeamAData.key_players?.[0]?.age || "N/A";
+                    const ageB = localizedTeamBData.key_players?.[0]?.age || "N/A";
+                    const goalsA = typeof localizedTeamAData.key_players?.[0]?.goals === 'number' ? localizedTeamAData.key_players[0].goals : "0";
+                    const goalsB = typeof localizedTeamBData.key_players?.[0]?.goals === 'number' ? localizedTeamBData.key_players[0].goals : "0";
+                    const assistsA = typeof localizedTeamAData.key_players?.[0]?.assists === 'number' ? localizedTeamAData.key_players[0].assists : "0";
+                    const assistsB = typeof localizedTeamBData.key_players?.[0]?.assists === 'number' ? localizedTeamBData.key_players[0].assists : "0";
+                    const valA = normalizeMarketValue(localizedTeamAData.key_players?.[0]?.market_value || "N/A");
+                    const valB = normalizeMarketValue(localizedTeamBData.key_players?.[0]?.market_value || "N/A");
+                    const perfA = localizedTeamAData.key_players?.[0]?.performance_stats || "N/A";
+                    const perfB = localizedTeamBData.key_players?.[0]?.performance_stats || "N/A";
+                    const statsText = `${labels.compare}: ${playerA} - ${playerB} | ${labels.position}: ${posA} - ${posB} | ${labels.age}: ${ageA} - ${ageB} | ${labels.goals}: ${goalsA} - ${goalsB} | ${labels.assists}: ${assistsA} - ${assistsB} | ${labels.marketValue}: ${valA} - ${valB} | ${labels.performance}: ${perfA} - ${perfB}`;
+                    list[1] = {
+                      text: statsText,
+                      style: 'stats-board',
+                      startSecond: 0.5,
+                      duration: 14.0
+                    };
+                  } else if (idx === totalSceneCount - 2 && scoreDecision && scoreDecision.teamStats) {
+                    const labels = getStatsLabels(currentLang);
+                    const stats = scoreDecision.teamStats;
+                    const statsText = `${labels.score}: ${scoreDecision.finalScore} | ${labels.possession}: ${stats.teamA.possessionPercent}% - ${stats.teamB.possessionPercent}% | ${labels.shots}: ${stats.teamA.totalShots} - ${stats.teamB.totalShots} | ${labels.onTarget}: ${stats.teamA.shotsOnTarget} - ${stats.teamB.shotsOnTarget} | ${labels.xg}: ${stats.teamA.expectedGoalsXg} - ${stats.teamB.expectedGoalsXg} | ${labels.corners}: ${stats.teamA.cornerKicks} - ${stats.teamB.cornerKicks} | ${labels.fouls}: ${stats.teamA.foulsCommitted} - ${stats.teamB.foulsCommitted}`;
+                    list[1] = {
+                      text: statsText,
+                      style: 'stats-board',
+                      startSecond: 0.5,
+                      duration: 14.0
+                    };
+                  }
+                  return list.slice(0, 3);
+                })(),
+                animationStyles: [movementAnimations[idx % movementAnimations.length]],
+                selectedMusicId: s.background_audio_id || 'music_thrilling',
+                selectedSfxId: s.sfx_audio_id || 'ambience_crowd',
+                videoOptions: {
+                  duration: 6,
+                  resolution: '1080p',
+                  generateAudio: true,
+                  aspectRatio: '16:9',
+                  numVideos: 1,
+                  placement: 'end'
+                },
+                matchMinute: s.match_minute,
+                language: currentLang,
+                teamA: pendingMatch.teamA,
+                teamB: pendingMatch.teamB
+              };
+            });
+
+            setRenderResolution('1440p');
+            const renderResult = await renderFullVideo(
+              finalScenes as any[],
+              inputs.aspectRatio,
+              '1440p',
+              setRenderProgress,
+              false
+            );
+            
+            const rawFilename = renderResult.filename;
+            if (!rawFilename) {
+              throw new Error(`Video rendering returned empty filename for ${currentLang}.`);
+            }
+
+            // Save the rendered video file copy to target auto-assets folder
+            const saveVideoRes = await fetch('http://localhost:3001/api/auto-assets/save-rendered-video', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchKey, language: currentLang, videoFilename: rawFilename })
+            }).then(r => r.json());
+
+            renderFilename = `auto_assets/${matchKey}/${currentLang}/rendered_video.mp4`;
+
+            if (currentLang === Language.English) {
+              setRenderedVideoUrl(saveVideoRes.url || `http://localhost:3001/static/${renderFilename}`);
+              setServerVideoFilename(renderFilename);
+            }
+
+            setLangPipelineSteps(prev => ({
+              ...prev,
+              [currentLang]: {
+                ...prev[currentLang],
+                statusMessage: `Video rendering complete.`
+              }
+            }));
+          } finally {
+            releaseRender();
+          }
+        }
+
+        if (!renderFilename) {
+          throw new Error(`Video rendering returned empty filename for ${currentLang}.`);
+        }
+
+        // 4. Parallel YouTube Upload & Publish
+        if (isStopRequestedRef.current) return;
+
+        // Check if already published
+        const publishCheck = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${currentLang}&fileName=publish_status.json`).then(r => r.json());
+        if (publishCheck.exists && publishCheck.data?.published) {
+          console.info(`🎯 [AutoMode] Video already published for ${currentLang} to YouTube: ${publishCheck.data.videoUrl}`);
+          setLangPipelineSteps(prev => ({
+            ...prev,
+            [currentLang]: {
+              ...prev[currentLang],
+              statusMessage: `Published successfully!`
+            }
+          }));
+          return;
+        }
+
+        console.info(`🚀 [AutoMode] Rendering completed for ${currentLang}. Initiating YouTube upload in parallel...`);
+        
+        await executeStepWithRetry(
+          `Publish ${currentLang} Video to YouTube`,
+          'publish',
+          async () => {
+            const burnedThumbUrl = resolvedThumbnail.burnedUrl;
+            const thumbLoc = {
+              topLeftText: thumbMeta.topLeftText || "",
+              titleText: thumbMeta.titleText,
+              subtitleText: thumbMeta.subtitleText,
+              topRightText: thumbMeta.topRightText,
+              prompt: thumbMeta.customVisualPrompt,
+              style: inputs.artStyle,
+              url: burnedThumbUrl
+            };
+
+            const uploadRes = await executeYoutubePublish(
+              renderFilename,
+              localizedMeta.title,
+              localizedMeta.description,
+              { [currentLang]: burnedThumbUrl },
+              { [currentLang]: thumbLoc },
+              burnedThumbUrl,
+              { [currentLang]: localizedMeta },
+              currentLang
+            );
+            
+            // Save publish status
+            await fetch('http://localhost:3001/api/auto-assets/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                matchKey,
+                language: currentLang,
+                fileName: 'publish_status.json',
+                content: { published: true, videoUrl: uploadRes?.videoUrl || `https://www.youtube.com/watch?v=${uploadRes?.videoId || ''}` }
+              })
+            });
+            
+            return true;
+          },
+          currentLang
+        );
+
+        setLangPipelineSteps(prev => ({
+          ...prev,
+          [currentLang]: {
+            ...prev[currentLang],
+            statusMessage: `Published successfully!`
+          }
+        }));
+
+        console.info(`🎉 [AutoMode] Language ${currentLang} successfully published!`);
+      });
+
+      // Await all parallel pipelines to finish
+      await Promise.all(pipelinePromises);
+
+      // Only mark match as Done if all selected languages are done
+      const statusChecks = await Promise.all(
+        (selectedAutoLanguages.length > 0 ? selectedAutoLanguages : [currentEditorLanguage]).map(async (lang) => {
+          try {
+            const check = await fetch(`http://localhost:3001/api/auto-assets/load?matchKey=${matchKey}&language=${lang}&fileName=publish_status.json`).then(r => r.json());
+            return !!check.exists && !!check.data?.published;
+          } catch {
+            return false;
+          }
+        })
+      );
+      const allSelectedLangsDone = statusChecks.every(Boolean);
+
+      if (allSelectedLangsDone) {
+        console.info("🎉 [AutoMode] All selected languages completed successfully. Marking match as Done!");
+        const updatedFiles = fixtureFiles.map(f => {
+          if (f.name !== selectedFixtureName) return f;
+          const fileLines = f.content.split(/\r?\n/);
+          fileLines[pendingMatch.lineIndex] = `${pendingMatch.originalLine} | Done`;
+          return {
+            ...f,
+            content: fileLines.join('\n')
+          };
+        });
+
+        setFixtureFiles(updatedFiles);
+
+        // Save the updated fixture file to the backend filesystem
+        const updatedFixture = updatedFiles.find(f => f.name === selectedFixtureName);
+        if (updatedFixture) {
+          try {
+            await fetch('http://localhost:3001/api/fixtures/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: updatedFixture.name, content: updatedFixture.content })
+            });
+            console.info(`💾 [AutoMode] Updated fixture file saved to backend filesystem: ${updatedFixture.name}`);
+          } catch (saveErr) {
+            console.error("⚠️ [AutoMode] Failed to save updated fixture to backend filesystem:", saveErr);
+          }
+        }
+      } else {
+        console.info("ℹ️ [AutoMode] Some selected languages are still pending. Match will not be marked as Done yet.");
       }
 
       setAutoPublishState(prev => ({
@@ -1618,14 +3335,14 @@ const App: React.FC = () => {
 
       setCurrentEditorLanguage(Language.English);
 
+      sharedImageCacheRef.current = {};
       setScenes([]);
       setCharacters([]);
       setStoryContext("");
+      setHistoryData(null);
       setThumbnailUrl(null);
       setRenderedVideoUrl(null);
       setServerVideoFilename(null);
-
-      isPipelineRunningRef.current = false;
 
     } catch (err: any) {
       console.error("❌ [AutoMode] Critical pipeline error:", err);
@@ -1636,10 +3353,13 @@ const App: React.FC = () => {
         statusMessage: `Paused: ${err.message || 'Error occurred.'}`,
         errorLog: [...prev.errorLog, `Critical: ${err.message || String(err)}`]
       }));
-      isPipelineRunningRef.current = false;
       alert(`⚠️ Auto Mode Paused!\n\nReason: ${err.message || 'Unknown error'}\n\nYou can review/resume the step after resolving the issue.`);
+    } finally {
+      setSoloRunningLanguage(null);
+      isPipelineRunningRef.current = false;
     }
   };
+
 
   useEffect(() => {
     if (autoPublishState.isRunning && !autoPublishState.isPaused && !isPipelineRunningRef.current) {
@@ -1658,34 +3378,45 @@ const App: React.FC = () => {
       const todayStr = now.toDateString();
       const triggerKey = `${todayStr}_${currentTimeStr}`;
 
-      const activeTimes = schedulerTimes.slice(0, schedulerFrequency);
+      const activeTimes = Array.from({ length: schedulerFrequency }).map((_, idx) => schedulerTimes[idx] || '09:00');
       if (activeTimes.includes(currentTimeStr) && lastScheduledTrigger !== triggerKey) {
         if (selectedFixtureName === 'manual') {
           console.warn("⚠️ [Scheduler] Cannot automatically launch: Competition / Tournament drop-down is set to 'manual'. Please select a fixture file.");
+          return;
+        }
+        if (selectedAutoLanguages.length === 0) {
+          console.warn("⚠️ [Scheduler] Cannot automatically launch: No active languages selected.");
+          setLastScheduledTrigger(triggerKey);
+          return;
+        }
+        if (autoPublishState.isRunning) {
+          console.warn(`⏰ [Scheduler] Time matched (${currentTimeStr}), but Full Auto Publish is already running. Trigger bypassed.`);
+          setLastScheduledTrigger(triggerKey);
           return;
         }
         console.info(`⏰ [Scheduler] Time matched (${currentTimeStr}). Automatically launching Full Auto Publish!`);
         setLastScheduledTrigger(triggerKey);
         startFullAutoMode();
       }
-    }, 30000);
+    }, 15000);
 
     return () => clearInterval(interval);
-  }, [schedulerEnabled, schedulerFrequency, schedulerTimes, lastScheduledTrigger]);
+  }, [schedulerEnabled, schedulerFrequency, schedulerTimes, lastScheduledTrigger, selectedFixtureName, autoPublishState.isRunning, selectedAutoLanguages]);
+
 
   const handleLocalize = async (targetLanguage: Language) => {
     // 1. Always check and prefill empty thumbnail overlays first
     await checkAndPrefillThumbnailOverlays(targetLanguage);
 
     if (targetLanguage === currentEditorLanguage) return;
-    
+
     // Switch the tab immediately
     setCurrentEditorLanguage(targetLanguage);
-    
+
     if (targetLanguage !== Language.English && !scenes.some(s => s.localizations?.[targetLanguage])) {
       setIsLocalizing(true);
       try {
-        const locResults = await localizeScript(scenes, targetLanguage);
+        const locResults = await localizeScript(scenes, targetLanguage, inputs.appMode, footballInput);
         setScenes(prev => prev.map(s => {
           const loc = locResults[s.id];
           if (loc) {
@@ -1709,7 +3440,7 @@ const App: React.FC = () => {
               ? `AI, football, soccer, football simulator, world cup, fifa, fifa 2026, ${footballInput.teamA.toLowerCase()} football team, ${footballInput.teamB.toLowerCase()} football team`
               : (youtubeTags || "story, AI")
           };
-          
+
           const localizedMeta = await localizeMetadata(englishMeta, targetLanguage);
           setYoutubeMetadataLocalizations(prev => ({
             ...prev,
@@ -1737,7 +3468,7 @@ const App: React.FC = () => {
       for (let i = 0; i < charactersToProcess.length; i++) {
         const char = charactersToProcess[i];
         await handleGenerateCharacterRef(char.id);
-        
+
         // 5-second interval between each image generation API call (both characters and scenes)
         if (i < charactersToProcess.length - 1 || scenesToProcess.length > 0) {
           await delay(5000);
@@ -1748,7 +3479,7 @@ const App: React.FC = () => {
       for (let j = 0; j < scenesToProcess.length; j++) {
         const scene = scenesToProcess[j];
         await handleGenerateImage(scene.id, scene.visualPrompt);
-        
+
         if (j < scenesToProcess.length - 1) {
           await delay(5000);
         }
@@ -1805,19 +3536,23 @@ const App: React.FC = () => {
   const handleGenerateTTS = async (id: number, tone: TTSTone) => {
     const scene = scenes.find(s => s.id === id);
     if (!scene) return;
-    
+
     let targetScript = scene.voiceoverScript;
     if (currentEditorLanguage !== Language.English && scene.localizations?.[currentEditorLanguage]?.voiceoverScript) {
       targetScript = scene.localizations[currentEditorLanguage]!.voiceoverScript;
     }
-    
+
     if (!targetScript) return;
     updateScene(id, { isGeneratingTTS: true });
     await executeWithAuthHandler(async () => {
       try {
         const voiceToUse = scene.selectedVoice || inputs.voice;
-        const ttsAudioUrl = await generateTTS(targetScript, voiceToUse, tone);
-        updateScene(id, { ttsAudioUrl, isGeneratingTTS: false });
+        const res = await generateTTS(targetScript, voiceToUse, tone, inputs.speaker1Voice, inputs.speaker2Voice, currentEditorLanguage);
+        const updates: any = { ttsAudioUrl: res.audioUrl, isGeneratingTTS: false };
+        if (res.correctedText) {
+          updates.voiceoverScript = res.correctedText;
+        }
+        updateScene(id, updates);
       } catch (e) {
         updateScene(id, { isGeneratingTTS: false });
         throw e;
@@ -1834,7 +3569,7 @@ const App: React.FC = () => {
       for (let i = 0; i < scenesToProcess.length; i++) {
         const scene = scenesToProcess[i];
         await handleGenerateTTS(scene.id, scene.selectedTone);
-        
+
         if (i < scenesToProcess.length - 1) {
           await delay(5000);
         }
@@ -1864,6 +3599,7 @@ const App: React.FC = () => {
       try {
         const currentThumbLoc = thumbnailLocalizations[currentEditorLanguage] || {
           url: null,
+          topLeftText: thumbnailTopLeftText || "",
           titleText: thumbnailTitleText || "",
           subtitleText: thumbnailSubtitleText || "",
           topRightText: thumbnailTopRightText || "",
@@ -1878,7 +3614,8 @@ const App: React.FC = () => {
           characters,
           currentThumbLoc.titleText,
           currentThumbLoc.subtitleText,
-          currentThumbLoc.prompt
+          currentThumbLoc.prompt,
+          inputs.imageGenerator
         );
 
         setThumbnailLocalizations(prev => {
@@ -1971,6 +3708,27 @@ const App: React.FC = () => {
         setIsYoutubeConnected(false);
         setYoutubeChannel(null);
       }
+
+      // Sync status for all 4 languages for the match setup connection menu
+      const langs = ['English', 'Turkish', 'Spanish', 'Portuguese'];
+      const connectionStatuses = await Promise.all(
+        langs.map(async (l) => {
+          try {
+            const res = await fetch(`http://localhost:3001/api/youtube/status?lang=${l}`);
+            if (!res.ok) return { lang: l, isConnected: false, channel: null };
+            const statusData = await res.json();
+            return { lang: l, isConnected: !!statusData.isConnected, channel: statusData.channel || null };
+          } catch {
+            return { lang: l, isConnected: false, channel: null };
+          }
+        })
+      );
+
+      const nextConns: Record<string, { isConnected: boolean; channel?: { title: string; avatar: string; customUrl: string } | null }> = {};
+      connectionStatuses.forEach(s => {
+        nextConns[s.lang] = { isConnected: s.isConnected, channel: s.channel };
+      });
+      setYoutubeConnections(nextConns);
     } catch (e) {
       console.error("Failed to check YouTube status:", e);
     }
@@ -2010,8 +3768,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const handler = setTimeout(async () => {
       const cleanBaseImageUrl = thumbnailLocalizations[Language.English]?.url ||
-                                (Object.values(thumbnailLocalizations) as any[]).find(t => t?.url)?.url ||
-                                thumbnailUrl;
+        (Object.values(thumbnailLocalizations) as any[]).find(t => t?.url)?.url ||
+        thumbnailUrl;
 
       if (!cleanBaseImageUrl) return;
 
@@ -2024,7 +3782,10 @@ const App: React.FC = () => {
               cleanBaseImageUrl,
               thumb.titleText || "",
               thumb.subtitleText || "",
-              thumb.topRightText || ""
+              thumb.topRightText || "",
+              thumb.topLeftText || "",
+              inputs.appMode === AppMode.Football ? footballInput.teamA : undefined,
+              inputs.appMode === AppMode.Football ? footballInput.teamB : undefined
             );
             setBurnedThumbnailUrls(prev => {
               if (prev[langEnum] === burnedUrl) return prev;
@@ -2043,9 +3804,9 @@ const App: React.FC = () => {
     return () => clearTimeout(handler);
   }, [thumbnailLocalizations, thumbnailUrl]);
 
-  const handleConnectYoutube = async () => {
+  const handleConnectYoutube = async (lang = currentEditorLanguage) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/youtube/auth-url?lang=${currentEditorLanguage}`);
+      const res = await fetch(`http://localhost:3001/api/youtube/auth-url?lang=${lang}`);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
@@ -2057,7 +3818,7 @@ const App: React.FC = () => {
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
         const popup = window.open(data.url, 'YouTubeAuth', `width=${width},height=${height},left=${left},top=${top}`);
-        
+
         const timer = setInterval(async () => {
           try {
             if (!popup || popup.closed) {
@@ -2078,15 +3839,18 @@ const App: React.FC = () => {
     }
   };
 
-  const handleDisconnectYoutube = async () => {
-    if (confirm("Are you sure you want to disconnect your YouTube channel?")) {
+  const handleDisconnectYoutube = async (lang = currentEditorLanguage) => {
+    if (confirm(`Are you sure you want to disconnect your YouTube channel for ${lang}?`)) {
       try {
-        const res = await fetch(`http://localhost:3001/api/youtube/disconnect?lang=${currentEditorLanguage}`, { method: 'POST' });
+        const res = await fetch(`http://localhost:3001/api/youtube/disconnect?lang=${lang}`, { method: 'POST' });
         const data = await res.json();
         if (data.success) {
-          setIsYoutubeConnected(false);
-          setYoutubeChannel(null);
-          setPublishSuccessUrl(null);
+          if (lang === currentEditorLanguage) {
+            setIsYoutubeConnected(false);
+            setYoutubeChannel(null);
+            setPublishSuccessUrl(null);
+          }
+          await checkYoutubeStatus();
         }
       } catch (e) {
         console.error(e);
@@ -2116,7 +3880,7 @@ const App: React.FC = () => {
       if (filename) {
         formData.append('videoFilename', filename);
       }
-      
+
       // If we have a local rendered video URL (from imports) and NO server-side filename, retrieve and upload the actual video file!
       if (renderedVideoUrl && !filename) {
         try {
@@ -2147,20 +3911,20 @@ const App: React.FC = () => {
       };
 
       formData.append('title', currentMeta.title || 'AI Story Video');
-      
+
       let finalDesc = currentMeta.description;
       if (!finalDesc.trim()) {
         finalDesc = `🎬 AI Cinematic Story: ${inputs.title}\n\n${storyContext}\n\nGenerated with AI Creator Studio.`;
       }
       formData.append('description', finalDesc);
-      
+
       const tagsArray = (currentMeta.tags || "").split(',').map(t => t.trim()).filter(Boolean);
       formData.append('tags', JSON.stringify(tagsArray));
       formData.append('category', inputs.appMode === AppMode.Football ? "17" : "22");
 
-      const activeThumbUrl = activeBurnedThumbnailUrls[activeLang] || 
-                             activeThumbnailLocalizations[activeLang]?.url || 
-                             activeThumbnailUrl;
+      const activeThumbUrl = activeBurnedThumbnailUrls[activeLang] ||
+        activeThumbnailLocalizations[activeLang]?.url ||
+        activeThumbnailUrl;
       if (activeThumbUrl) {
         try {
           setPublishProgress(25);
@@ -2188,11 +3952,27 @@ const App: React.FC = () => {
       if (uploadData.success) {
         setPublishProgress(100);
         setPublishSuccessUrl(uploadData.videoUrl);
+
+        // Record successfully uploaded video in history log
+        const newUploadedVideo: UploadedVideo = {
+          id: uploadData.videoId || `${Date.now()}_${activeLang}`,
+          title: currentMeta.title || 'AI Story Video',
+          lang: activeLang,
+          youtubeUrl: uploadData.videoUrl || `https://www.youtube.com/watch?v=${uploadData.videoId}`,
+          uploadedAt: new Date().toISOString(),
+          matchInfo: inputs.appMode === AppMode.Football
+            ? `${footballInput.teamA} vs ${footballInput.teamB} (${footballInput.competition})`
+            : inputs.title
+        };
+
+        setUploadedVideos(prev => [newUploadedVideo, ...prev]);
+
         if (!autoPublishState.isRunning) {
           alert("🎉 Video successfully published to YouTube as Private!");
         } else {
           console.info("🎉 [AutoMode] Video successfully published to YouTube as Private!");
         }
+        return uploadData;
       }
     } catch (err: any) {
       console.error("YouTube automated publish failed:", err);
@@ -2251,6 +4031,7 @@ const App: React.FC = () => {
       const projectState = {
         inputs: activeInputs,
         storyContext: activeStoryContext,
+        historyData,
         characters: activeCharacters,
         footballInput,
         scenes: activeScenes.map(s => {
@@ -2312,6 +4093,22 @@ const App: React.FC = () => {
       const videoFolder = root.folder("videos");
 
       const dataUrlToBlob = async (dataUrl: string) => {
+        if (!dataUrl) return null;
+        if (dataUrl.startsWith('data:')) {
+          try {
+            const parts = dataUrl.split(',');
+            const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/png';
+            const bstr = atob(parts[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+          } catch (e) {
+            console.error("Failed to parse data URL to blob directly:", e);
+          }
+        }
         try {
           const res = await fetch(dataUrl);
           if (!res.ok) throw new Error(`HTTP status ${res.status}`);
@@ -2362,9 +4159,9 @@ const App: React.FC = () => {
         } catch (e) {
           console.error("Error exporting default base thumbnail:", e);
         }
-        const defaultBurnedUrl = activeBurnedThumbnailUrls[Language.English] || 
-                                 Object.values(activeBurnedThumbnailUrls)[0] || 
-                                 activeThumbnailUrl;
+        const defaultBurnedUrl = activeBurnedThumbnailUrls[Language.English] ||
+          Object.values(activeBurnedThumbnailUrls)[0] ||
+          activeThumbnailUrl;
         const blob = await dataUrlToBlob(defaultBurnedUrl);
         if (blob) imageFolder.file("thumbnail.png", blob);
       }
@@ -2625,7 +4422,7 @@ const App: React.FC = () => {
         if (!fileData) return undefined;
 
         const blob = await fileData.async("blob");
-        
+
         // Ensure correct MIME type for the browser
         let mimeType = blob.type;
         const lowerPath = relativePath.toLowerCase();
@@ -2633,15 +4430,19 @@ const App: React.FC = () => {
         else if (lowerPath.endsWith('.mp4')) mimeType = 'video/mp4';
         else if (lowerPath.endsWith('.png')) mimeType = 'image/png';
         else if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg')) mimeType = 'image/jpeg';
-        
+
         const typedBlob = new Blob([blob], { type: mimeType });
         const id = `${storagePrefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         return await AssetStorage.saveAsset(id, typedBlob);
       };
 
-      setInputs(data.inputs);
+      setInputs({
+        imageGenerator: 'xAI',
+        ...data.inputs
+      });
       setThumbnailStyle(data.inputs.artStyle || "");
       setStoryContext(data.storyContext || "");
+      setHistoryData(data.historyData || null);
       if (data.footballInput) setFootballInput(data.footballInput);
 
       const restoredChars: Character[] = await Promise.all(data.charactersData.map(async (c: any) => ({
@@ -2695,7 +4496,7 @@ const App: React.FC = () => {
           baseThumbUrl = baseThumb;
         }
       }
-      
+
       if (!baseThumbUrl) {
         const foundBaseThumbKey = files.find(f => f.toLowerCase().endsWith('images/thumbnail_base.png') && !f.includes('__MACOSX'));
         if (foundBaseThumbKey) {
@@ -2722,12 +4523,12 @@ const App: React.FC = () => {
         const restoredBurnedUrls: Record<Language, string> = {} as any;
         for (const [lang, thumb] of Object.entries(data.thumbnailLocalizations)) {
           const t = thumb as any;
-          
+
           let baseThumbUrlForLang: string | null = null;
           if (t.baseUrl) {
             baseThumbUrlForLang = await loadBlobUrl(t.baseUrl, `thumb_base_${lang}`) || null;
           }
-          
+
           if (!baseThumbUrlForLang) {
             const foundBaseThumbKey = files.find(f => f.toLowerCase().endsWith(`images/thumbnail_base_${lang}.png`) && !f.includes('__MACOSX'));
             if (foundBaseThumbKey) {
@@ -2735,7 +4536,7 @@ const App: React.FC = () => {
               baseThumbUrlForLang = await loadBlobUrl(relativePath, `thumb_base_${lang}`) || null;
             }
           }
-          
+
           if (!baseThumbUrlForLang) {
             baseThumbUrlForLang = baseThumbUrl;
           }
@@ -3039,10 +4840,10 @@ const App: React.FC = () => {
   // Robustly set volumes for background audio based on current scene and mode
   useEffect(() => {
     if (!isPreviewing) return;
-    
+
     const isAnimated = inputs.appMode === (AppMode as any).Animated;
-    const musicVolume = isAnimated ? 0.074 : 0.15;
-    const sfxVolume = isAnimated ? 0.3 : 0.5;
+    const musicVolume = isAnimated ? 0.037 : 0.075;
+    const sfxVolume = isAnimated ? 0.15 : 0.25;
 
     if (previewMusicRef.current) {
       previewMusicRef.current.volume = musicVolume;
@@ -3050,7 +4851,7 @@ const App: React.FC = () => {
     if (previewSfxRef.current) {
       previewSfxRef.current.volume = sfxVolume;
     }
-    
+
     console.log(`[Preview] Volumes Set: Mode=${inputs.appMode}, Music=${musicVolume}, SFX=${sfxVolume}`);
   }, [isPreviewing, currentPreviewIndex, inputs.appMode]);
 
@@ -3073,7 +4874,16 @@ const App: React.FC = () => {
             🎬 Animated Video
           </button>
           <button
-            onClick={() => setInputs(prev => ({ ...prev, appMode: AppMode.Football, imageIntervalMinutes: 0.25 }))}
+            onClick={() => setInputs(prev => {
+              const newStyle = prev.artStyle === ArtStyle.VectorGraphic ? ArtStyle.Cinematic : prev.artStyle;
+              return { 
+                ...prev, 
+                appMode: AppMode.Football, 
+                imageIntervalMinutes: 0.25,
+                durationMinutes: prev.durationMinutes === DEFAULT_DURATION ? 6 : prev.durationMinutes,
+                artStyle: newStyle
+              };
+            })}
             className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${inputs.appMode === AppMode.Football ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400 hover:text-white'}`}
           >
             ⚽ AI Football Simulation
@@ -3158,7 +4968,7 @@ const App: React.FC = () => {
                       });
                       setSelectedFixtureName(cleanName);
                       setFootballInput(prev => ({ ...prev, competition: cleanName }));
-                      
+
                       // Also save/upload fixture to backend
                       try {
                         await fetch('http://localhost:3001/api/fixtures/save', {
@@ -3253,6 +5063,121 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
+                {/* YouTube Channel Status Grid */}
+                <div className="space-y-3 bg-slate-950/40 p-4 rounded-xl border border-slate-800/80">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">YouTube Automation Channels Connection</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                    {['English', 'Turkish', 'Spanish', 'Portuguese', 'French', 'German'].map((lang) => {
+                      const conn = youtubeConnections[lang];
+                      const isConnected = !!conn?.isConnected;
+                      const channel = conn?.channel;
+                      const langFlags: Record<string, string> = {
+                        'English': '🇺🇸',
+                        'Turkish': '🇹🇷',
+                        'Spanish': '🇪🇸',
+                        'Portuguese': '🇧🇷',
+                        'French': '🇫🇷',
+                        'German': '🇩🇪'
+                      };
+
+                      return (
+                        <div
+                          key={lang}
+                          className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-all duration-300 ${
+                            soloRunningLanguage === (lang as Language)
+                              ? 'bg-amber-950/20 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] animate-pulse'
+                              : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="font-bold text-sm text-slate-200 flex items-center gap-1.5">
+                              <span>{langFlags[lang] || '🌐'}</span> {lang}
+                            </div>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${isConnected ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                              {isConnected ? 'Active' : 'Offline'}
+                            </span>
+                          </div>
+
+                          {isConnected && channel ? (
+                            <div className="flex items-center gap-2">
+                              {channel.avatar && (
+                                <img src={channel.avatar} alt={channel.title} className="w-6 h-6 rounded-full border border-red-500/30" />
+                              )}
+                              <div className="text-[11px] font-semibold text-slate-400 truncate max-w-[120px]">
+                                {channel.title}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-[11px] text-slate-500 italic">No channel connected</div>
+                          )}
+
+                          <div className="space-y-1.5">
+                            {isConnected ? (
+                              <button
+                                onClick={() => handleDisconnectYoutube(lang)}
+                                className="w-full text-center text-xs text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30 py-1.5 rounded-lg transition-colors cursor-pointer"
+                              >
+                                Disconnect
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleConnectYoutube(lang)}
+                                className="w-full text-center text-xs text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/30 py-1.5 rounded-lg transition-colors cursor-pointer"
+                              >
+                                Connect Channel
+                              </button>
+                            )}
+
+                            {isConnected && (
+                              <div>
+                                {soloRunningLanguage === (lang as Language) ? (
+                                  <button
+                                    onClick={() => {
+                                      setSoloRunningLanguage(null);
+                                      stopFullAutoMode();
+                                    }}
+                                    className="w-full text-center text-xs text-white bg-amber-600 hover:bg-amber-500 border border-amber-500 py-1.5 rounded-lg transition-all cursor-pointer font-bold animate-pulse"
+                                  >
+                                    ⏹️ Stop Solo
+                                  </button>
+                                ) : (
+                                  <button
+                                    disabled={autoPublishState.isRunning}
+                                    onClick={() => startSoloAutoMode(lang as Language)}
+                                    className={`w-full text-center text-xs font-semibold py-1.5 rounded-lg transition-all cursor-pointer border ${
+                                      autoPublishState.isRunning
+                                        ? 'text-slate-600 bg-slate-800/20 border-slate-800/40 cursor-not-allowed'
+                                        : 'text-amber-400 bg-amber-500/5 hover:bg-amber-500/15 border-amber-500/20 hover:border-amber-500/40 hover:shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+                                    }`}
+                                  >
+                                    ⚡ Run Solo
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="border-t border-slate-800/80 pt-2 flex items-center justify-between mt-1">
+                            <span className="text-[11px] text-slate-400 font-medium">Auto Publish</span>
+                            <button
+                              onClick={() => setSelectedAutoLanguages(prev => prev.includes(lang as Language) ? prev.filter(l => l !== (lang as Language)) : [...prev, lang as Language])}
+                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                selectedAutoLanguages.includes(lang as Language) ? 'bg-emerald-500' : 'bg-slate-700'
+                              }`}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                  selectedAutoLanguages.includes(lang as Language) ? 'translate-x-4' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Match Checklist */}
                 <div className="space-y-2">
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Fixture Matches Checklist</div>
@@ -3262,7 +5187,7 @@ const App: React.FC = () => {
                       if (!file) return <div className="text-slate-500 text-sm">No matches found.</div>;
                       const parsed = parseFixtureMatches(file.content);
                       if (parsed.length === 0) return <div className="text-slate-500 text-sm">No valid matches parsed.</div>;
-                      
+
                       return parsed.map((m, i) => {
                         const isNext = parsed.find(pm => !pm.isCompleted)?.lineIndex === m.lineIndex;
                         return (
@@ -3289,10 +5214,16 @@ const App: React.FC = () => {
                     <>
                       <button
                         onClick={startFullAutoMode}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-98 cursor-pointer flex items-center gap-2"
+                        disabled={selectedAutoLanguages.length === 0}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-98 cursor-pointer flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         🚀 Start Full Auto Mode
                       </button>
+                      {selectedAutoLanguages.length === 0 && (
+                        <span className="text-red-400 text-xs font-semibold">
+                          ⚠️ Select at least one channel above to run Auto Mode.
+                        </span>
+                      )}
                       {(autoPublishState.currentLangIndex > 0 || autoPublishState.currentSubStep !== 'idle' || autoPublishState.errorLog.length > 0 || scenes.length > 0) && (
                         <button
                           onClick={handleResetEngineState}
@@ -3374,37 +5305,76 @@ const App: React.FC = () => {
                   </div>
 
                   {schedulerEnabled && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800 text-sm font-sans">
-                      <div>
-                        <label className="block text-slate-400 text-xs font-medium mb-1">Frequency Per Day</label>
-                        <select
-                          value={schedulerFrequency}
-                          onChange={(e) => setSchedulerFrequency(Number(e.target.value))}
-                          className="bg-slate-900 border border-slate-700 rounded p-2 text-white w-full outline-none"
-                        >
-                          <option value={1}>1 time a day</option>
-                          <option value={2}>2 times a day</option>
-                          <option value={3}>3 times a day</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-slate-400 text-xs font-medium">Scheduled Trigger Times</label>
-                        {Array.from({ length: schedulerFrequency }).map((_, idx) => (
-                          <input
-                            key={idx}
-                            type="time"
-                            value={schedulerTimes[idx] || '09:00'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSchedulerTimes(prev => {
-                                const copy = [...prev];
-                                copy[idx] = val;
-                                return copy;
-                              });
-                            }}
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800 text-sm font-sans">
+                        <div>
+                          <label className="block text-slate-400 text-xs font-medium mb-1">Frequency Per Day</label>
+                          <select
+                            value={schedulerFrequency}
+                            onChange={(e) => setSchedulerFrequency(Number(e.target.value))}
                             className="bg-slate-900 border border-slate-700 rounded p-2 text-white w-full outline-none"
-                          />
-                        ))}
+                          >
+                            <option value={1}>1 time a day</option>
+                            <option value={2}>2 times a day</option>
+                            <option value={3}>3 times a day</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-slate-400 text-xs font-medium">Scheduled Trigger Times</label>
+                          {Array.from({ length: schedulerFrequency }).map((_, idx) => (
+                            <input
+                              key={idx}
+                              type="time"
+                              value={schedulerTimes[idx] || '09:00'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setSchedulerTimes(prev => {
+                                  const copy = [...prev];
+                                  copy[idx] = val;
+                                  return copy;
+                                });
+                              }}
+                              className="bg-slate-900 border border-slate-700 rounded p-2 text-white w-full outline-none"
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Scheduler Live Status Panel */}
+                      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2 text-xs font-sans">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">Scheduler Live Status</span>
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            schedulerStatus.warningStr 
+                              ? 'bg-amber-950/40 text-amber-400 border-amber-800' 
+                              : 'bg-emerald-950/40 text-emerald-400 border-emerald-800'
+                          }`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${schedulerStatus.warningStr ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                            {schedulerStatus.warningStr ? 'Warning' : 'Active & Waiting'}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 pt-1">
+                          <div className="space-y-1">
+                            <span className="text-slate-500 block text-[10px] uppercase">Next Run Time</span>
+                            <span className="text-white font-medium text-sm">
+                              {schedulerStatus.nextTriggerStr ? `${schedulerStatus.nextTriggerStr} (Local)` : 'Not Configured'}
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-slate-500 block text-[10px] uppercase">Countdown</span>
+                            <span className="text-emerald-400 font-mono text-sm font-semibold">
+                              {schedulerStatus.countdownStr || 'Calculating...'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {schedulerStatus.warningStr && (
+                          <div className="mt-2 text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg flex items-start gap-2 leading-relaxed">
+                            <span className="mt-0.5">⚠️</span>
+                            <span>{schedulerStatus.warningStr}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -3415,28 +5385,51 @@ const App: React.FC = () => {
                   <div className="space-y-4">
                     {/* Language Progress Tracker */}
                     <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Language Progression</div>
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Language Progression Tabs</div>
+                        {!selectedAutoLanguages.includes(dashboardSelectedLanguage) ? null : (
+                          <button
+                            onClick={() => {
+                              setCurrentEditorLanguage(dashboardSelectedLanguage);
+                              setStep(AppStep.ASSET_GENERATION);
+                            }}
+                            className="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer font-semibold"
+                          >
+                            🎨 View Assets in Studio ↗
+                          </button>
+                        )}
+                      </div>
                       <div className="flex gap-2">
-                        {['English', 'Turkish', 'Spanish', 'Portuguese'].map((lang, lIdx) => {
-                          const isCurrent = autoPublishState.currentLangIndex === lIdx;
-                          const isPast = autoPublishState.currentLangIndex > lIdx;
+                        {['English', 'Turkish', 'Spanish', 'Portuguese', 'French', 'German'].map((lang, lIdx) => {
+                          const targetLang = [Language.English, Language.Turkish, Language.Spanish, Language.Portuguese, Language.French, Language.German][lIdx];
+                          const isExcluded = !selectedAutoLanguages.includes(targetLang);
+                          const stepState = langPipelineSteps[targetLang];
+                          const isCompleted = stepState?.subStep === 'publish' && stepState?.statusMessage === 'Published successfully!';
+                          const isRunning = autoPublishState.isRunning && !isExcluded && !isCompleted && stepState?.subStep && stepState?.subStep !== 'idle';
+                          const isSelected = dashboardSelectedLanguage === targetLang;
+
+                          let btnClass = "bg-slate-900/55 border-slate-800 text-slate-400";
+                          if (isExcluded) {
+                            btnClass = "bg-slate-950/20 border-slate-900/40 text-slate-500 opacity-50 cursor-not-allowed";
+                          } else if (isSelected) {
+                            btnClass = "bg-indigo-650/30 border-indigo-500 text-indigo-300 shadow-md shadow-indigo-500/10 ring-2 ring-indigo-500/20";
+                          } else if (isRunning) {
+                            btnClass = "bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-sm shadow-emerald-500/5";
+                          } else if (isCompleted) {
+                            btnClass = "bg-slate-800 border-slate-700 text-slate-350";
+                          }
+
                           return (
                             <button
                               key={lang}
                               onClick={() => {
-                                const targetLang = [Language.English, Language.Turkish, Language.Spanish, Language.Portuguese][lIdx];
+                                setDashboardSelectedLanguage(targetLang);
                                 setCurrentEditorLanguage(targetLang);
-                                setStep(AppStep.ASSET_GENERATION);
                               }}
-                              className={`flex-1 text-center py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                                isCurrent
-                                  ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/10'
-                                  : isPast
-                                  ? 'bg-slate-800 border-slate-700 text-slate-400'
-                                  : 'bg-slate-900/55 border-slate-800 text-slate-650'
-                              }`}
+                              className={`flex-1 text-center py-2 px-3 rounded-lg text-[10px] md:text-xs font-semibold border transition-all cursor-pointer ${btnClass}`}
+                              disabled={isExcluded}
                             >
-                              {isPast ? '✅ ' : isCurrent ? '⚡ ' : ''}{lang}
+                              {isExcluded ? '🚫 ' : isCompleted ? '✅ ' : isRunning ? '⚡ ' : '⏳ '}{lang}
                             </button>
                           );
                         })}
@@ -3459,14 +5452,15 @@ const App: React.FC = () => {
                           { id: 'publish', label: '🚀 YouTube Publishing', desc: 'Publish video & localized metadata' }
                         ].map((step) => {
                           const stepOrder = ['script', 'assets', 'thumbnail', 'render', 'backup', 'publish'];
-                          const currentIndex = stepOrder.indexOf(autoPublishState.currentSubStep);
+                          const activeLangState = langPipelineSteps[dashboardSelectedLanguage];
+                          const currentIndex = stepOrder.indexOf(activeLangState?.subStep || 'idle');
                           const stepIndex = stepOrder.indexOf(step.id);
-                          
+
                           let status: 'pending' | 'running' | 'completed' | 'failed' = 'pending';
                           if (stepIndex < currentIndex) {
                             status = 'completed';
                           } else if (stepIndex === currentIndex) {
-                            if (autoPublishState.errorLog.length > 0 && autoPublishState.isPaused) {
+                            if ((activeLangState?.errorLog?.length || 0) > 0 && autoPublishState.isPaused) {
                               status = 'failed';
                             } else {
                               status = 'running';
@@ -3476,15 +5470,14 @@ const App: React.FC = () => {
                           return (
                             <div
                               key={step.id}
-                              className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
-                                status === 'completed'
+                              className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${status === 'completed'
                                   ? 'bg-emerald-950/20 border-emerald-900/50 text-slate-350'
                                   : status === 'running'
-                                  ? 'bg-indigo-950/30 border-indigo-500/55 text-white ring-1 ring-indigo-500/20'
-                                  : status === 'failed'
-                                  ? 'bg-red-950/25 border-red-900/60 text-slate-350'
-                                  : 'bg-slate-900/40 border-slate-800/60 text-slate-550'
-                              }`}
+                                    ? 'bg-indigo-950/30 border-indigo-500/55 text-white ring-1 ring-indigo-500/20'
+                                    : status === 'failed'
+                                      ? 'bg-red-950/25 border-red-900/60 text-slate-350'
+                                      : 'bg-slate-900/40 border-slate-800/60 text-slate-550'
+                                }`}
                             >
                               <div className="mt-0.5 flex-shrink-0">
                                 {status === 'completed' && <span className="text-emerald-500 text-sm font-bold">✓</span>}
@@ -3492,7 +5485,7 @@ const App: React.FC = () => {
                                 {status === 'failed' && <span className="text-red-500 text-sm font-bold">⚠️</span>}
                                 {status === 'pending' && <span className="text-slate-700 text-sm font-bold">○</span>}
                               </div>
-                              <div className="space-y-0.5">
+                              <div className="space-y-0.5 text-left">
                                 <div className={`text-xs font-bold ${status === 'running' ? 'text-indigo-305' : ''}`}>
                                   {step.label}
                                 </div>
@@ -3507,22 +5500,94 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Console Logger Panel */}
-                    <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 font-mono text-xs">
+                    <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 font-mono text-xs text-left">
                       <div className="flex justify-between items-center text-slate-400 font-bold border-b border-slate-800 pb-2">
-                        <span>Console Output / Error Logs</span>
-                        {autoPublishState.retries > 0 && (
-                          <span className="text-amber-400">Warning: Retry {autoPublishState.retries}/3</span>
+                        <span>Console Output / Error Logs ({dashboardSelectedLanguage})</span>
+                        {(langPipelineSteps[dashboardSelectedLanguage]?.retries || 0) > 0 && (
+                          <span className="text-amber-400">Warning: Retry {langPipelineSteps[dashboardSelectedLanguage]?.retries}/3</span>
                         )}
                       </div>
                       <div className="space-y-1">
-                        <p><span className="text-slate-500">[Status]:</span> <span className="text-slate-200">{autoPublishState.statusMessage}</span></p>
+                        <p><span className="text-slate-500">[Status]:</span> <span className="text-slate-200">{langPipelineSteps[dashboardSelectedLanguage]?.statusMessage || 'Idle.'}</span></p>
                       </div>
-                      {autoPublishState.errorLog.length > 0 && (
+                      {(langPipelineSteps[dashboardSelectedLanguage]?.errorLog?.length || 0) > 0 && (
                         <div className="space-y-1 pt-2 border-t border-slate-800 max-h-24 overflow-y-auto">
                           <span className="text-red-400 font-bold block">Error Log history:</span>
-                          {autoPublishState.errorLog.map((log, lidx) => (
+                          {langPipelineSteps[dashboardSelectedLanguage].errorLog.map((log, lidx) => (
                             <p key={lidx} className="text-red-450">{log}</p>
                           ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Successfully Uploaded YouTube Videos Log */}
+                    <div className="space-y-3 bg-slate-950/40 p-4 rounded-xl border border-slate-800/80">
+                      <div className="flex justify-between items-center border-b border-slate-850 pb-2">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                          <span>📤</span> Successfully Uploaded YouTube Videos
+                        </div>
+                        {uploadedVideos.length > 0 && (
+                          <button
+                            onClick={() => {
+                              if (confirm("Are you sure you want to clear the upload history log?")) {
+                                setUploadedVideos([]);
+                                localStorage.removeItem('yt_studio_uploaded_videos');
+                              }
+                            }}
+                            className="text-[10px] text-red-400 hover:text-red-300 underline cursor-pointer font-semibold"
+                          >
+                            Clear Log
+                          </button>
+                        )}
+                      </div>
+                      {uploadedVideos.length === 0 ? (
+                        <div className="text-[11px] text-slate-500 italic p-2">No videos uploaded in this session yet.</div>
+                      ) : (
+                        <div className="max-h-60 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                          {uploadedVideos.map((video) => {
+                            const langFlags: Record<string, string> = {
+                              'English': '🇺🇸',
+                              'Turkish': '🇹🇷',
+                              'Spanish': '🇪🇸',
+                              'Portuguese': '🇧🇷'
+                            };
+                            const dateStr = new Date(video.uploadedAt).toLocaleString();
+                            return (
+                              <div key={video.id} className="bg-slate-900/80 p-3 rounded-lg border border-slate-850 flex items-center justify-between gap-4 text-xs hover:border-slate-700 transition-colors">
+                                <div className="flex flex-col gap-1 min-w-0 flex-1 text-left">
+                                  <div className="font-semibold text-slate-200 truncate" title={video.title}>
+                                    {video.title}
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-x-2 text-[10px] text-slate-400">
+                                    <span className="bg-slate-850 px-1.5 py-0.5 rounded text-slate-350 flex items-center gap-1 font-mono">
+                                      <span>{langFlags[video.lang] || '🌐'}</span>
+                                      <span>{video.lang}</span>
+                                    </span>
+                                    {video.matchInfo && (
+                                      <span className="truncate max-w-[200px]" title={video.matchInfo}>
+                                        ⚽ {video.matchInfo}
+                                      </span>
+                                    )}
+                                    <span>•</span>
+                                    <span>📅 {dateStr}</span>
+                                  </div>
+                                </div>
+                                <div className="flex-shrink-0 flex items-center gap-2">
+                                  <span className="bg-green-500/10 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-500/25 uppercase">
+                                    Success
+                                  </span>
+                                  <a
+                                    href={video.youtubeUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-indigo-650 hover:bg-indigo-600 text-white font-bold px-3 py-1.5 rounded text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
+                                  >
+                                    View ↗
+                                  </a>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -3588,7 +5653,11 @@ const App: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-2">Duration (mins)</label>
-            <input type="number" value={inputs.durationMinutes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputs({ ...inputs, durationMinutes: parseInt(e.target.value) })} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 focus:border-purple-500 outline-none" />
+            <input type="number" value={inputs.durationMinutes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputs({ ...inputs, durationMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">MP4 Render Concurrency</label>
+            <input type="number" min={1} max={10} value={renderConcurrency} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRenderConcurrency(parseInt(e.target.value) || 2)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-2">Image Interval (mins)</label>
@@ -3618,16 +5687,71 @@ const App: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Visual Style</label>
-            <select value={inputs.artStyle} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, artStyle: e.target.value as ArtStyle })} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none">
-              {ART_STYLES.map(style => <option key={style.label} value={style.value}>{style.label}</option>)}
+            <label className="block text-sm font-medium text-slate-400 mb-2">Image Generator</label>
+            <select
+              value={inputs.imageGenerator || 'xAI'}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, imageGenerator: e.target.value as 'xAI' | 'Gemini' })}
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none"
+            >
+              <option value="xAI">xAI (Grok Imagine)</option>
+              <option value="Gemini">Gemini (Imagen 3)</option>
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Narrator Voice</label>
-            <select value={inputs.voice} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, voice: e.target.value as VoiceOption })} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none">
-              {VOICE_OPTIONS.map(voice => <option key={voice} value={voice}>{voice}</option>)}
-            </select>
+          {inputs.appMode === AppMode.Football ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Speaker 1 (Host) Voice</label>
+                <select
+                  value={inputs.speaker1Voice || VoiceOption.Enceladus}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, speaker1Voice: e.target.value as VoiceOption })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none"
+                >
+                  {VOICE_OPTIONS.map(voice => <option key={voice} value={voice}>{voice}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Speaker 2 (Analyst) Voice</label>
+                <select
+                  value={inputs.speaker2Voice || VoiceOption.Kore}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, speaker2Voice: e.target.value as VoiceOption })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none"
+                >
+                  {VOICE_OPTIONS.map(voice => <option key={voice} value={voice}>{voice}</option>)}
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Visual Style</label>
+                <select value={inputs.artStyle} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, artStyle: e.target.value as ArtStyle })} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none">
+                  {ART_STYLES.filter(style => inputs.appMode !== AppMode.Football || style.value !== ArtStyle.VectorGraphic).map(style => (
+                    <option key={style.label} value={style.value}>{style.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Narrator Voice</label>
+                <select value={inputs.voice} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInputs({ ...inputs, voice: e.target.value as VoiceOption })} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-purple-500 outline-none">
+                  {VOICE_OPTIONS.map(voice => <option key={voice} value={voice}>{voice}</option>)}
+                </select>
+              </div>
+            </>
+          )}
+          <div className="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 flex items-center justify-between col-span-1 md:col-span-2 lg:col-span-3 mt-4">
+            <div>
+              <h4 className="text-sm font-semibold text-white">Ortak Görsel Modu (Shared Images Mode)</h4>
+              <p className="text-xs text-slate-400 mt-0.5 font-sans">Görselleri sadece bir kez üreterek diller arasında ortak kullanır ve Imagen API maliyetlerini %75 azaltır.</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sharedImagesMode}
+                onChange={(e) => setSharedImagesMode(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
           </div>
         </div>
       </div>
@@ -3658,8 +5782,8 @@ const App: React.FC = () => {
       {/* Control Bar */}
       <div className="flex flex-wrap gap-4 justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700 sticky top-4 z-40 shadow-xl backdrop-blur-md bg-opacity-90">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setStep(AppStep.INPUT)} 
+          <button
+            onClick={() => setStep(AppStep.INPUT)}
             className="bg-slate-700 hover:bg-slate-600 text-slate-350 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-slate-600 flex items-center gap-1 cursor-pointer"
           >
             ⬅ Back to Dashboard
@@ -3688,7 +5812,7 @@ const App: React.FC = () => {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
             Present (Record)
           </button>
-          <button onClick={handleExportProject} disabled={isExporting} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-500/30 flex items-center gap-2">
+          <button onClick={() => handleExportProject()} disabled={isExporting} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-500/30 flex items-center gap-2">
             {isExporting ? <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></div> : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>}
             Export Zip
           </button>
@@ -3707,22 +5831,151 @@ const App: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-lg font-bold text-pink-400">{inputs.appMode === AppMode.Football ? '👕 Player & Staff Registry' : '👤 Character Consistency Studio'}</h3>
-              <div className="text-xs text-slate-500 mt-1">{inputs.appMode === AppMode.Football ? 'Key players, coaches and staff extracted from the match. Generate reference sheets for visual consistency.' : 'Characters must have reference sheets to be consistent.'} {!isReadyForSceneGeneration && hasCharacters && <span className="text-red-400 font-bold ml-2">⚠️ Generate all character sheets before creating scenes!</span>}</div>
+              <div className="text-xs text-slate-500 mt-1">{inputs.appMode === AppMode.Football ? 'Key players, coaches, staff, and team kit designs extracted/defined for the match. Generate references for visual consistency.' : 'Characters must have reference sheets to be consistent.'} {!isReadyForSceneGeneration && (hasCharacters || !hasKits) && <span className="text-red-400 font-bold ml-2">⚠️ Generate all character sheets and team kit designs before creating scenes!</span>}</div>
             </div>
             <button onClick={addCustomCharacter} className="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded flex items-center gap-1 border border-slate-600 transition-colors">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               Add Character
             </button>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
-            {characters.length === 0 && <div className="text-slate-500 text-sm p-4 w-full text-center border-2 border-dashed border-slate-700 rounded-lg">No characters extracted. Add one manually.</div>}
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin font-sans">
+            {inputs.appMode === AppMode.Football && (
+              <>
+                {/* Team A Kit Card */}
+                <div className="min-w-[240px] w-[240px] bg-slate-900 rounded-lg p-3 border border-slate-700 flex flex-col gap-2 relative shadow-md">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-sm font-bold text-white truncate" title={`${footballInput.teamA || 'Team A'} Kit`}>👕 {footballInput.teamA || 'Team A'} Kit</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded font-mono border border-emerald-400/20">Ref Design</span>
+                  </div>
+                  <div
+                    className="aspect-video bg-black rounded overflow-hidden relative group border border-slate-800 cursor-pointer"
+                    onClick={() => !isGeneratingKitA && document.getElementById('upload-kit-a')?.click()}
+                    title="Click to Upload Kit Image"
+                  >
+                    {kitAUrl ? (
+                      <img src={kitAUrl} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 text-xs text-center p-2 bg-slate-800/50 group-hover:bg-slate-800 transition-colors">
+                        {isGeneratingKitA ? (
+                          <div className="animate-spin h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full mb-2"></div>
+                        ) : (
+                          <svg className="w-8 h-8 opacity-20 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        )}
+                        <span className="text-[10px] mt-1">{isGeneratingKitA ? 'Processing...' : 'Click to Upload'}</span>
+                      </div>
+                    )}
+                    <input
+                      id="upload-kit-a"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadKit('A', file);
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => document.getElementById('upload-kit-a')?.click()}
+                        disabled={isGeneratingKitA}
+                        className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-all"
+                        title="Upload Custom Kit Design"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleGenerateKit('A')}
+                        disabled={isGeneratingKitA}
+                        className="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded disabled:opacity-50 flex items-center gap-1 font-bold"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        {isGeneratingKitA ? '...' : (kitAUrl ? 'Regen' : 'Gen AI')}
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-slate-500">{kitAUrl ? 'Ready' : 'Missing'}</span>
+                  </div>
+                </div>
+
+                {/* Team B Kit Card */}
+                <div className="min-w-[240px] w-[240px] bg-slate-900 rounded-lg p-3 border border-slate-700 flex flex-col gap-2 relative shadow-md">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-sm font-bold text-white truncate" title={`${footballInput.teamB || 'Team B'} Kit`}>👕 {footballInput.teamB || 'Team B'} Kit</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded font-mono border border-emerald-400/20">Ref Design</span>
+                  </div>
+                  <div
+                    className="aspect-video bg-black rounded overflow-hidden relative group border border-slate-800 cursor-pointer"
+                    onClick={() => !isGeneratingKitB && document.getElementById('upload-kit-b')?.click()}
+                    title="Click to Upload Kit Image"
+                  >
+                    {kitBUrl ? (
+                      <img src={kitBUrl} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 text-xs text-center p-2 bg-slate-800/50 group-hover:bg-slate-800 transition-colors">
+                        {isGeneratingKitB ? (
+                          <div className="animate-spin h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full mb-2"></div>
+                        ) : (
+                          <svg className="w-8 h-8 opacity-20 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        )}
+                        <span className="text-[10px] mt-1">{isGeneratingKitB ? 'Processing...' : 'Click to Upload'}</span>
+                      </div>
+                    )}
+                    <input
+                      id="upload-kit-b"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadKit('B', file);
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => document.getElementById('upload-kit-b')?.click()}
+                        disabled={isGeneratingKitB}
+                        className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-all"
+                        title="Upload Custom Kit Design"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleGenerateKit('B')}
+                        disabled={isGeneratingKitB}
+                        className="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded disabled:opacity-50 flex items-center gap-1 font-bold"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        {isGeneratingKitB ? '...' : (kitBUrl ? 'Regen' : 'Gen AI')}
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-slate-500">{kitBUrl ? 'Ready' : 'Missing'}</span>
+                  </div>
+                </div>
+              </>
+            )}
+            {characters.length === 0 && inputs.appMode !== AppMode.Football && <div className="text-slate-500 text-sm p-4 w-full text-center border-2 border-dashed border-slate-700 rounded-lg">No characters extracted. Add one manually.</div>}
             {characters.map(char => (
               <div key={char.id} className="min-w-[240px] w-[240px] bg-slate-900 rounded-lg p-3 border border-slate-700 flex flex-col gap-2 relative shadow-md">
                 <div className="flex justify-between items-start mb-1">
                   <input type="text" value={char.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCharacter(char.id, { name: e.target.value })} className="bg-transparent border-b border-slate-700 focus:border-indigo-500 text-sm font-bold text-white w-[85%] outline-none pb-1" placeholder="Name" />
                   <button onClick={() => deleteCharacter(char.id)} className="text-slate-600 hover:text-red-400" title="Delete Character"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
-                <div 
+                <div
                   className="aspect-video bg-black rounded overflow-hidden relative group border border-slate-800 cursor-pointer"
                   onClick={() => !char.isGenerating && document.getElementById(`upload-char-${char.id}`)?.click()}
                   title="Click to Upload Reference Image"
@@ -3733,7 +5986,7 @@ const App: React.FC = () => {
                       <span className="text-[10px] mt-1">{char.isGenerating ? 'Processing...' : 'Click to Upload'}</span>
                     </div>
                   )}
-                  <input 
+                  <input
                     id={`upload-char-${char.id}`}
                     type="file"
                     accept="image/*"
@@ -3746,9 +5999,9 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
                   <div className="flex items-center gap-1">
-                    <button 
-                      onClick={() => document.getElementById(`upload-char-${char.id}`)?.click()} 
-                      disabled={char.isGenerating} 
+                    <button
+                      onClick={() => document.getElementById(`upload-char-${char.id}`)?.click()}
+                      disabled={char.isGenerating}
                       className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-all"
                       title="Upload Reference Image"
                     >
@@ -3782,11 +6035,10 @@ const App: React.FC = () => {
                 key={lang}
                 onClick={() => handleLocalize(lang)}
                 disabled={isLocalizing}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                  currentEditorLanguage === lang 
-                    ? 'bg-indigo-600 border-indigo-500 text-white' 
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${currentEditorLanguage === lang
+                    ? 'bg-indigo-600 border-indigo-500 text-white'
                     : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white'
-                } disabled:opacity-50`}
+                  } disabled:opacity-50`}
               >
                 {lang}
                 {isLocalizing && currentEditorLanguage !== lang && scenes.some(s => s.localizations?.[lang]) === false && '...'}
@@ -3811,6 +6063,7 @@ const App: React.FC = () => {
             onUpdateImage: (id: number, val: string) => updateScene(id, { imageUrl: val }),
             onUpdateTone: (id: number, val: TTSTone) => updateScene(id, { selectedTone: val }),
             onUpdateVoice: (id: number, val: VoiceOption) => updateScene(id, { selectedVoice: val }),
+            onUpdateArtStyle: (id: number, val: ArtStyle) => updateScene(id, { selectedArtStyle: val }),
             onUpdateOverlays: (id: number, val: Overlay[]) => updateScene(id, { overlays: val }),
             onUpdateAnimationStyle: (id: number, styles: string[], config?: Record<string, AnimationConfigEntry>) => updateScene(id, { animationStyles: styles, animationConfig: config }),
             onUpdateAudioSelection: (id: number, type: 'music' | 'sfx', val: string) => updateScene(id, type === 'music' ? { selectedMusicId: val } : { selectedSfxId: val }),
@@ -3826,7 +6079,8 @@ const App: React.FC = () => {
             onGenerateVideoPrompt: handleGenerateVideoPrompt,
             onPreviewVideo: handlePreviewSingleVideo,
             onUpdateMute: (id: number, val: boolean) => updateScene(id, { isMuted: val }),
-            isMuted: scene.isMuted
+            isMuted: scene.isMuted,
+            appMode: inputs.appMode
           };
 
           return inputs.appMode === AppMode.Animated ? (
@@ -3844,6 +6098,7 @@ const App: React.FC = () => {
           {(() => {
             const currentThumbLoc = thumbnailLocalizations[currentEditorLanguage] || {
               url: null,
+              topLeftText: thumbnailTopLeftText || "",
               titleText: thumbnailTitleText || "",
               subtitleText: thumbnailSubtitleText || "",
               topRightText: thumbnailTopRightText || "",
@@ -3857,6 +6112,7 @@ const App: React.FC = () => {
                 [currentEditorLanguage]: {
                   ...(prev[currentEditorLanguage] || {
                     url: null,
+                    topLeftText: thumbnailTopLeftText || "",
                     titleText: thumbnailTitleText || "",
                     subtitleText: thumbnailSubtitleText || "",
                     topRightText: thumbnailTopRightText || "",
@@ -3868,10 +6124,10 @@ const App: React.FC = () => {
               }));
             };
 
-            const activeCleanImageUrl = currentThumbLoc.url || 
-                                         thumbnailLocalizations[Language.English]?.url || 
-                                         (Object.values(thumbnailLocalizations) as any[]).find(t => t?.url)?.url || 
-                                         thumbnailUrl;
+            const activeCleanImageUrl = currentThumbLoc.url ||
+              thumbnailLocalizations[Language.English]?.url ||
+              (Object.values(thumbnailLocalizations) as any[]).find(t => t?.url)?.url ||
+              thumbnailUrl;
 
             const activePreviewImageUrl = burnedThumbnailUrls[currentEditorLanguage] || activeCleanImageUrl;
 
@@ -3879,56 +6135,65 @@ const App: React.FC = () => {
               <>
                 <div className="w-full md:w-1/3 space-y-4">
                   <div className="flex gap-2">
-                    <select 
-                      value={currentThumbLoc.style || (thumbnailStyle as string)} 
-                      onChange={(e) => updateThumbnailLoc({ style: e.target.value })} 
+                    <select
+                      value={currentThumbLoc.style || (thumbnailStyle as string)}
+                      onChange={(e) => updateThumbnailLoc({ style: e.target.value })}
                       className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none"
                     >
                       <option value="" disabled>Select Style</option>
-                      {ART_STYLES.map(style => <option key={style.label} value={style.value}>{style.label}</option>)}
+                      {ART_STYLES.filter(style => inputs.appMode !== AppMode.Football || style.value !== ArtStyle.VectorGraphic).map(style => (
+                        <option key={style.label} value={style.value}>{style.label}</option>
+                      ))}
                     </select>
                   </div>
-                  <input 
-                    type="text" 
-                    value={currentThumbLoc.titleText} 
-                    onChange={(e) => updateThumbnailLoc({ titleText: e.target.value })} 
-                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none" 
-                    placeholder="Main Title Text (e.g. İNANILMAZ MAÇ!)" 
+                  <input
+                    type="text"
+                    value={currentThumbLoc.titleText}
+                    onChange={(e) => updateThumbnailLoc({ titleText: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none"
+                    placeholder="Main Title Text (e.g. İNANILMAZ MAÇ!)"
                   />
-                  <input 
-                    type="text" 
-                    value={currentThumbLoc.subtitleText} 
-                    onChange={(e) => updateThumbnailLoc({ subtitleText: e.target.value })} 
-                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none" 
-                    placeholder="Subtitle (e.g. Gemini Simülasyonu)" 
+                  <input
+                    type="text"
+                    value={currentThumbLoc.subtitleText}
+                    onChange={(e) => updateThumbnailLoc({ subtitleText: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none"
+                    placeholder="Subtitle (e.g. Gemini Simülasyonu)"
                   />
-                  <input 
-                    type="text" 
-                    value={currentThumbLoc.topRightText || ""} 
-                    onChange={(e) => updateThumbnailLoc({ topRightText: e.target.value })} 
-                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none" 
-                    placeholder="Top Right Text (e.g. 10BİN SİM)" 
+                  <input
+                    type="text"
+                    value={currentThumbLoc.topLeftText || ""}
+                    onChange={(e) => updateThumbnailLoc({ topLeftText: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none"
+                    placeholder="Top Left Badge (e.g. WINNER PREDICTED!)"
                   />
-                  <textarea 
-                    value={currentThumbLoc.prompt} 
-                    onChange={(e) => updateThumbnailLoc({ prompt: e.target.value })} 
-                    className="w-full h-24 bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white resize-none focus:border-indigo-500 outline-none" 
-                    placeholder="Custom visual description for thumbnail (optional)..." 
+                  <input
+                    type="text"
+                    value={currentThumbLoc.topRightText || ""}
+                    onChange={(e) => updateThumbnailLoc({ topRightText: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-indigo-500 outline-none"
+                    placeholder="Top Right Text (e.g. 10BİN SİM)"
                   />
-                  <button 
-                    onClick={handleGenerateThumbnail} 
-                    disabled={isGeneratingThumbnail} 
+                  <textarea
+                    value={currentThumbLoc.prompt}
+                    onChange={(e) => updateThumbnailLoc({ prompt: e.target.value })}
+                    className="w-full h-24 bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white resize-none focus:border-indigo-500 outline-none"
+                    placeholder="Custom visual description for thumbnail (optional)..."
+                  />
+                  <button
+                    onClick={handleGenerateThumbnail}
+                    disabled={isGeneratingThumbnail}
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded font-bold disabled:opacity-50"
                   >
                     {isGeneratingThumbnail ? 'Generating...' : 'Generate Thumbnail'}
                   </button>
                 </div>
-                
+
                 <div className="w-full md:w-2/3 bg-black rounded-lg aspect-video flex items-center justify-center overflow-hidden border border-slate-700 relative group">
                   {activePreviewImageUrl ? (
                     <div className="relative w-full h-full">
                       <img src={activePreviewImageUrl} className="w-full h-full object-cover" />
-                      
+
                       {/* Premium Localized High-CTR Overlay Text (Fallback when clean URL is shown) */}
                       {!burnedThumbnailUrls[currentEditorLanguage] && (
                         <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none select-none">
@@ -3984,7 +6249,7 @@ const App: React.FC = () => {
             </h2>
             <p className="text-slate-400 mt-1 text-sm">Automate publishing directly to your YouTube Channel.</p>
           </div>
-          
+
           <div className="mt-4 md:mt-0">
             {isYoutubeConnected ? (
               <div className="flex items-center gap-3 bg-slate-800/80 p-2 pr-4 rounded-full border border-slate-700">
@@ -4045,7 +6310,7 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-2">
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-200">Video Meta & Optimization</h3>
-                
+
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Video Title (max 100 characters)</label>
                   <input
@@ -4084,7 +6349,7 @@ const App: React.FC = () => {
               <div className="flex flex-col justify-between bg-slate-800/20 border border-slate-800/80 rounded-xl p-6 space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-slate-200">Autopilot Settings</h3>
-                  
+
                   <div className="flex items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-slate-800">
                     <div>
                       <h4 className="text-sm font-semibold text-white">Autopilot Publish</h4>
@@ -4121,45 +6386,45 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-              <div className="space-y-4">
-                {isPublishing ? (
-                  <div className="space-y-2 text-center">
-                    <div className="w-full bg-slate-700 rounded-full h-2">
-                      <div className="bg-red-500 h-2 rounded-full transition-all duration-300" style={{ width: `${publishProgress}%` }}></div>
+                <div className="space-y-4">
+                  {isPublishing ? (
+                    <div className="space-y-2 text-center">
+                      <div className="w-full bg-slate-700 rounded-full h-2">
+                        <div className="bg-red-500 h-2 rounded-full transition-all duration-300" style={{ width: `${publishProgress}%` }}></div>
+                      </div>
+                      <p className="text-red-400 font-semibold text-sm animate-pulse">Uploading to YouTube... {publishProgress}%</p>
                     </div>
-                    <p className="text-red-400 font-semibold text-sm animate-pulse">Uploading to YouTube... {publishProgress}%</p>
-                  </div>
-                ) : publishSuccessUrl ? (
-                  <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-xl text-center space-y-2">
-                    <p className="text-green-400 font-semibold">🎉 Video Published Privately!</p>
-                    <a
-                      href={publishSuccessUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block text-xs bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-full transition-colors cursor-pointer"
+                  ) : publishSuccessUrl ? (
+                    <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-xl text-center space-y-2">
+                      <p className="text-green-400 font-semibold">🎉 Video Published Privately!</p>
+                      <a
+                        href={publishSuccessUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block text-xs bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-full transition-colors cursor-pointer"
+                      >
+                        View on YouTube
+                      </a>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handlePublishToYoutube}
+                      disabled={(!serverVideoFilename && !renderedVideoUrl) || isPublishing}
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-red-600/15 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] cursor-pointer"
                     >
-                      View on YouTube
-                    </a>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handlePublishToYoutube}
-                    disabled={(!serverVideoFilename && !renderedVideoUrl) || isPublishing}
-                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-red-600/15 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] cursor-pointer"
-                  >
-                    🚀 Publish to YouTube (Private)
-                  </button>
-                )}
-                {!serverVideoFilename && !renderedVideoUrl && (
-                  <p className="text-center text-xs text-slate-500">
-                    ⚠️ You must render the movie before you can publish.
-                  </p>
-                )}
+                      🚀 Publish to YouTube (Private)
+                    </button>
+                  )}
+                  {!serverVideoFilename && !renderedVideoUrl && (
+                    <p className="text-center text-xs text-slate-500">
+                      ⚠️ You must render the movie before you can publish.
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })() : (
+          );
+        })() : (
           <div className="bg-slate-900/40 p-8 rounded-xl border border-slate-800 text-center space-y-4">
             <div className="text-4xl">🔒</div>
             <h4 className="text-base font-semibold text-slate-300">YouTube Publishing Console Locked</h4>
@@ -4167,7 +6432,7 @@ const App: React.FC = () => {
               Please click the "Connect YouTube Channel" button above to authenticate with Google and unlock full-auto uploads.
             </p>
             <div className="pt-2">
-              <button 
+              <button
                 onClick={checkYoutubeStatus}
                 className="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-400 font-semibold px-4 py-2.5 rounded-lg border border-slate-700 hover:border-indigo-500/30 transition-all active:scale-95 flex items-center gap-1.5 mx-auto cursor-pointer"
               >

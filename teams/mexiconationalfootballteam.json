@@ -1,0 +1,46 @@
+{
+  "team_name": "Mexico National Football Team",
+  "head_coach": {
+    "name": "Javier Aguirre",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Focusing on the philosophy of 'structure first, flexibility always', Aguirre's core system is a balanced 4-3-3 that emphasizes building from the back and maintaining midfield stability via a single pivot. Under his guidance, Mexico frequently morphs into variations such as a 3-4-2-1, 4-2-3-1, or a highly compact 4-1-4-1 mid-match to counter opposing tactics and prioritize defensive compactness."
+  },
+  "key_players": [
+    {
+      "name": "Santiago Giménez",
+      "position": "Centre-Forward",
+      "market_value": "€18.00m",
+      "performance_stats": "The 25-year-old AC Milan striker remains El Tri's premier attacking asset. Though navigating recovery from previous injury spells in Serie A, his high-volume goalscoring history (including 65 career goals for Feyenoord) secures his place as Mexico's primary offensive reference point."
+    },
+    {
+      "name": "Edson Álvarez",
+      "position": "Defensive Midfield",
+      "market_value": "€15.00m",
+      "performance_stats": "As the national team captain and Fenerbahçe anchor, the 28-year-old acts as the vital defensive pivot. He is essential in shielding the back line, regulating match tempo, and translating Aguirre's tactical requirements onto the pitch."
+    },
+    {
+      "name": "Armando González",
+      "position": "Centre-Forward",
+      "market_value": "€15.00m",
+      "performance_stats": "Nicknamed 'La Hormiga', the 23-year-old Guadalajara sensation experienced a meteoric rise, claiming the Liga MX Clausura 2026 Player of the Tournament after tallying 24 goals over the season, which secured both his national team debut and a spot on the 2026 World Cup roster."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Luis Ángel Malagón",
+      "absence_reason": "Ruptured Achilles tendon suffered in March 2026, officially excluding him from the 2026 World Cup roster."
+    },
+    {
+      "player_name": "Marcel Ruiz",
+      "absence_reason": "Torn anterior cruciate ligament (ACL) and meniscus damage suffered during continental club play in March 2026, ruling him out of the tournament."
+    },
+    {
+      "player_name": "César Montes",
+      "absence_reason": "Struggling with muscle pain and undergoing closely monitored rehabilitation to regain full match fitness."
+    },
+    {
+      "player_name": "Luis Chávez",
+      "absence_reason": "Dealing with a painful ligament injury, fighting against time to recover ahead of the group stage fixtures."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "team_name": "Panama National Football Team",
+  "head_coach": {
+    "name": "Thomas Christiansen",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Pragmatic and highly structured style built on defensive discipline, tactical compactness, and rapid transitions. Utilizes a double midfield pivot to control possession and overlapping full-backs to exploit wide areas, capable of shifting to a solid low block against elite opposition."
+  },
+  "key_players": [
+    {
+      "name": "Amir Murillo",
+      "position": "Right-Back",
+      "market_value": "€7.00m",
+      "performance_stats": "Recorded 42 tackles and 118 ball recoveries with 6 big chances created in 36 club matches, maintaining an average FotMob rating of 6.92 in the Turkish Süper Lig [3.4.4].",
+      "age": 30,
+      "goals": 4,
+      "assists": 4
+    },
+    {
+      "name": "José Córdoba",
+      "position": "Centre-Back",
+      "market_value": "€5.00m",
+      "performance_stats": "Achieved a 7.19 average rating in the EFL Championship with 146 clearances, 28 interceptions, and 24 tackles won across 28 matches.",
+      "age": 25,
+      "goals": 1,
+      "assists": 1
+    },
+    {
+      "name": "Adalberto Carrasquilla",
+      "position": "Central Midfield",
+      "market_value": "€4.00m",
+      "performance_stats": "Midfield engine with an average rating of 6.99, completing 1,601 minutes of play in Liga MX Clausura.",
+      "age": 27,
+      "goals": 2,
+      "assists": 2
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Adalberto Carrasquilla",
+      "absence_reason": "Groin injury / adductor tear suffered during the Liga MX final with Pumas UNAM; currently highly doubtful for the initial group stage games but returning to individual training [3.1.9]."
+    },
+    {
+      "player_name": "Luis Mejía",
+      "absence_reason": "Muscle injury."
+    },
+    {
+      "player_name": "Aníbal Godoy",
+      "absence_reason": "Sore muscles / physical discomfort."
+    }
+  ]
+}

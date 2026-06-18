@@ -1,0 +1,38 @@
+{
+  "team_name": "Belgium",
+  "head_coach": {
+    "name": "Rudi Garcia",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "An attacking, high-tempo, possession-based style focused on rapid vertical transitions immediately after winning the ball. Employs aggressive pressing without the ball and encourages fluidity from attacking midfielders and wingers to stretch opposition lines."
+  },
+  "key_players": [
+    {
+      "name": "Jérémy Doku",
+      "position": "Left Winger",
+      "market_value": "€65.00m",
+      "performance_stats": "Regarded as one of Belgium's premier attacking outlets, utilizing explosive dribbling and rapid pace to stretch defenses. He was a central figure during their unbeaten World Cup qualifying campaign."
+    },
+    {
+      "name": "Youri Tielemans",
+      "position": "Central Midfield",
+      "market_value": "€35.00m",
+      "performance_stats": "Serves as the national team captain. He controls the tempo from central midfield, providing defensive coverage and driving ball progression into the final third."
+    },
+    {
+      "name": "Charles De Ketelaere",
+      "position": "Attacking Midfield",
+      "market_value": "€30.00m",
+      "performance_stats": "Highly versatile creative midfielder who excels at finding pockets of space and linking play between the midfield and lone striker. He started in Belgium's key World Cup warm-up matches."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Hans Vanaken",
+      "absence_reason": "Sidelined while recovering from a hip injury."
+    },
+    {
+      "player_name": "Loïs Openda",
+      "absence_reason": "Excluded from the World Cup squad due to a lack of playing time after spending several months on the bench at club level."
+    }
+  ]
+}

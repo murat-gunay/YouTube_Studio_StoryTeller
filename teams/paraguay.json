@@ -1,0 +1,55 @@
+{
+  "team_name": "Paraguay",
+  "head_coach": {
+    "name": "Gustavo Alfaro",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "A highly pragmatic, disciplined low-block structure focusing on intense physical duels, restricting central spaces, rapid counter-attacking vertical transitions, and structured set pieces."
+  },
+  "key_players": [
+    {
+      "name": "Julio Enciso",
+      "position": "Attacking Midfielder",
+      "market_value": "€25.00m",
+      "performance_stats": "Averages 1.27 shots on target per match, won 157 duels, 79% pass completion rate, and provides elite playmaking with creative dribbling capacity.",
+      "age": 22,
+      "goals": 12,
+      "assists": 5
+    },
+    {
+      "name": "Diego Gómez",
+      "position": "Central Midfielder",
+      "market_value": "€25.00m",
+      "performance_stats": "Maintains an 85% pass completion rate, averages 1.8 tackles per match, and serves as a highly versatile box-to-box midfielder with exceptional stamina.",
+      "age": 23,
+      "goals": 5,
+      "assists": 5
+    },
+    {
+      "name": "Ramón Sosa",
+      "position": "Second Striker",
+      "market_value": "€10.00m",
+      "performance_stats": "Explosive winger with a 74.1% pass completion rate, averaging 1.1 key passes per match, and excels at running into space and attacking in 1v1 transitions.",
+      "age": 26,
+      "goals": 5,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Julio Enciso",
+      "absence_reason": "Thigh/quadriceps injury suffered on June 5, 2026, during a friendly match against Nicaragua; currently under monitoring and doubtful for the group stage opening matches."
+    },
+    {
+      "player_name": "Damián Bobadilla",
+      "absence_reason": "Knee problems sustained during national team training camp preparations."
+    },
+    {
+      "player_name": "Fabián Balbuena",
+      "absence_reason": "Hamstring injury."
+    },
+    {
+      "player_name": "Antonio Sanabria",
+      "absence_reason": "Undisclosed minor injury currently under medical observation."
+    }
+  ]
+}

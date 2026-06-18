@@ -1,0 +1,42 @@
+{
+  "team_name": "Iraq National Football Team",
+  "head_coach": {
+    "name": "Graham Arnold",
+    "preferred_formation": "4-2-4",
+    "play_style_summary": "Combines pragmatic defensive organization with an aggressive attacking mentality. Focuses on maintaining high pressing, dominating ball possession, and utilizing wide overloads from full-backs to support a high-risk, high-reward front four."
+  },
+  "key_players": [
+    {
+      "name": "Marko Farji",
+      "position": "Left Winger",
+      "market_value": "€1.70m",
+      "performance_stats": "Plays for Venezia FC [1.1.4]. Known for his pace and technical ability to cut inside from the left wing to create attacking chances in transitions."
+    },
+    {
+      "name": "Ali Al-Hamadi",
+      "position": "Centre-Forward",
+      "market_value": "€1.50m",
+      "performance_stats": "Plays for Luton Town. Serving as a key physical striker leading the front line with high work rate and pressing capabilities."
+    },
+    {
+      "name": "Aimar Sher",
+      "position": "Central Midfield",
+      "market_value": "€1.50m",
+      "performance_stats": "Plays for Sarpsborg 08 FF. Acting as a controlling presence in the midfield pivot, breaking lines with his distribution and defensive positioning."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Youssef Amyn",
+      "absence_reason": "Hamstring injury [1.2.1]"
+    },
+    {
+      "player_name": "Bayar Zaki",
+      "absence_reason": "Cruciate ligament injury"
+    },
+    {
+      "player_name": "Zana Allée",
+      "absence_reason": "Unknown injury"
+    }
+  ]
+}

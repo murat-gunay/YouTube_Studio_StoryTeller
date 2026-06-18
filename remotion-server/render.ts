@@ -3,6 +3,16 @@ import { renderMedia, selectComposition } from '@remotion/renderer';
 import path from 'path';
 import fs from 'fs';
 
+// Redirect temporary folder to the 1TB external volume
+const extTempDir = '/Volumes/Yeni Birim/YouTubeStudio/Football_Simulator/temp';
+if (!fs.existsSync(extTempDir)) {
+    try {
+        fs.mkdirSync(extTempDir, { recursive: true });
+    } catch (_) {}
+}
+process.env.TMPDIR = extTempDir;
+
+
 export async function renderVideo(payload: any): Promise<string> {
     const entry = path.join(process.cwd(), 'src', 'Root.tsx');
     console.info(`🎬 [RenderService] Entry file path: ${entry}`);

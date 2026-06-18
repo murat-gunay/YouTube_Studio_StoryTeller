@@ -1,0 +1,59 @@
+{
+  "team_name": "Ecuador",
+  "head_coach": {
+    "name": "Sebastián Beccacece",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Argentine manager who employs a high-intensity, hyper-aggressive pressing system with quick vertical transitions. He demands absolute tactical discipline, utilizing a double-pivot midfield for balance and explosive wingers to exploit spaces."
+  },
+  "key_players": [
+    {
+      "name": "Moisés Caicedo",
+      "position": "Defensive Midfielder",
+      "market_value": "€100m",
+      "performance_stats": "Maintained a 91.7% pass completion rate, averaging 2.76 tackles and 1.90 interceptions per 90 minutes in the Premier League during the 2025/26 season.",
+      "age": 24,
+      "goals": 3,
+      "assists": 1
+    },
+    {
+      "name": "Willian Pacho",
+      "position": "Centre-Back",
+      "market_value": "€80m",
+      "performance_stats": "Named to the Ligue 1 Team of the Year; registered a 92% pass accuracy with elite recovery pace and physical presence for Paris Saint-Germain.",
+      "age": 24,
+      "goals": 0,
+      "assists": 1
+    },
+    {
+      "name": "Piero Hincapié",
+      "position": "Centre-Back",
+      "market_value": "€50m",
+      "performance_stats": "A versatile left-footed ball-playing defender, noted for strong tackle ratios and high successful clearances while on loan at Arsenal.",
+      "age": 24,
+      "goals": 1,
+      "assists": 0
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "José Cifuentes",
+      "absence_reason": "Excluded from the 2026 World Cup squad due to a recent knee injury and a decline in club form."
+    },
+    {
+      "player_name": "Byron Castillo",
+      "absence_reason": "Omitted from the roster to avoid potential FIFA sanctions and legal disputes surrounding his eligibility issues."
+    },
+    {
+      "player_name": "Robert Arboleda",
+      "absence_reason": "Excluded from selection due to past off-field disciplinary issues and the coach's tactical preference for younger center-backs."
+    },
+    {
+      "player_name": "Enner Valencia",
+      "absence_reason": "Under close medical monitoring ahead of the World Cup due to a minor calf muscle strain sustained in May 2026."
+    },
+    {
+      "player_name": "Leonardo Campana",
+      "absence_reason": "Withdrawn from squad consideration due to recurring hamstring injury problems."
+    }
+  ]
+}

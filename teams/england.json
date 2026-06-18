@@ -1,0 +1,55 @@
+{
+  "team_name": "England",
+  "head_coach": {
+    "name": "Thomas Tuchel",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "A highly structured, energetic, and vertical approach that combines defensive compactness with aggressive counter-pressing, rapid direct transitions, and fluid rotations to unlock elite attacking talent."
+  },
+  "key_players": [
+    {
+      "name": "Jude Bellingham",
+      "position": "Attacking Midfield",
+      "market_value": "€130m",
+      "performance_stats": "Averaged an 88% pass completion rate, 1.8 key passes, and 1.5 tackles per game, providing a dominant box-to-box and creative attacking presence.",
+      "age": 22,
+      "goals": 9,
+      "assists": 10
+    },
+    {
+      "name": "Harry Kane",
+      "position": "Centre-Forward",
+      "market_value": "€60m",
+      "performance_stats": "Finished as Europe's top clinical striker, averaging 1.3 shots on target, 41.3 touches per game with 62% in the final third, and outstanding hold-up play.",
+      "age": 32,
+      "goals": 61,
+      "assists": 12
+    },
+    {
+      "name": "Cole Palmer",
+      "position": "Attacking Midfield",
+      "market_value": "€100m",
+      "performance_stats": "Maintained an 85% pass accuracy, averaging 2.2 key passes per match and proving highly clinical with a record of multiple first-half hat-tricks.",
+      "age": 24,
+      "goals": 12,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Bukayo Saka",
+      "absence_reason": "Sustained an Achilles tendon injury at the end of the domestic season, causing him to miss team training and casting doubt on his availability."
+    },
+    {
+      "player_name": "Ben White",
+      "absence_reason": "Ruled out for the tournament after suffering a significant knee ligament injury with Arsenal."
+    },
+    {
+      "player_name": "Jarrad Branthwaite",
+      "absence_reason": "Sidelined and officially excluded from the squad due to a severe thigh injury suffered in late April."
+    },
+    {
+      "player_name": "Jack Grealish",
+      "absence_reason": "Unavailable for squad selection due to a foot injury."
+    }
+  ]
+}

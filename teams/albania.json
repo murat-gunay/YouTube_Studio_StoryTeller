@@ -1,0 +1,46 @@
+{
+  "team_name": "Albania",
+  "head_coach": {
+    "name": "Rolando Maran",
+    "preferred_formation": "4-3-1-2",
+    "play_style_summary": "Focuses on building an aggressive, tactically disciplined team with personality, a strong defensive foundation, and a winning mentality."
+  },
+  "key_players": [
+    {
+      "name": "Anis Mehmeti",
+      "position": "Attacking Midfield",
+      "market_value": "€15.00m",
+      "performance_stats": "Versatile and creative playmaker with superb dribbling skills, heavily relied on to drive transition attacks."
+    },
+    {
+      "name": "Kristjan Asllani",
+      "position": "Defensive Midfield",
+      "market_value": "€12.00m",
+      "performance_stats": "Midfield engine and metronome, serves as a deep-lying playmaker, demonstrating highly composed passing for Besiktas and Inter Milan."
+    },
+    {
+      "name": "Ernest Muçi",
+      "position": "Attacking Midfield",
+      "market_value": "€11.00m",
+      "performance_stats": "Highly clinical in front of goal, scoring 11 goals in 26 appearances on loan at Trabzonspor prior to sealing a permanent transfer."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ernest Muçi",
+      "absence_reason": "Injured (ruled out of the June 2026 international friendlies against Israel and Luxembourg)"
+    },
+    {
+      "player_name": "Thomas Strakosha",
+      "absence_reason": "Injured (absent from the June 2026 international squad selection)"
+    },
+    {
+      "player_name": "Medon Berisha",
+      "absence_reason": "Right femoral muscle injury with tendon involvement (ruled out for the remainder of the season)"
+    },
+    {
+      "player_name": "Ardian Ismajli",
+      "absence_reason": "Hamstring muscle injury"
+    }
+  ]
+}

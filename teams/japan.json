@@ -1,0 +1,42 @@
+{
+  "team_name": "Japan",
+  "head_coach": {
+    "name": "Hajime Moriyasu",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Discipline-oriented, highly adaptable, and structured style focusing on compact defensive lines, coordinated high pressing to force turnovers, and rapid transitional counter-attacks balancing technical skill with physical intensity."
+  },
+  "key_players": [
+    {
+      "name": "Takefusa Kubo",
+      "position": "Right Winger / Attacking Midfielder",
+      "market_value": "€50.00 million",
+      "performance_stats": "Core creative spark in the attacking third, vital in quick transitions and isolating defenders in one-on-one situations."
+    },
+    {
+      "name": "Hiroki Ito",
+      "position": "Left-Back / Centre-Back",
+      "market_value": "€30.00 million",
+      "performance_stats": "Provides elite defensive stability and versatility, playing at the highest level in Europe with Bayern Munich."
+    },
+    {
+      "name": "Wataru Endo",
+      "position": "Defensive Midfielder",
+      "market_value": "€13.00 million",
+      "performance_stats": "The team captain and defensive anchor, crucial for breaking opponent lines and shielding the back four."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Kaoru Mitoma",
+      "absence_reason": "Hamstring injury sustained in May 2026, officially ruling him out of the World Cup squad."
+    },
+    {
+      "player_name": "Takumi Minamino",
+      "absence_reason": "Withdrew and excluded from the final tournament roster due to an unspecified injury."
+    },
+    {
+      "player_name": "Yuito Suzuki",
+      "absence_reason": "Suffered a broken collarbone, leaving him as a major injury variable."
+    }
+  ]
+}

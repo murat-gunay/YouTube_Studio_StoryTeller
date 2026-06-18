@@ -1,0 +1,46 @@
+{
+  "team_name": "Australia National Football Team",
+  "head_coach": {
+    "name": "Tony Popovic",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Emphasizes a structured back-three build-up with a tight double midfield pivot. Focuses on defensive compactness, counter-pressing, and utilizing attacking midfielders playing between the lines to create vertical progression."
+  },
+  "key_players": [
+    {
+      "name": "Alessandro Circati",
+      "position": "Centre-Back",
+      "market_value": "€10.00m",
+      "performance_stats": "He is a dominant force in Serie A with Parma, showcasing strong aerial presence and the ability to build play out from the back [2.1.4]."
+    },
+    {
+      "name": "Jordan Bos",
+      "position": "Left-Back",
+      "market_value": "€8.00m",
+      "performance_stats": "A versatile left-back playing in the Eredivisie for Feyenoord, known for his attacking threat down the flank and solid defensive recovery."
+    },
+    {
+      "name": "Nestory Irankunda",
+      "position": "Right Winger",
+      "market_value": "€6.00m",
+      "performance_stats": "A highly explosive winger with incredible pace and individual flair, providing a potent threat on transitions."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Riley McGree",
+      "absence_reason": "Sustained a hamstring injury during Middlesbrough's Championship playoff final defeat, ruling him out of the squad [1.2.2]."
+    },
+    {
+      "player_name": "Patrick Yazbek",
+      "absence_reason": "Sustained a quad injury playing for his club, Nashville SC, ruling him out of the pre-tournament camp."
+    },
+    {
+      "player_name": "Hayden Matthews",
+      "absence_reason": "Withdrew from the pre-tournament training camp in Florida due to an injury."
+    },
+    {
+      "player_name": "Mitch Duke",
+      "absence_reason": "Excluded from the training camp roster in a late tactical selection decision by head coach Tony Popovic."
+    }
+  ]
+}

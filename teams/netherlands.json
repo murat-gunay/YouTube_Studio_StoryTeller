@@ -1,0 +1,55 @@
+{
+  "team_name": "Netherlands",
+  "head_coach": {
+    "name": "Ronald Koeman",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "An attacking, possession-based tactical style derived from the Johan Cruyff school of thought. It focuses on structured build-up from defensive areas, a solid midfield double-pivot, and inside-cutting wide forwards who generate dynamic passing sequences and balanced offensive movement."
+  },
+  "key_players": [
+    {
+      "name": "Cody Gakpo",
+      "position": "Left Winger",
+      "market_value": "’60m",
+      "performance_stats": "In the 2025/2026 Premier League season, he recorded a 7.17 FotMob rating, completing 84.1% of his passes, creating 10 big chances, and averaging 2.9 shots per 90 minutes.",
+      "age": 27,
+      "goals": 9,
+      "assists": 7
+    },
+    {
+      "name": "Donyell Malen",
+      "position": "Centre-Forward",
+      "market_value": "’45m",
+      "performance_stats": "An explosive attacker who registered 14 goals in 18 Serie A appearances for Roma on loan from Aston Villa in 2025/2026, posting a 7.15 average rating and a 79.1% passing accuracy in European play.",
+      "age": 27,
+      "goals": 24,
+      "assists": 4
+    },
+    {
+      "name": "Virgil van Dijk",
+      "position": "Centre-Back",
+      "market_value": "’15m",
+      "performance_stats": "The veteran captain won 73.2% of his duels and averaged 6.76 clearances per game during the 2025/2026 season, registering an average FotMob rating of 7.26 in the Premier League.",
+      "age": 34,
+      "goals": 8,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Jurri&euml;n Timber",
+      "absence_reason": "Withdrew from the World Cup squad on June 8, 2026, due to failing to recover sufficiently from a groin injury."
+    },
+    {
+      "player_name": "Xavi Simons",
+      "absence_reason": "Ruptured his anterior cruciate ligament (ACL) in April 2026, ruling him out of the 2026 World Cup."
+    },
+    {
+      "player_name": "Jerdy Schouten",
+      "absence_reason": "Suffered a cruciate ligament (ACL) tear in April 2026, ruling him out of the tournament."
+    },
+    {
+      "player_name": "Jeremie Frimpong",
+      "absence_reason": "Omitted from the final squad due to recurring muscle injury issues during the 2025/2026 season."
+    }
+  ]
+}

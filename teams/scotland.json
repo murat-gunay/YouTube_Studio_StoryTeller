@@ -1,0 +1,47 @@
+{
+  "team_name": "Scotland",
+  "head_coach": {
+    "name": "Steve Clarke",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Pragmatic and defensively solid style built on structural discipline and a compact mid-block. Tactics focus heavily on rapid vertical transitions, utilizing energetic wing-backs and direct attacking midfielders who make late runs into the opposition penalty box."
+  },
+  "key_players": [
+    {
+      "name": "Scott McTominay",
+      "position": "Central Midfield",
+      "market_value": "€40.00m",
+      "performance_stats": "Achieved a 7.24 average match rating across 33 games in the 2025/26 Serie A season for Napoli, registering 1,885 touches, 101 shots, and 34 shots on target [3.1.4].",
+      "age": 29,
+      "goals": 10,
+      "assists": 3
+    },
+    {
+      "name": "John McGinn",
+      "position": "Central Midfield",
+      "market_value": "€13.00m",
+      "performance_stats": "Appeared in 30 Premier League matches during the 2025/26 campaign for Aston Villa, demonstrating high-intensity pressing, exceptional leadership, and outstanding ball-winning capabilities in central areas.",
+      "age": 31,
+      "goals": 5,
+      "assists": 4
+    },
+    {
+      "name": "Ben Gannon-Doak",
+      "position": "Right Winger",
+      "market_value": "€15.00m",
+      "performance_stats": "Made 8 Premier League appearances in the 2025/26 season for Bournemouth following a £25m transfer, proving to be a highly explosive, direct threat in 1v1 situations with elite acceleration.",
+      "age": 20,
+      "goals": 0,
+      "assists": 1
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Billy Gilmour",
+      "absence_reason": "Sustained a Grade II sprain to his right knee in a warm-up friendly against Curaçao on May 30, 2026, ruling him out of the 2026 FIFA World Cup [4.2.5]."
+    },
+    {
+      "player_name": "Tommy Conway",
+      "absence_reason": "Ruled out of the 2026 World Cup squad due to injury, which opened up a squad place for Ross Stewart."
+    }
+  ]
+}

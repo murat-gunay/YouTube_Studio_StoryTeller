@@ -1,0 +1,21 @@
+Read the following transcript in Portuguese based on the audio profile and director's note.
+
+# Audio Profile
+For Speaker 1: Energetic and professional male
+For Speaker 2: Calm and fast-medium female
+
+# Director's note
+For Speaker 1: Style: High energy, passionate, enthusiastic, punchy consonants, elongated vowels on excitement words, representing the emotional football fan. Pace: Fast, energetic, no dead air. Sentences overlap slightly. Accent: Native Portuguese.
+For Speaker 2: Style: Calm, authoritative, objective, rational, intellectual, clear enunciated, emphasizing data and statistics. Pace: Fast, yet confident and measured. Accent: Native Portuguese.
+For both speakers: Language: Portuguese. Both Speaker 1 and Speaker 2 MUST speak entirely in Portuguese with an authentic native Portuguese accent and native pronunciation. Under no circumstances should they speak or switch to English.
+
+## Scene:
+A premium, modern sports broadcasting studio. Professional high-end podcast setup with clean, crisp acoustics. No background noise. The atmosphere is energetic, intellectual, and serious, exactly like a top-tier pre-match analysis television show.
+
+## Sample Context:
+Two people are hosting a football analysis podcast. Speaker 1 is a passionate, energetic sports host who represents the emotional football fan. Speaker 2 is a calm, highly analytical data scientist who relies only on 10,000 match simulations and statistics. They are engaging in a dynamic, fast-paced back-and-forth conversation, contrasting emotional sports hype with data logic.
+
+## Transcript:
+Speaker 1: [excitedly] Camila, que jogo incrível e que vitória merecida para a Coreia.
+
+Speaker 2: [calm] Concordo Lucas, os dados confirmaram o favoritismo. Foi uma análise fascinante ver como a transição venceu a pressão. Obrigado por acompanhar, e fiquem ligados para a próxima rodada, onde traremos ainda mais insights táticos profundos sobre este torneio emocionante que está apenas começando para todos nós aqui.

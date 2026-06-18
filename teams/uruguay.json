@@ -1,0 +1,46 @@
+{
+  "team_name": "Uruguay",
+  "head_coach": {
+    "name": "Marcelo Bielsa",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "High-intensity vertical play, relentless pressing, rapid transitions, and heavy emphasis on vertical wing movements and high stamina."
+  },
+  "key_players": [
+    {
+      "name": "Federico Valverde",
+      "position": "Central Midfield",
+      "market_value": "€120.00m",
+      "performance_stats": "Captains both the national team and Real Madrid; widely regarded as one of the most versatile midfielders globally with exceptional stamina, work rate, and vertical driving runs."
+    },
+    {
+      "name": "Maximiliano Araújo",
+      "position": "Left Winger",
+      "market_value": "€35.00m",
+      "performance_stats": "A key attacking outlet under Bielsa, providing essential pace, directness, and crossing ability from the left flank."
+    },
+    {
+      "name": "Manuel Ugarte",
+      "position": "Defensive Midfield",
+      "market_value": "€30.00m",
+      "performance_stats": "Plays for Manchester United; acts as the crucial defensive anchor and primary axis for building out possession from the back."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Joaquín Piquerez",
+      "absence_reason": "Sidelined due to a severe cruciate ligament tear with recovery expected to last until late October 2026."
+    },
+    {
+      "player_name": "Giorgian de Arrascaeta",
+      "absence_reason": "Suffered a Grade 2 calf muscle tear shortly before the World Cup; although kept in the tournament squad, he is ruled out of the entire group stage."
+    },
+    {
+      "player_name": "Matías Viña",
+      "absence_reason": "Unavailable due to an adductor tear."
+    },
+    {
+      "player_name": "Luis Suárez",
+      "absence_reason": "Omitted from the final World Cup squad by head coach Marcelo Bielsa despite declaring his willingness to contribute."
+    }
+  ]
+}

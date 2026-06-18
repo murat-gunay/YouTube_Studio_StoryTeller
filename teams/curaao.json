@@ -1,0 +1,47 @@
+{
+  "team_name": "Curaçao",
+  "head_coach": {
+    "name": "Dick Advocaat",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Advocaat implements a highly organized and structured system built on defensive compactness, efficient possession buildup from the back, and rapid transitions. His tactical setup typically alternates between a progressive 4-2-3-1 or 4-3-3 and a disciplined low block that leverages fast wide outlets when facing higher-ranked nations."
+  },
+  "key_players": [
+    {
+      "name": "Armando Obispo",
+      "position": "Centre-Back",
+      "market_value": "€4.00m",
+      "performance_stats": "During the 2025/2026 Eredivisie campaign with PSV Eindhoven, he maintained an elite 89.6% pass accuracy (526 successful passes), won 51 duels (57.3% success rate), and registered 39 aerial duel wins (56.5% success rate) in 17 appearances.",
+      "age": 27,
+      "goals": 2,
+      "assists": 0
+    },
+    {
+      "name": "Tahith Chong",
+      "position": "Attacking Midfielder",
+      "market_value": "€3.50m",
+      "performance_stats": "For Sheffield United in the 2025/2026 season, he registered an 83.3% pass completion rate, created 12 chances, and completed 11 dribbles. He has established himself as a focal point for the national team, netting 3 goals in his first 6 international caps.",
+      "age": 26,
+      "goals": 3,
+      "assists": 1
+    },
+    {
+      "name": "Juninho Bacuna",
+      "position": "Central Midfielder",
+      "market_value": "€1.70m",
+      "performance_stats": "Playing for FC Volendam in the 2025/2026 season, he recorded a 69.9% pass completion rate, executed 17 tackles, won 71 duels, and completed 25 accurate long balls across 13 domestic league appearances.",
+      "age": 28,
+      "goals": 1,
+      "assists": 2
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Kenji Gorré",
+      "absence_reason": "Knee injury"
+    },
+    {
+      "player_name": "Livano Comenencia",
+      "absence_reason": "Unknown injury"
+    }
+  ]
+}

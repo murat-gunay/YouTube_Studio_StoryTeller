@@ -1,0 +1,42 @@
+{
+  "team_name": "Egypt National Football Team",
+  "head_coach": {
+    "name": "Hossam Hassan",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Hassan prioritizes a compact, disciplined defensive shape combined with rapid vertical transitions. The system relies on winning the ball quickly in midfield and exploiting the pace of wide attackers on counter-attacks."
+  },
+  "key_players": [
+    {
+      "name": "Omar Marmoush",
+      "position": "Centre-Forward",
+      "market_value": "€60.00m",
+      "performance_stats": "Scored 3 goals and provided 3 assists in 20 Premier League matches for Manchester City, serving as a highly anticipated offensive focal point."
+    },
+    {
+      "name": "Mohamed Salah",
+      "position": "Right Winger",
+      "market_value": "€30.00m",
+      "performance_stats": "Netted 12 goals and registered 9 assists across 39 appearances for Liverpool in his final season, serving as the Pharaohs' captain and legendary talisman."
+    },
+    {
+      "name": "Trezeguet (Mahmoud Hassan)",
+      "position": "Left Winger",
+      "market_value": "€4.50m",
+      "performance_stats": "Plays for Al Ahly where he is the Egyptian Premier League's most valuable player; crucial to the national team's width and transition play."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Islam Issa",
+      "absence_reason": "Cruciate ligament injury (knee medial ligament tear) ruling him out of the 2026 World Cup."
+    },
+    {
+      "player_name": "El Mahdy Soliman",
+      "absence_reason": "Muscle injury sidelined the experienced goalkeeper ahead of the training camp."
+    },
+    {
+      "player_name": "Mohamed Salah",
+      "absence_reason": "Suffered a hamstring tear in late April 2026; though sidelined for several weeks, he is undergoing intensive treatment to recover in time for the World Cup."
+    }
+  ]
+}

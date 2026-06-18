@@ -1,0 +1,38 @@
+{
+  "team_name": "New Zealand National Football Team (All Whites)",
+  "head_coach": {
+    "name": "Darren Bazeley",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Focuses on building a technical, ball-playing side utilizing a high press and quick transitions. The system aims to control the middle third while using the full-backs to provide width and stretch opponents in the final third."
+  },
+  "key_players": [
+    {
+      "name": "Chris Wood",
+      "position": "Centre-Forward",
+      "market_value": "€5.00m",
+      "performance_stats": "Team captain and all-time leading goalscorer for New Zealand with over 45 international goals, showing clinical finishing form in the English Premier League."
+    },
+    {
+      "name": "Joe Bell",
+      "position": "Defensive Midfield",
+      "market_value": "€3.50m",
+      "performance_stats": "A vital midfield engine for Viking FK, acting as the primary hub to break up play and transition the ball effectively."
+    },
+    {
+      "name": "Tyler Bindon",
+      "position": "Centre-Back",
+      "market_value": "€3.50m",
+      "performance_stats": "A highly-rated young defensive talent who has established himself as a key physical and tactical presence in the defensive unit."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ryan Thomas",
+      "absence_reason": "Recovering from a hamstring strain ahead of international fixtures."
+    },
+    {
+      "player_name": "Joe Bell",
+      "absence_reason": "Managing a calf issue that threatens his availability for the upcoming matches."
+    }
+  ]
+}

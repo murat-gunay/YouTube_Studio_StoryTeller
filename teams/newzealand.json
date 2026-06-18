@@ -1,0 +1,47 @@
+{
+  "team_name": "New Zealand",
+  "head_coach": {
+    "name": "Darren Bazeley",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Darren Bazeley has implemented a modern, possession-based approach for New Zealand, shifting away from their historically direct style. His tactical blueprint focuses on patient build-up from the back, positional rotation, and a compact central block that transitions quickly into vertical attacks and high pressing."
+  },
+  "key_players": [
+    {
+      "name": "Chris Wood",
+      "position": "Centre-Forward",
+      "market_value": "€5.00m",
+      "performance_stats": "Served as the primary focal point of attack for Nottingham Forest, scoring 3 goals in 15 appearances in 2025/2026. Dominant in aerial duels and physical hold-up play, maintaining a 69.4% pass success rate and winning 26 aerial duels.",
+      "age": 34,
+      "goals": 3,
+      "assists": 0
+    },
+    {
+      "name": "Tyler Bindon",
+      "position": "Centre-Back",
+      "market_value": "€3.50m",
+      "performance_stats": "A highly promising defender who spent the 2025/2026 season on loan at Sheffield United, registering 25 appearances and scoring 1 goal. Known for his aerial strength to clear lines and solid positioning in a flat back four.",
+      "age": 21,
+      "goals": 1,
+      "assists": 0
+    },
+    {
+      "name": "Marko Stamenić",
+      "position": "Central Midfield",
+      "market_value": "€3.00m",
+      "performance_stats": "Anchored the midfield for Swansea City during the 2025/2026 season with 36 appearances, contributing 3 goals and 2 assists. Highly effective as a defensive shield with strong tackle rates, excellent spatial awareness, and tempo-controlling passes.",
+      "age": 24,
+      "goals": 3,
+      "assists": 2
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ryan Thomas",
+      "absence_reason": "Nursing a hamstring strain, which forced him to miss pre-tournament friendlies against Haiti and England, leaving him short of match fitness."
+    },
+    {
+      "player_name": "Joe Bell",
+      "absence_reason": "Sidelined with a calf injury that kept him out of warm-up matches, disrupting midfield cohesion ahead of the group stage."
+    }
+  ]
+}

@@ -13,7 +13,12 @@ export default defineConfig(({ mode }) => {
         'Cross-Origin-Opener-Policy': 'same-origin',
       },
       watch: {
-        ignored: ['**/remotion-server/temp/**'],
+        ignored: [
+          '**/remotion-server/temp/**',
+          '**/*.txt',
+          '**/*.md',
+          '**/teams/**',
+        ],
       },
     },
     plugins: [react()],
@@ -22,7 +27,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.XAI_API_KEY': JSON.stringify(env.XAI_API_KEY)
     },
     resolve: {
       alias: {

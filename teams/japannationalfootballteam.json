@@ -1,0 +1,55 @@
+{
+  "team_name": "Japan National Football Team",
+  "head_coach": {
+    "name": "Hajime Moriyasu",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Moriyasu's system emphasizes aggressive high pressing, rapid vertical transitions after turnovers, a compact mid-block, and fluid positional rotations between the lines with wide overloads."
+  },
+  "key_players": [
+    {
+      "name": "Takefusa Kubo",
+      "position": "Right Winger",
+      "market_value": "€20m",
+      "performance_stats": "Recorded 2 goals and 4 assists in 24 La Liga appearances for Real Sociedad in 2025/26. He registered 4 goals and 8 assists with 30 key passes during the 2026 World Cup qualifiers.",
+      "age": 25,
+      "goals": 2,
+      "assists": 4
+    },
+    {
+      "name": "Ayase Ueda",
+      "position": "Centre-Forward",
+      "market_value": "€17m",
+      "performance_stats": "Finished as a top striker in Eredivisie with 23 goals in 31 appearances for Feyenoord in 2025/26. Known for high physical work rate, winning 5.6 duels per game.",
+      "age": 27,
+      "goals": 23,
+      "assists": 1
+    },
+    {
+      "name": "Ritsu Doan",
+      "position": "Right Winger",
+      "market_value": "€17m",
+      "performance_stats": "Scored 5 goals and provided 6 assists in 31 Bundesliga matches for Eintracht Frankfurt in 2025/26. An elite 1v1 dribbler averaging 1.1 key passes per game.",
+      "age": 27,
+      "goals": 5,
+      "assists": 6
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Wataru Endo",
+      "absence_reason": "Withdrew from the World Cup squad on June 11, 2026, due to an aggravated foot ligament injury and subsequently announced his international retirement."
+    },
+    {
+      "player_name": "Kaoru Mitoma",
+      "absence_reason": "Excluded from the World Cup squad due to a persistent left-foot injury."
+    },
+    {
+      "player_name": "Takumi Minamino",
+      "absence_reason": "Unavailable for selection due to injury."
+    },
+    {
+      "player_name": "Yuito Suzuki",
+      "absence_reason": "Sidelined from action due to a broken collarbone."
+    }
+  ]
+}

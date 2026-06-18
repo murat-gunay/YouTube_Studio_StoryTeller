@@ -3,32 +3,45 @@
   "head_coach": {
     "name": "Julen Lopetegui",
     "preferred_formation": "4-3-3",
-    "play_style_summary": "Focused on possession-based control, structural defensive discipline, compact organization, and tactical flexibility in transitions."
+    "play_style_summary": "Possession-based tactical play emphasizing structured defensive organization, control through a technically proficient midfield, patient build-up, and rapid counter-attacking transitions utilizing fast wingers in wide areas."
   },
   "key_players": [
     {
       "name": "Akram Afif",
       "position": "Left Winger",
       "market_value": "€8.00m",
-      "performance_stats": "Two-time Asian Footballer of the Year (2019, 2023); chief creative force and playmaker who led Qatar to historic direct qualification for the 2026 FIFA World Cup."
+      "performance_stats": "In 11 qualification matches, he created 69 goalscoring chances, provided 11 assists, and averaged an 80% passing accuracy.",
+      "age": 29,
+      "goals": 4,
+      "assists": 11
     },
     {
       "name": "Almoez Ali",
       "position": "Centre-Forward",
       "market_value": "€2.50m",
-      "performance_stats": "Qatar's all-time top goalscorer who recently returned from a long-term injury; scored 12 goals during the AFC World Cup qualification campaign."
+      "performance_stats": "Finished as the top goalscorer in the Asian qualifiers with 12 goals in 14 matches, boasting a high shot conversion rate as the team's primary striker.",
+      "age": 29,
+      "goals": 12,
+      "assists": 2
     },
     {
-      "name": "Edmílson Junior",
-      "position": "Left Winger",
-      "market_value": "€1.80m",
-      "performance_stats": "Highly technical naturalized winger offering exceptional width, dribbling ability, and clinical depth in attacking transitions."
+      "name": "Homam Al-Amin",
+      "position": "Left-Back",
+      "market_value": "€500k",
+      "performance_stats": "Contributed 4 assists across 17 qualification matches, creating 14 key chances with a strong 61% duel success rate on the left flank.",
+      "age": 26,
+      "goals": 0,
+      "assists": 4
     }
   ],
   "injuries_and_absences": [
     {
-      "player_name": "None",
-      "absence_reason": "No major injuries or suspensions currently reported. The entire 35-man preliminary squad is fully fit and participating in training camps ahead of their preparatory friendlies."
+      "player_name": "Shehab Ellethy",
+      "absence_reason": "Omitted from the final 26-man squad during the final selection cut on the squad submission deadline."
+    },
+    {
+      "player_name": "Rayyan Al Ali",
+      "absence_reason": "Omitted from the final 26-man squad during the final selection cut on the squad submission deadline."
     }
   ]
 }

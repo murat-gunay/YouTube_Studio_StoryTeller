@@ -2,41 +2,62 @@
   "team_name": "South Korea",
   "head_coach": {
     "name": "Hong Myung-bo",
-    "preferred_formation": "3-4-3",
-    "play_style_summary": "A defense-first, highly structured approach that relies on a flexible three-back system to sit in a compact mid-to-low block while enabling swift, fluid transitions to attack using the squad's elite individual skill up front."
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "A transition-based system centered around safety-first compact mid-block defending and rapid, explosive transition play. Adapts to high-altitude settings by preserving player stamina and prioritizing tactical discipline, releasing quick wide attackers once possession is recovered."
   },
   "key_players": [
     {
+      "name": "Son Heung-min",
+      "position": "Left Winger",
+      "market_value": "€15.00m",
+      "performance_stats": "Named MLS Transfermarkt Player of the Season for 2025. Maintained an exceptionally high shot accuracy and key pass frequency, leading LAFC to success and dominating current assist tables in 2026 with elite crossing accuracy.",
+      "age": 33,
+      "goals": 12,
+      "assists": 4
+    },
+    {
       "name": "Lee Kang-in",
-      "position": "Attacking Midfielder / Winger",
-      "market_value": "€28 million",
-      "performance_stats": "The most valuable player in the squad, rotating between starting and key roles for Paris Saint-Germain; serves as South Korea's main creative hub and primary set-piece taker."
+      "position": "Attacking Midfielder",
+      "market_value": "€28.00m",
+      "performance_stats": "Superb ball-carrying and vision. Maintained over 88% pass completion rate and 2.1 key passes per 90 minutes. Vital creative force for Paris Saint-Germain, helping them capture the UEFA Champions League title.",
+      "age": 25,
+      "goals": 3,
+      "assists": 4
     },
     {
       "name": "Kim Min-jae",
       "position": "Centre-Back",
-      "market_value": "€25 million",
-      "performance_stats": "Defensive linchpin for Bayern Munich; acts as the absolute leader and guaranteed starter in South Korea's back-three defensive setup."
-    },
-    {
-      "name": "Son Heung-min",
-      "position": "Forward / Winger",
-      "market_value": "€17 million",
-      "performance_stats": "National team captain currently playing for LAFC in MLS, where he recorded a dominant 12 goals and 4 assists in 13 matches during his debut campaign."
+      "market_value": "€20.00m",
+      "performance_stats": "Named official Player of the Match in the Champions League. Boasts a stellar 93% pass success rate, 67% long ball accuracy, 1.8 tackles, 3 recoveries, and 7 clearances per match to anchor Bayern Munich's defense.",
+      "age": 29,
+      "goals": 2,
+      "assists": 0
     }
   ],
   "injuries_and_absences": [
     {
+      "player_name": "Cho Yu-min",
+      "absence_reason": "Withdrew from the World Cup squad due to a partial tear of the plantar fascia (foot injury) sustained in a friendly against Trinidad and Tobago on May 30, 2026; replaced by Jo Wi-je."
+    },
+    {
       "player_name": "Park Yong-woo",
-      "absence_reason": "Sidelined long-term due to a torn cruciate ligament"
+      "absence_reason": "Sidelined since September 2025 due to a torn cruciate ligament (ACL injury)."
     },
     {
       "player_name": "Won Du-jae",
-      "absence_reason": "Sidelined long-term following major shoulder surgery"
-    },
-    {
-      "player_name": "Kim Ju-seong",
-      "absence_reason": "Excluded from the final World Cup squad roster due to an unresolved club injury"
+      "absence_reason": "Missed squad selection after undergoing shoulder surgery in late 2025, which required a five-month recovery period."
     }
-  ]
+  ],
+  "kit_colors": {
+    "home": {
+      "primary_color": "Red",
+      "secondary_color": "Black",
+      "pattern": "Tiger camouflage stripes"
+    },
+    "away": {
+      "primary_color": "Purple",
+      "secondary_color": "Violet",
+      "pattern": "Floral pattern"
+    }
+  }
 }

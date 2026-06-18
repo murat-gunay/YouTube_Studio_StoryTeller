@@ -1,0 +1,54 @@
+{
+  "team_name": "England national football team",
+  "head_coach": {
+    "name": "Thomas Tuchel",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Possession-dominant and system-first style focusing on high tactical control, defensive compactness, and intense counter-pressing. The team typically transitions to a 3-2-5 shape in possession to manage defensive transitions."
+  },
+  "key_players": [
+    {
+      "name": "Jude Bellingham",
+      "position": "Attacking Midfield",
+      "market_value": "€130.00m",
+      "performance_stats": "Assigned the prestigious No. 10 shirt for the World Cup. A world-class midfielder who remains a primary focal point despite adapting to deeper tactical responsibilities under the new system."
+    },
+    {
+      "name": "Declan Rice",
+      "position": "Central Midfield",
+      "market_value": "€120.00m",
+      "performance_stats": "Anchors the central midfield with exceptional defensive work rate and tactical discipline, crucial to Tuchel's blueprint for structural balance."
+    },
+    {
+      "name": "Bukayo Saka",
+      "position": "Right Winger",
+      "market_value": "€110.00m",
+      "performance_stats": "Assigned the No. 7 shirt for the World Cup. Continues to be highly explosive and consistent, providing valuable goal and assist contributions from the right wing."
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Ben White",
+      "absence_reason": "Ruled out of the 2026 World Cup due to a severe knee ligament injury."
+    },
+    {
+      "player_name": "Jarrad Branthwaite",
+      "absence_reason": "Ruled out of the World Cup squad after suffering a severe thigh injury at the end of April."
+    },
+    {
+      "player_name": "Jack Grealish",
+      "absence_reason": "Sidelined and missed the World Cup squad due to a season-ending foot injury."
+    },
+    {
+      "player_name": "Cole Palmer",
+      "absence_reason": "Omitted from the final World Cup squad due to physical fitness concerns, late-season form issues, and Thomas Tuchel's tactical preference for structural balance over luxury creators."
+    },
+    {
+      "player_name": "Phil Foden",
+      "absence_reason": "Omitted from the squad as Tuchel prioritized defensive work rate, collective athleticism, and tactical discipline over individual improvisation."
+    },
+    {
+      "player_name": "Harry Maguire",
+      "absence_reason": "Omitted from the squad following thigh/calf injuries during the season and failing to fit into Tuchel's preferred back-four system."
+    }
+  ]
+}

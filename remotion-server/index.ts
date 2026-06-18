@@ -6,6 +6,16 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { renderVideo } from './render';
 
+// Redirect all temporary bundling and frame assets to the external volume
+const extTempDir = '/Volumes/Yeni Birim/YouTubeStudio/Football_Simulator/temp';
+if (!fs.existsSync(extTempDir)) {
+    try {
+        fs.mkdirSync(extTempDir, { recursive: true });
+    } catch (_) {}
+}
+process.env.TMPDIR = extTempDir;
+
+
 // Load environment variables from parent directory's .env.local
 dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
 
@@ -187,6 +197,13 @@ app.get('/api/render/status/:jobId', (req, res) => {
         });
     }
 });
+
+// GET all render jobs debug route
+app.get('/api/render/jobs/debug', (req, res) => {
+    console.info(`🔍 [Server:API] Debugging render jobs. Total registered: ${renderJobs.size}`);
+    res.json(Array.from(renderJobs.entries()));
+});
+
 
 
 // --- YouTube Integration Routes ---
@@ -424,6 +441,65 @@ app.post('/api/fixtures/save', (req, res) => {
     }
 });
 
+// 8b. Log TTS prompt to text file in workspace root
+app.post('/api/log-tts', (req, res) => {
+    try {
+        const { prompt, text, isMultiSpeaker, voiceName, tone } = req.body;
+        if (prompt === undefined) {
+            return res.status(400).json({ error: "Missing prompt." });
+        }
+        const workspaceDir = path.join(__dirname, '..');
+        const latestPath = path.join(workspaceDir, 'latest_tts_prompt.txt');
+        const logPath = path.join(workspaceDir, 'tts_prompts_log.txt');
+        const timestamp = new Date().toISOString();
+        
+        const logHeader = `\n\n==================================================\nTIMESTAMP: ${timestamp}\nIS MULTI-SPEAKER: ${isMultiSpeaker}\nVOICE: ${voiceName}\nTONE: ${tone}\nTEXT ENCOUNTERED: ${text}\n==================================================\n`;
+        const fullLogEntry = logHeader + prompt;
+        
+        // Write latest prompt to a single file
+        fs.writeFileSync(latestPath, prompt, 'utf8');
+        
+        // Append all prompts to the log file
+        fs.appendFileSync(logPath, fullLogEntry, 'utf8');
+        
+        console.info(`💾 [Server] Saved latest TTS prompt and appended to log.`);
+        res.json({ success: true, latestPath, logPath });
+    } catch (err: any) {
+        console.error("❌ [Server] Failed to log TTS prompt:", err);
+        res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+});
+
+// 8c. Log Image prompt to text file in workspace root
+app.post('/api/log-image-prompt', (req, res) => {
+    try {
+        const { prompt, type, identifier, style, aspectRatio } = req.body;
+        if (prompt === undefined) {
+            return res.status(400).json({ error: "Missing prompt." });
+        }
+        const workspaceDir = path.join(__dirname, '..');
+        const latestPath = path.join(workspaceDir, 'latest_image_prompt.txt');
+        const logPath = path.join(workspaceDir, 'image_prompts_log.txt');
+        const timestamp = new Date().toISOString();
+        
+        const logHeader = `\n\n==================================================\nTIMESTAMP: ${timestamp}\nTYPE: ${type || 'scene'}\nIDENTIFIER: ${identifier || 'N/A'}\nSTYLE: ${style || 'N/A'}\nASPECT RATIO: ${aspectRatio || 'N/A'}\n==================================================\n`;
+        const fullLogEntry = logHeader + prompt;
+        
+        // Write latest prompt to a single file
+        fs.writeFileSync(latestPath, prompt, 'utf8');
+        
+        // Append all prompts to the log file
+        fs.appendFileSync(logPath, fullLogEntry, 'utf8');
+        
+        console.info(`💾 [Server] Saved latest Image prompt and appended to log.`);
+        res.json({ success: true, latestPath, logPath });
+    } catch (err: any) {
+        console.error("❌ [Server] Failed to log Image prompt:", err);
+        res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+});
+
+
 // 9. List cached team profiles
 app.get('/api/teams', (req, res) => {
     try {
@@ -500,6 +576,143 @@ app.post('/api/teams/:name', (req, res) => {
         res.json({ success: true, path: filePath });
     } catch (err: any) {
         console.error("❌ [Server] Failed to save team cache:", err);
+        res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+});
+
+// --- Auto-Assets Caching Endpoints ---
+
+// 12. Check and load cached auto-assets (JSON or check binary)
+app.get('/api/auto-assets/load', (req, res) => {
+    try {
+        const { matchKey, language, fileName } = req.query;
+        if (!matchKey || !fileName) {
+            return res.status(400).json({ error: "Missing matchKey or fileName." });
+        }
+
+        const baseDir = '/Volumes/Yeni Birim/YouTubeStudio/Football_Simulator';
+        const filePath = language
+            ? path.join(baseDir, 'auto_assets', matchKey as string, language as string, fileName as string)
+            : path.join(baseDir, 'auto_assets', matchKey as string, fileName as string);
+
+        if (!fs.existsSync(filePath)) {
+            return res.json({ exists: false });
+        }
+
+        const publicUrl = language
+            ? `http://localhost:3001/static/auto_assets/${matchKey}/${language}/${fileName}`
+            : `http://localhost:3001/static/auto_assets/${matchKey}/${fileName}`;
+
+        const isJson = (fileName as string).endsWith('.json');
+        if (isJson) {
+            const contentStr = fs.readFileSync(filePath, 'utf8');
+            return res.json({ exists: true, url: publicUrl, data: JSON.parse(contentStr) });
+        }
+
+        res.json({ exists: true, url: publicUrl });
+    } catch (err: any) {
+        console.error("❌ [Server:AutoAssets] Failed to load asset:", err);
+        res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+});
+
+// 13. Save auto-assets (JSON metadata or Base64 data URIs)
+app.post('/api/auto-assets/save', async (req, res) => {
+    try {
+        const { matchKey, language, fileName, content } = req.body;
+        if (!matchKey || !fileName || content === undefined) {
+            return res.status(400).json({ error: "Missing matchKey, fileName or content." });
+        }
+
+        const baseDir = '/Volumes/Yeni Birim/YouTubeStudio/Football_Simulator';
+        const targetDir = language
+            ? path.join(baseDir, 'auto_assets', matchKey, language)
+            : path.join(baseDir, 'auto_assets', matchKey);
+
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        const filePath = path.join(targetDir, fileName);
+
+        if (typeof content === 'string' && content.startsWith('data:')) {
+            // Base64 data URI (image or audio)
+            const commaIdx = content.indexOf(',');
+            const base64Data = content.substring(commaIdx + 1);
+            const buffer = Buffer.from(base64Data, 'base64');
+            fs.writeFileSync(filePath, buffer);
+            console.info(`💾 [Server:AutoAssets] Saved binary asset to: ${filePath}`);
+        } else if (typeof content === 'object') {
+            // JSON object
+            fs.writeFileSync(filePath, JSON.stringify(content, null, 2), 'utf8');
+            console.info(`💾 [Server:AutoAssets] Saved JSON asset to: ${filePath}`);
+        } else {
+            // Plain text
+            fs.writeFileSync(filePath, content, 'utf8');
+            console.info(`💾 [Server:AutoAssets] Saved text asset to: ${filePath}`);
+        }
+
+        const publicUrl = language
+            ? `http://localhost:3001/static/auto_assets/${matchKey}/${language}/${fileName}`
+            : `http://localhost:3001/static/auto_assets/${matchKey}/${fileName}`;
+
+        res.json({ success: true, path: filePath, url: publicUrl });
+    } catch (err: any) {
+        console.error("❌ [Server:AutoAssets] Failed to save asset:", err);
+        res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+});
+
+// 14. Save rendered video by copying it from the root simulator directory to the asset subfolder
+app.post('/api/auto-assets/save-rendered-video', (req, res) => {
+    try {
+        const { matchKey, language, videoFilename } = req.body;
+        if (!matchKey || !language || !videoFilename) {
+            return res.status(400).json({ error: "Missing matchKey, language or videoFilename." });
+        }
+
+        const baseDir = '/Volumes/Yeni Birim/YouTubeStudio/Football_Simulator';
+        const sourcePath = path.join(baseDir, videoFilename);
+        const targetDir = path.join(baseDir, 'auto_assets', matchKey, language);
+
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        const targetPath = path.join(targetDir, 'rendered_video.mp4');
+        if (fs.existsSync(sourcePath)) {
+            fs.copyFileSync(sourcePath, targetPath);
+            console.info(`💾 [Server:AutoAssets] Copied rendered video ${sourcePath} to ${targetPath}`);
+            res.json({ success: true, url: `http://localhost:3001/static/auto_assets/${matchKey}/${language}/rendered_video.mp4` });
+        } else {
+            res.status(404).json({ error: `Source video ${videoFilename} not found.` });
+        }
+    } catch (err: any) {
+        console.error("❌ [Server:AutoAssets] Failed to save rendered video:", err);
+        res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+});
+
+// 15. Delete match assets folder on reset
+app.post('/api/auto-assets/reset', (req, res) => {
+    try {
+        const { matchKey } = req.body;
+        if (!matchKey) {
+            return res.status(400).json({ error: "Missing matchKey." });
+        }
+
+        const baseDir = '/Volumes/Yeni Birim/YouTubeStudio/Football_Simulator';
+        const targetDir = path.join(baseDir, 'auto_assets', matchKey);
+
+        if (fs.existsSync(targetDir)) {
+            fs.rmSync(targetDir, { recursive: true, force: true });
+            console.info(`🗑️ [Server:AutoAssets] Deleted match folder on reset: ${targetDir}`);
+            res.json({ success: true, message: "Match assets deleted." });
+        } else {
+            res.json({ success: true, message: "No assets existed for this match." });
+        }
+    } catch (err: any) {
+        console.error("❌ [Server:AutoAssets] Failed to delete match assets:", err);
         res.status(500).json({ error: err.message || 'Internal Server Error' });
     }
 });

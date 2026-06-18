@@ -1,0 +1,47 @@
+{
+  "team_name": "Australia",
+  "head_coach": {
+    "name": "Tony Popovic",
+    "preferred_formation": "3-4-2-1",
+    "play_style_summary": "Highly structured and pragmatic with a focus on defensive solidity and defensive discipline. Utilizes a compact shape and resilient defensive block coupled with rapid counter-attacking transitions and intense counterpressing."
+  },
+  "key_players": [
+    {
+      "name": "Jordan Bos",
+      "position": "Left-Back",
+      "market_value": "€12.00m",
+      "performance_stats": "Recorded 4 goals and 7 assists in 28 appearances in the Eredivisie for Feyenoord, registering an outstanding average FotMob match rating of 7.43.",
+      "age": 23,
+      "goals": 4,
+      "assists": 7
+    },
+    {
+      "name": "Alessandro Circati",
+      "position": "Centre-Back",
+      "market_value": "€12.00m",
+      "performance_stats": "Played 31 Serie A games for Parma, logging 2,664 minutes, averaging 4.8 clearances and 1.4 tackles per match with a 6.83 average FotMob rating.",
+      "age": 22,
+      "goals": 1,
+      "assists": 0
+    },
+    {
+      "name": "Nestory Irankunda",
+      "position": "Right Winger",
+      "market_value": "€8.00m",
+      "performance_stats": "Made 40 appearances in the Championship for Watford, scoring 4 goals and registering 4 assists in 2,031 minutes of action.",
+      "age": 20,
+      "goals": 4,
+      "assists": 4
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Riley McGree",
+      "absence_reason": "Hamstring injury, which ruled the Middlesbrough midfielder out of the 2026 FIFA World Cup."
+    },
+    {
+      "player_name": "Nick D'Agostino",
+      "absence_reason": "Leg injury sustained in training, forcing him to leave the Socceroos' pre-camp in Sarasota."
+    }
+  ]
+}

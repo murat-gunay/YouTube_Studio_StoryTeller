@@ -1,0 +1,51 @@
+{
+  "team_name": "Ghana National Football Team",
+  "head_coach": {
+    "name": "Carlos Queiroz",
+    "preferred_formation": "4-4-2",
+    "play_style_summary": "An extremely organized, disciplined, and defensive-minded approach. Focuses on compressing space in a mid-to-low block, utilizing a solid flat back four, and launching rapid, direct counter-attacks in transition using pacey wingers."
+  },
+  "key_players": [
+    {
+      "name": "Antoine Semenyo",
+      "position": "Right Winger",
+      "market_value": "€80.00m",
+      "performance_stats": "Elite physical presence and direct goal threat. Transferred to Manchester City in 2026, he is known for high shot volume, an impressive dribbling success rate, and contributing a high percentage of his team's goals.",
+      "age": 26,
+      "goals": 17,
+      "assists": 4
+    },
+    {
+      "name": "Abdul Fatawu",
+      "position": "Right Winger",
+      "market_value": "€20.00m",
+      "performance_stats": "Incredibly dynamic and pacey winger with explosive acceleration. Recognized as a highly effective 1v1 dribbler and crosser for Leicester City. Winner of the EFL Championship Goal of the Month in August 2025.",
+      "age": 22,
+      "goals": 9,
+      "assists": 8
+    },
+    {
+      "name": "Iñaki Williams",
+      "position": "Right Winger",
+      "market_value": "€8.00m",
+      "performance_stats": "Renowned for blistering speed, exceptional longevity, and fitness. A tactically disciplined forward for Athletic Club who constantly stretches defenses with runs in behind and provides highly intense off-the-ball pressing.",
+      "age": 32,
+      "goals": 3,
+      "assists": 6
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Mohammed Kudus",
+      "absence_reason": "Excluded from the 2026 World Cup squad after failing to recover from a serious quadriceps injury and subsequent surgery sustained in January 2026."
+    },
+    {
+      "player_name": "Mohammed Salisu",
+      "absence_reason": "Ruled out of the tournament due to a ruptured anterior cruciate ligament (ACL) suffered during a Ligue 1 clash with Monaco in January 2026."
+    },
+    {
+      "player_name": "Alexander Djiku",
+      "absence_reason": "Sustained a late injury in training over the weekend just prior to the final World Cup squad deadline in early June 2026, resulting in him being replaced in the squad."
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 
 import { ArtStyle, AspectRatio, VoiceOption, TTSTone, AudioAsset, Language } from "./types";
 
-export const DEFAULT_DURATION = 30;
+export const DEFAULT_DURATION = 5;
 export const DEFAULT_INTERVAL = 2;
 
 export const MODELS = {
-  transcription: 'gemini-3.1-flash-lite-preview',
-  scriptGen: 'gemini-3.1-flash-lite-preview',
-  contentRefine: 'gemini-3.1-flash-lite-preview',
+  transcription: 'gemini-3.1-flash-lite',
+  scriptGen: 'gemini-3.1-flash-lite',
+  contentRefine: 'gemini-3.1-flash-lite',
   imageGen: 'gemini-3.1-flash-image-preview', // For aspect ratio control
   imageEdit: 'gemini-3.1-flash-image-preview', // Upgraded to Pro for better instruction following
   videoGen: 'veo-3.1-lite-generate-preview',

@@ -1,0 +1,55 @@
+{
+  "team_name": "Tunisia",
+  "head_coach": {
+    "name": "Sabri Lamouchi",
+    "preferred_formation": "4-3-3",
+    "play_style_summary": "Focuses on a high press, fast vertical transitions, and structured defensive solidity. Lamouchi prefers a compact central midfield that is hard-working and quick to win back possession, utilizing rapid transitions to play direct balls to wide players."
+  },
+  "key_players": [
+    {
+      "name": "Hannibal Mejbri",
+      "position": "Attacking Midfielder",
+      "market_value": "€15.00m",
+      "performance_stats": "For Burnley in the 2025/2026 season, he made 27 appearances (1,231 minutes played), maintaining a 77.3% pass completion rate, creating 21 chances, winning 102 duels, and making 29 tackles with a high-energy pressing style.",
+      "age": 23,
+      "goals": 1,
+      "assists": 4
+    },
+    {
+      "name": "Montassar Talbi",
+      "position": "Centre-Back",
+      "market_value": "€8.00m",
+      "performance_stats": "For FC Lorient in the 2025/2026 season, he played 29 matches (2,610 minutes) with an 89.2% pass completion rate, won 77 aerial duels (62.1% success), made 186 clearances, 22 tackles, and 26 interceptions.",
+      "age": 28,
+      "goals": 1,
+      "assists": 1
+    },
+    {
+      "name": "Elias Achouri",
+      "position": "Left Winger",
+      "market_value": "€3.00m",
+      "performance_stats": "For FC Copenhagen in the 2025/2026 season (1,303 minutes), he achieved an 82.8% pass completion rate, created 26 chances, completed 24 successful dribbles (42.1% success), won 76 duels, and made 19 tackles.",
+      "age": 27,
+      "goals": 3,
+      "assists": 3
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Yassine Meriah",
+      "absence_reason": "Excluded from the 2026 World Cup squad by Sabri Lamouchi as part of a squad rejuvenation process."
+    },
+    {
+      "player_name": "Ferjani Sassi",
+      "absence_reason": "Former captain who was officially left out and excluded from the 2026 World Cup squad."
+    },
+    {
+      "player_name": "Mohamed Ali Ben Romdhane",
+      "absence_reason": "Key midfielder who was officially left out of the 26-man roster for the 2026 World Cup."
+    },
+    {
+      "player_name": "Naim Sliti",
+      "absence_reason": "Officially announced his retirement from international football in March 2026."
+    }
+  ]
+}

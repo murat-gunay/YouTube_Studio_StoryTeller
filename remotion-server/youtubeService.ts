@@ -134,24 +134,32 @@ export function isConnected(lang: string = 'default'): boolean {
  * Fetches the authenticated channel's profile (name, handle, avatar).
  */
 export async function getChannelDetails(lang: string = 'default') {
-    const youtube = await getYouTubeClient(lang);
-    const response = await youtube.channels.list({
-        part: ['snippet', 'statistics'],
-        mine: true
-    });
+    try {
+        const youtube = await getYouTubeClient(lang);
+        const response = await youtube.channels.list({
+            part: ['snippet', 'statistics'],
+            mine: true
+        });
 
-    if (!response.data.items || response.data.items.length === 0) {
-        throw new Error(`No channel found for the authenticated user for ${lang}.`);
+        if (!response.data.items || response.data.items.length === 0) {
+            throw new Error(`No channel found for the authenticated user for ${lang}.`);
+        }
+
+        const channel = response.data.items[0];
+        const snippet = channel.snippet || {};
+        return {
+            id: channel.id,
+            title: snippet.title || "Unknown Channel",
+            customUrl: snippet.customUrl || "", // e.g. @TipsForMinds
+            avatar: snippet.thumbnails?.default?.url || ""
+        };
+    } catch (error: any) {
+        if (error.message && error.message.includes('invalid_grant')) {
+            console.warn(`🔒 [YouTubeService] invalid_grant detected in getChannelDetails for ${lang}. Deleting invalid tokens.`);
+            disconnectYouTube(lang);
+        }
+        throw error;
     }
-
-    const channel = response.data.items[0];
-    const snippet = channel.snippet || {};
-    return {
-        id: channel.id,
-        title: snippet.title || "Unknown Channel",
-        customUrl: snippet.customUrl || "", // e.g. @TipsForMinds
-        avatar: snippet.thumbnails?.default?.url || ""
-    };
 }
 
 /**
@@ -176,7 +184,7 @@ const languageToIsoCode: Record<string, string> = {
     'Chinese': 'zh',
     'Japanese': 'ja',
     'Turkish': 'tr',
-    'Portuguese': 'pt',
+    'Portuguese': 'pt-BR',
     'Hindi': 'hi',
     'Arabic': 'ar',
     'default': 'en'
@@ -213,66 +221,74 @@ export async function uploadVideo({
         throw new Error(`Rendered video file not found at ${filePath}`);
     }
 
-    const youtube = await getYouTubeClient(lang);
-    const isoCode = languageToIsoCode[lang] || 'en';
+    try {
+        const youtube = await getYouTubeClient(lang);
+        const isoCode = languageToIsoCode[lang] || 'en';
 
-    // 1. Upload Video
-    const videoResponse = await youtube.videos.insert({
-        part: ['snippet', 'status'],
-        requestBody: {
-            snippet: {
-                title: title.substring(0, 100), // YouTube title limit is 100
-                description: description,
-                categoryId: category || "22", // People & Blogs or custom category ID
-                tags: tags || [],
-                defaultAudioLanguage: isoCode,
-                defaultLanguage: isoCode
-            },
-            status: {
-                privacyStatus: 'private', // Forced to Private as requested
-                selfDeclaredMadeForKids: false
-            }
-        },
-        media: {
-            body: fs.createReadStream(filePath)
-        }
-    }, {
-        onUploadProgress: (evt) => {
-            const size = fs.statSync(filePath).size;
-            const progress = size > 0 ? Math.round((evt.bytesRead / size) * 100) : 0;
-            console.info(`   - Video Uploading... ${progress}% (${evt.bytesRead}/${size} bytes)`);
-            if (onProgress) {
-                onProgress(progress);
-            }
-        }
-    });
-
-    const videoId = videoResponse.data.id;
-    if (!videoId) {
-        throw new Error("YouTube upload succeeded but no video ID was returned.");
-    }
-
-    console.info(`🎬 [YouTubeService] Video uploaded successfully! ID: ${videoId}`);
-
-    // 2. Upload Thumbnail if available
-    if (thumbnailPath && fs.existsSync(thumbnailPath)) {
-        console.info(`🎬 [YouTubeService] Uploading thumbnail from ${thumbnailPath}...`);
-        try {
-            await youtube.thumbnails.set({
-                videoId: videoId,
-                media: {
-                    body: fs.createReadStream(thumbnailPath)
+        // 1. Upload Video
+        const videoResponse = await youtube.videos.insert({
+            part: ['snippet', 'status'],
+            requestBody: {
+                snippet: {
+                    title: title.substring(0, 100), // YouTube title limit is 100
+                    description: description,
+                    categoryId: category || "22", // People & Blogs or custom category ID
+                    tags: tags || [],
+                    defaultAudioLanguage: isoCode,
+                    defaultLanguage: isoCode
+                },
+                status: {
+                    privacyStatus: 'private', // Forced to Private as requested
+                    selfDeclaredMadeForKids: false
                 }
-            });
-            console.info(`🎬 [YouTubeService] Thumbnail uploaded successfully!`);
-        } catch (e: any) {
-            console.error(`❌ [YouTubeService] Failed to set thumbnail for video ${videoId}:`, e.message || e);
-            // Non-blocking error: the video is uploaded successfully even if thumbnail fails
-        }
-    }
+            },
+            media: {
+                body: fs.createReadStream(filePath)
+            }
+        }, {
+            onUploadProgress: (evt) => {
+                const size = fs.statSync(filePath).size;
+                const progress = size > 0 ? Math.round((evt.bytesRead / size) * 100) : 0;
+                console.info(`   - Video Uploading... ${progress}% (${evt.bytesRead}/${size} bytes)`);
+                if (onProgress) {
+                    onProgress(progress);
+                }
+            }
+        });
 
-    return {
-        videoId,
-        videoUrl: `https://www.youtube.com/watch?v=${videoId}`
-    };
+        const videoId = videoResponse.data.id;
+        if (!videoId) {
+            throw new Error("YouTube upload succeeded but no video ID was returned.");
+        }
+
+        console.info(`🎬 [YouTubeService] Video uploaded successfully! ID: ${videoId}`);
+
+        // 2. Upload Thumbnail if available
+        if (thumbnailPath && fs.existsSync(thumbnailPath)) {
+            console.info(`🎬 [YouTubeService] Uploading thumbnail from ${thumbnailPath}...`);
+            try {
+                await youtube.thumbnails.set({
+                    videoId: videoId,
+                    media: {
+                        body: fs.createReadStream(thumbnailPath)
+                    }
+                });
+                console.info(`🎬 [YouTubeService] Thumbnail uploaded successfully!`);
+            } catch (e: any) {
+                console.error(`❌ [YouTubeService] Failed to set thumbnail for video ${videoId}:`, e.message || e);
+                // Non-blocking error: the video is uploaded successfully even if thumbnail fails
+            }
+        }
+
+        return {
+            videoId,
+            videoUrl: `https://www.youtube.com/watch?v=${videoId}`
+        };
+    } catch (error: any) {
+        if (error.message && error.message.includes('invalid_grant')) {
+            console.warn(`🔒 [YouTubeService] invalid_grant detected in uploadVideo for ${lang}. Deleting invalid tokens.`);
+            disconnectYouTube(lang);
+        }
+        throw error;
+    }
 }

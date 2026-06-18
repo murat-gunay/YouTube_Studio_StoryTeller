@@ -1,0 +1,47 @@
+{
+  "team_name": "Germany",
+  "head_coach": {
+    "name": "Julian Nagelsmann",
+    "preferred_formation": "4-2-3-1",
+    "play_style_summary": "Relies on high-intensity gegenpressing, territory-based defensive blocks, positional interchanging, spatial manipulation, and possession dominance through a double-diamond build-up structure."
+  },
+  "key_players": [
+    {
+      "name": "Florian Wirtz",
+      "position": "Attacking Midfield",
+      "market_value": "€100m",
+      "performance_stats": "In his debut 25/26 season for Liverpool, he adapted to a more physical style, playing 49 matches, creating high-value chances, and executing tactical half-space runs.",
+      "age": 23,
+      "goals": 7,
+      "assists": 10
+    },
+    {
+      "name": "Jamal Musiala",
+      "position": "Attacking Midfield",
+      "market_value": "€100m",
+      "performance_stats": "After recovering from a broken fibula that sidelined him for months, he showed incredible form in the second half of the 25/26 season with elite dribbling and chance creation.",
+      "age": 23,
+      "goals": 5,
+      "assists": 6
+    },
+    {
+      "name": "Joshua Kimmich",
+      "position": "Defensive Midfield",
+      "market_value": "€35m",
+      "performance_stats": "Serving as Germany's captain, Kimmich completed 50 games for Bayern Munich in the 25/26 season, displaying unmatched passing precision, high defensive recovery rates, and key playmaking contributions.",
+      "age": 31,
+      "goals": 2,
+      "assists": 13
+    }
+  ],
+  "injuries_and_absences": [
+    {
+      "player_name": "Serge Gnabry",
+      "absence_reason": "Adductor injury"
+    },
+    {
+      "player_name": "Lennart Karl",
+      "absence_reason": "Muscle fibre tear in the back of his left thigh"
+    }
+  ]
+}
